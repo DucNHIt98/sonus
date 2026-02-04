@@ -9,6 +9,8 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/library/presentation/pages/library_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
+import '../../features/login/presentation/pages/sign_in_page.dart';
+import '../../features/login/presentation/pages/login_page.dart';
 
 part 'router.g.dart';
 
@@ -34,6 +36,20 @@ GoRouter router(RouterRef ref) {
         path: '/splash',
         name: 'splash',
         builder: (context, state) => const SplashPage(),
+      ),
+
+      // Sign In Screen (Intro)
+      GoRoute(
+        path: '/sign-in',
+        name: 'sign-in',
+        builder: (context, state) => const SignInPage(),
+      ),
+
+      // Login Screen (Form)
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
       ),
 
       // Full Screen Player

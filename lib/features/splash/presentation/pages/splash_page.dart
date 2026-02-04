@@ -51,7 +51,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
         // Initialization complete, navigate to Auth or Home
         Future.delayed(const Duration(seconds: 2), () {
           if (context.mounted) {
-            context.go('/home');
+            context.go('/sign-in');
           }
         });
       }
