@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -13,11 +15,24 @@ void main() async {
   // 1. Đảm bảo Flutter đã sẵn sàng
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. Khởi tạo Local Database (Isar)
-  // Disable temporarily until we have schemas
+  // 2. Initialize JustAudioBackground
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
+
+  // 3. Initialize Supabase
+  // TODO: Replace with your actual Supabase URL and Anon Key
+  await Supabase.initialize(
+    url: 'https://fxeirztjkgmydwnmsonb.supabase.co',
+    anonKey: 'sb_publishable_bTiasBbKJ13_d03V45LaJg_UNYP-G8C',
+  );
+
+  // 3. Khởi tạo Local Database (Isar) (Disabled temporarily)
   // final dir = await getApplicationDocumentsDirectory();
   // final isar = await Isar.open(
-  //   [], // Schema cũ đã bị xóa, hiện tại chưa có schema nào
+  //   [],
   //   directory: dir.path,
   // );
 

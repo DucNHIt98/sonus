@@ -12,6 +12,10 @@ _$HomeModelImpl _$$HomeModelImplFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String,
       subtitle: json['subtitle'] as String? ?? '',
       imageUrl: json['imageUrl'] as String? ?? '',
+      audioUrl: json['audio_url'] as String? ?? '',
+      source: json['source'] as String? ?? 'youtube',
+      youtubeId: json['youtube_id'] as String?,
+      durationMs: (json['duration_ms'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$$HomeModelImplToJson(_$HomeModelImpl instance) =>
@@ -20,4 +24,8 @@ Map<String, dynamic> _$$HomeModelImplToJson(_$HomeModelImpl instance) =>
       'title': instance.title,
       'subtitle': instance.subtitle,
       'imageUrl': instance.imageUrl,
+      'audio_url': instance.audioUrl,
+      'source': instance.source,
+      'youtube_id': instance.youtubeId,
+      'duration_ms': instance.durationMs,
     };

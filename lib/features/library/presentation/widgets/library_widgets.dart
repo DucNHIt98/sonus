@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 class LibraryHeader extends StatelessWidget {
   const LibraryHeader({super.key});
@@ -100,74 +99,71 @@ class LibraryListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => context.push('/player'),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 8.h),
-        child: Row(
-          children: [
-            Container(
-              width: 64.w,
-              height: 64.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4.r),
-                image: DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  fit: BoxFit.cover,
-                ),
-                color: Colors.grey[800],
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Row(
+        children: [
+          Container(
+            width: 64.w,
+            height: 64.h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.r),
+              image: DecorationImage(
+                image: NetworkImage(imageUrl),
+                fit: BoxFit.cover,
               ),
-              child: imageUrl.isEmpty
-                  ? Icon(Icons.music_note, color: Colors.white54, size: 30.r)
-                  : null,
+              color: Colors.grey[800],
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+            child: imageUrl.isEmpty
+                ? Icon(Icons.music_note, color: Colors.white54, size: 30.r)
+                : null,
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
                   ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      if (isPinned) ...[
-                        Transform.rotate(
-                          angle: 0.7,
-                          child: Icon(
-                            Icons.push_pin,
-                            color: Colors.green[400],
-                            size: 14.r,
-                          ),
-                        ),
-                        SizedBox(width: 6.w),
-                      ],
-                      Expanded(
-                        child: Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 13.sp,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4.h),
+                Row(
+                  children: [
+                    if (isPinned) ...[
+                      Transform.rotate(
+                        angle: 0.7,
+                        child: Icon(
+                          Icons.push_pin,
+                          color: Colors.green[400],
+                          size: 14.r,
                         ),
                       ),
+                      SizedBox(width: 6.w),
                     ],
-                  ),
-                ],
-              ),
+                    Expanded(
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 13.sp,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

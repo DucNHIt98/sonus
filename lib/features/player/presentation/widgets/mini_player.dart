@@ -1,12 +1,22 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
-class MiniPlayer extends StatelessWidget {
+class MiniPlayer extends ConsumerWidget {
   const MiniPlayer({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final playerState = ref.watch(playerControllerProvider);
+    final song = playerState.valueOrNull;
+
+    if (song == null) return const SizedBox.shrink();
+
+    final playerController = ref.watch(playerControllerProvider.notifier);
+    final player = playerController.audioPlayer;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(12.r),
       child: BackdropFilter(
@@ -15,9 +25,7 @@ class MiniPlayer extends StatelessWidget {
           height: 60.h,
           margin: EdgeInsets.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
-            color: const Color(
-              0xFF400503,
-            ).withOpacity(0.8), // Deep Red tint compatible with theme
+            color: const Color(0xFF400503).withOpacity(0.8),
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: Colors.white.withOpacity(0.1),
@@ -28,20 +36,18 @@ class MiniPlayer extends StatelessWidget {
             children: [
               // Album Art
               Container(
-                width: 48.w,
-                height: 48.h,
-                margin: EdgeInsets.all(6.r),
+                width: 44.w,
+                height: 44.h,
+                margin: EdgeInsets.all(8.r),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.r),
-                  image: const DecorationImage(
-                    image: NetworkImage(
-                      'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=150&q=80',
-                    ), // Mock Image
+                  borderRadius: BorderRadius.circular(6.r),
+                  image: DecorationImage(
+                    image: NetworkImage(song.imageUrl),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 4.w),
 
               // Title & Artist
               Expanded(
@@ -50,20 +56,20 @@ class MiniPlayer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'On Repeat',
+                      song.title,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14.sp,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Songs you love',
+                      song.subtitle,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.7),
-                        fontSize: 12.sp,
+                        fontSize: 11.sp,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -73,21 +79,21 @@ class MiniPlayer extends StatelessWidget {
               ),
 
               // Controls
-              IconButton(
-                icon: Icon(
-                  Icons.favorite_border,
-                  color: Colors.white,
-                  size: 24.r,
-                ),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: 32.r,
-                ),
-                onPressed: () {},
+              StreamBuilder<bool>(
+                stream: player.playingStream,
+                builder: (context, snapshot) {
+                  final isPlaying = snapshot.data ?? false;
+                  return IconButton(
+                    icon: Icon(
+                      isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 30.r,
+                    ),
+                    onPressed: () => playerController.togglePlay(),
+                  );
+                },
               ),
               SizedBox(width: 8.w),
             ],

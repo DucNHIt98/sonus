@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:sonus/core/presentation/widgets/scaffold_with_navbar.dart';
 import 'package:sonus/features/player/presentation/pages/player_page.dart';
+import '../../features/playlist/presentation/pages/playlist_page.dart';
 import '../../features/create/presentation/pages/create_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/library/presentation/pages/library_page.dart';
@@ -110,6 +111,22 @@ GoRouter router(RouterRef ref) {
             ],
           ),
         ],
+      ),
+      // Playlist Detail Screen (Push from Library/Home)
+      GoRoute(
+        path: '/playlist/:id',
+        name: 'playlist-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          final extra = state.extra as Map<String, dynamic>?;
+          return PlaylistPage(
+            playlistId: id,
+            title: extra?['title'],
+            imageUrl: extra?['imageUrl'],
+            description: extra?['description'],
+          );
+        },
       ),
     ],
     // Redirect logic can be added here

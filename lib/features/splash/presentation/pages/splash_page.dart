@@ -47,13 +47,15 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
     // Listen to state changes for navigation
     ref.listen(splashControllerProvider, (previous, next) {
-      if (next is AsyncData) {
+      if (next case AsyncData(value: final isLoggedIn)) {
         // Initialization complete, navigate to Auth or Home
-        Future.delayed(const Duration(seconds: 2), () {
-          if (context.mounted) {
+        if (context.mounted) {
+          if (isLoggedIn) {
+            context.go('/home');
+          } else {
             context.go('/sign-in');
           }
-        });
+        }
       }
     });
 

@@ -24,6 +24,11 @@ mixin _$Home {
   String get title => throw _privateConstructorUsedError;
   String get subtitle => throw _privateConstructorUsedError;
   String get imageUrl => throw _privateConstructorUsedError;
+  String get audioUrl => throw _privateConstructorUsedError;
+  String get source =>
+      throw _privateConstructorUsedError; // 'youtube' | 'local'
+  String? get youtubeId => throw _privateConstructorUsedError; // nullable
+  Duration? get duration => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -35,7 +40,15 @@ abstract class $HomeCopyWith<$Res> {
   factory $HomeCopyWith(Home value, $Res Function(Home) then) =
       _$HomeCopyWithImpl<$Res, Home>;
   @useResult
-  $Res call({String id, String title, String subtitle, String imageUrl});
+  $Res call(
+      {String id,
+      String title,
+      String subtitle,
+      String imageUrl,
+      String audioUrl,
+      String source,
+      String? youtubeId,
+      Duration? duration});
 }
 
 /// @nodoc
@@ -55,6 +68,10 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
     Object? title = null,
     Object? subtitle = null,
     Object? imageUrl = null,
+    Object? audioUrl = null,
+    Object? source = null,
+    Object? youtubeId = freezed,
+    Object? duration = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -73,6 +90,22 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      audioUrl: null == audioUrl
+          ? _value.audioUrl
+          : audioUrl // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      youtubeId: freezed == youtubeId
+          ? _value.youtubeId
+          : youtubeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      duration: freezed == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as Duration?,
     ) as $Val);
   }
 }
@@ -84,7 +117,15 @@ abstract class _$$HomeImplCopyWith<$Res> implements $HomeCopyWith<$Res> {
       __$$HomeImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String title, String subtitle, String imageUrl});
+  $Res call(
+      {String id,
+      String title,
+      String subtitle,
+      String imageUrl,
+      String audioUrl,
+      String source,
+      String? youtubeId,
+      Duration? duration});
 }
 
 /// @nodoc
@@ -101,6 +142,10 @@ class __$$HomeImplCopyWithImpl<$Res>
     Object? title = null,
     Object? subtitle = null,
     Object? imageUrl = null,
+    Object? audioUrl = null,
+    Object? source = null,
+    Object? youtubeId = freezed,
+    Object? duration = freezed,
   }) {
     return _then(_$HomeImpl(
       id: null == id
@@ -119,6 +164,22 @@ class __$$HomeImplCopyWithImpl<$Res>
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      audioUrl: null == audioUrl
+          ? _value.audioUrl
+          : audioUrl // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      youtubeId: freezed == youtubeId
+          ? _value.youtubeId
+          : youtubeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      duration: freezed == duration
+          ? _value.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as Duration?,
     ));
   }
 }
@@ -130,7 +191,11 @@ class _$HomeImpl implements _Home {
       {required this.id,
       required this.title,
       this.subtitle = '',
-      this.imageUrl = ''});
+      this.imageUrl = '',
+      this.audioUrl = '',
+      this.source = 'youtube',
+      this.youtubeId,
+      this.duration});
 
   factory _$HomeImpl.fromJson(Map<String, dynamic> json) =>
       _$$HomeImplFromJson(json);
@@ -145,10 +210,22 @@ class _$HomeImpl implements _Home {
   @override
   @JsonKey()
   final String imageUrl;
+  @override
+  @JsonKey()
+  final String audioUrl;
+  @override
+  @JsonKey()
+  final String source;
+// 'youtube' | 'local'
+  @override
+  final String? youtubeId;
+// nullable
+  @override
+  final Duration? duration;
 
   @override
   String toString() {
-    return 'Home(id: $id, title: $title, subtitle: $subtitle, imageUrl: $imageUrl)';
+    return 'Home(id: $id, title: $title, subtitle: $subtitle, imageUrl: $imageUrl, audioUrl: $audioUrl, source: $source, youtubeId: $youtubeId, duration: $duration)';
   }
 
   @override
@@ -161,12 +238,20 @@ class _$HomeImpl implements _Home {
             (identical(other.subtitle, subtitle) ||
                 other.subtitle == subtitle) &&
             (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl));
+                other.imageUrl == imageUrl) &&
+            (identical(other.audioUrl, audioUrl) ||
+                other.audioUrl == audioUrl) &&
+            (identical(other.source, source) || other.source == source) &&
+            (identical(other.youtubeId, youtubeId) ||
+                other.youtubeId == youtubeId) &&
+            (identical(other.duration, duration) ||
+                other.duration == duration));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, subtitle, imageUrl);
+  int get hashCode => Object.hash(runtimeType, id, title, subtitle, imageUrl,
+      audioUrl, source, youtubeId, duration);
 
   @JsonKey(ignore: true)
   @override
@@ -187,7 +272,11 @@ abstract class _Home implements Home {
       {required final String id,
       required final String title,
       final String subtitle,
-      final String imageUrl}) = _$HomeImpl;
+      final String imageUrl,
+      final String audioUrl,
+      final String source,
+      final String? youtubeId,
+      final Duration? duration}) = _$HomeImpl;
 
   factory _Home.fromJson(Map<String, dynamic> json) = _$HomeImpl.fromJson;
 
@@ -199,6 +288,14 @@ abstract class _Home implements Home {
   String get subtitle;
   @override
   String get imageUrl;
+  @override
+  String get audioUrl;
+  @override
+  String get source;
+  @override // 'youtube' | 'local'
+  String? get youtubeId;
+  @override // nullable
+  Duration? get duration;
   @override
   @JsonKey(ignore: true)
   _$$HomeImplCopyWith<_$HomeImpl> get copyWith =>

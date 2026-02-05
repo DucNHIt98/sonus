@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/home/presentation/providers/home_provider.dart';
 import 'package:sonus/features/home/presentation/widgets/home_widgets.dart';
+import 'package:sonus/features/splash/data/repositories/splash_repository_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -64,7 +66,20 @@ class HomePage extends ConsumerWidget {
                           IconButton(
                             icon: Icon(Icons.settings, size: 24.r),
                             color: Colors.white,
-                            onPressed: () {},
+                            onPressed: () async {
+                              // Logout logic
+                              final repository = ref.read(
+                                splashRepositoryProvider,
+                              );
+                              await repository.setAuthStatus(
+                                false,
+                              ); // Clear login state
+                              if (context.mounted) {
+                                context.go(
+                                  '/sign-in',
+                                ); // proper way to use router
+                              }
+                            },
                           ),
                         ],
                       ),

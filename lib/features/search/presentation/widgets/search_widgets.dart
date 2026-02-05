@@ -3,7 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 class CustomSearchBar extends StatelessWidget {
-  const CustomSearchBar({super.key});
+  final Function(String)? onSubmitted;
+  const CustomSearchBar({super.key, this.onSubmitted});
 
   @override
   Widget build(BuildContext context) {
@@ -14,18 +15,22 @@ class CustomSearchBar extends StatelessWidget {
         color: Colors.white.withOpacity(0.2),
         borderRadius: BorderRadius.circular(12.r),
       ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: Colors.white.withOpacity(0.6), size: 24.r),
-          SizedBox(width: 12.w),
-          Text(
-            'Search song, playlist, artist...',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 16.sp,
-            ),
+      child: TextField(
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          icon: Icon(
+            Icons.search,
+            color: Colors.white.withOpacity(0.6),
+            size: 24.r,
           ),
-        ],
+          hintText: 'Search song, playlist, artist...',
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: 16.sp,
+          ),
+        ),
+        onSubmitted: onSubmitted,
       ),
     );
   }
@@ -187,62 +192,59 @@ class SongTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => context.push('/player'),
-      child: Padding(
-        padding: EdgeInsets.only(bottom: 16.h),
-        child: Row(
-          children: [
-            Container(
-              width: 60.w,
-              height: 60.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-                image: imageUrl.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(imageUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-                color: Colors.grey[800],
-              ),
-              child: imageUrl.isEmpty
-                  ? Icon(Icons.music_note, color: Colors.white, size: 30.r)
+    return Padding(
+      padding: EdgeInsets.only(bottom: 16.h),
+      child: Row(
+        children: [
+          Container(
+            width: 60.w,
+            height: 60.h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.r),
+              image: imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                    )
                   : null,
+              color: Colors.grey[800],
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+            child: imageUrl.isEmpty
+                ? Icon(Icons.music_note, color: Colors.white, size: 30.r)
+                : null,
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    artist,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 14.sp,
-                    ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  artist,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 14.sp,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Text(
-              duration,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontSize: 14.sp,
-              ),
+          ),
+          Text(
+            duration,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 14.sp,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

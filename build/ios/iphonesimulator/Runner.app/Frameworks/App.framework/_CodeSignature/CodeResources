@@ -10,11 +10,11 @@
 		</data>
 		<key>flutter_assets/AssetManifest.bin</key>
 		<data>
-		rGETesNb1I4XdrTgcV/aaJdXXik=
+		pRxV4ZEbQwdKsSiqKzCsLiNdels=
 		</data>
 		<key>flutter_assets/AssetManifest.json</key>
 		<data>
-		ibUDy4tDdiTjTpMWbWeUaD+V00s=
+		MLSYTLoh2/iK8F+d9qLzzhgTz8A=
 		</data>
 		<key>flutter_assets/FontManifest.json</key>
 		<data>
@@ -22,11 +22,27 @@
 		</data>
 		<key>flutter_assets/NOTICES.Z</key>
 		<data>
-		Wx6pjOBjQ3DgftHccTlouHbnOfc=
+		D0kyZlqKsJ1iYsBrf6hgclTq+4w=
 		</data>
 		<key>flutter_assets/NativeAssetsManifest.json</key>
 		<data>
 		re4p7E8rPLLsN+wzaPN/+AVpXTY=
+		</data>
+		<key>flutter_assets/assets/icons/apple.svg</key>
+		<data>
+		2UYZV4HdQN76MQtqjS8puG32pO0=
+		</data>
+		<key>flutter_assets/assets/icons/facebook.svg</key>
+		<data>
+		muCp6h6gDkqRiO6JMUMd5RDK4Ds=
+		</data>
+		<key>flutter_assets/assets/icons/google.svg</key>
+		<data>
+		LMeJoCU0VXOA2SEk4vi5SD0Zj7M=
+		</data>
+		<key>flutter_assets/assets/logo/logo_sonus_app.png</key>
+		<data>
+		b0ZCADGhULxhjKyIKC6RDRQ25SE=
 		</data>
 		<key>flutter_assets/assets/logo/logo_sonus_no_background_red_text.svg</key>
 		<data>
@@ -54,7 +70,7 @@
 		</data>
 		<key>flutter_assets/kernel_blob.bin</key>
 		<data>
-		iqjxQvY9kajZfTEQeOH5U9X4qD0=
+		+bSxb9ZHeBQRHsVgJnCaqsLBu2w=
 		</data>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -75,14 +91,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			zd+bL/aL5gunnjsTpt4mZU9VGveydNoPTWuET8dFVe4=
+			vTtW4d7a/Jd8+PXjd4VnXL/3Xh0hz64qlN8QyBAlS98=
 			</data>
 		</dict>
 		<key>flutter_assets/AssetManifest.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			q9wEd4osHL/73ys47m26RvBJjf1j8j1AUkbemdrR808=
+			l/6qJeyKjNXwvMr4pTJbRgzs/C8401Z62dlXFak2sdo=
 			</data>
 		</dict>
 		<key>flutter_assets/FontManifest.json</key>
@@ -96,7 +112,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Qtl7LS07P4J/1Ki4D4eMlM0P92lScI/lZ9NKQ0aSvEc=
+			SAV/Y1u1ZXWk5/awxTFUX64FzA4Q1oI3ZUSwpG63qJ8=
 			</data>
 		</dict>
 		<key>flutter_assets/NativeAssetsManifest.json</key>
@@ -104,6 +120,34 @@
 			<key>hash2</key>
 			<data>
 			lUijHkoEgTXB2U+Rkyi/tirix7s8q5ZVfHlB2ql3dss=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/icons/apple.svg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			nQDqd6MkDykTVsNiYcX0XX+kVvKcl6LwYMrw7UucMjE=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/icons/facebook.svg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ujS7Cp5D/a1mXqK4TQNjBGF3FH52PsN2VkFQF3k1aHY=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/icons/google.svg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			7ZCH12zcbRxTaY9gaPeYcud+h8jQEsDP2tE7BbbMs3w=
+			</data>
+		</dict>
+		<key>flutter_assets/assets/logo/logo_sonus_app.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			SSnU5hF+lgT/4sues25b76OnOE9a6BwxoDXPQhFYfPk=
 			</data>
 		</dict>
 		<key>flutter_assets/assets/logo/logo_sonus_no_background_red_text.svg</key>
@@ -152,7 +196,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			dkE/KzUkjHPm2xkbHnvHzwMMnYsKc7RkONx3BmzZark=
+			autdgPcWq9nSXfSozf1t/1vAD9Qz5zJ4NQFFBbIuhxk=
 			</data>
 		</dict>
 		<key>flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>

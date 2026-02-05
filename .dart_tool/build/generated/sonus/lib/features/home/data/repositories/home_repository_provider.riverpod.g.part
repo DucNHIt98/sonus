@@ -2,7 +2,7 @@
 // RiverpodGenerator
 // **************************************************************************
 
-String _$homeRepositoryHash() => r'73328635b385035255a9748618ac29f62086037f';
+String _$homeRepositoryHash() => r'13a122090a40704f450852ab806c71eacfded30a';
 
 /// See also [homeRepository].
 @ProviderFor(homeRepository)

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sonus/features/home/domain/entities/home.dart';
+import 'package:sonus/features/library/data/repositories/library_repository_impl.dart';
 import 'package:sonus/features/library/presentation/widgets/library_widgets.dart';
 
-class LibraryPage extends StatelessWidget {
+class LibraryPage extends ConsumerWidget {
   const LibraryPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Fetch playlists
+    final playlistsAsync = ref.watch(userPlaylistsProvider);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
@@ -14,7 +21,6 @@ class LibraryPage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            // Same gradient as Home & Search
             colors: [Color(0xFF400503), Colors.black],
             stops: [0.0, 0.3],
           ),
@@ -63,57 +69,61 @@ class LibraryPage extends StatelessWidget {
                   ),
                 ),
 
-                // 4. Library List
-                SliverList(
-                  delegate: SliverChildListDelegate([
-                    const LibraryListTile(
-                      title: 'Liked Songs',
-                      subtitle: 'Playlist • 430 songs',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=150&q=80',
-                      isPinned: true,
+                // 4. Library List (Real Data)
+                playlistsAsync.when(
+                  data: (playlists) {
+                    if (playlists.isEmpty) {
+                      return const SliverFillRemaining(
+                        child: Center(
+                          child: Text(
+                            'No playlists found',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      );
+                    }
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final playlist = playlists[index];
+                        return InkWell(
+                          onTap: () {
+                            context.pushNamed(
+                              'playlist-detail',
+                              pathParameters: {'id': playlist.id},
+                              extra: {
+                                'title': playlist.title,
+                                'imageUrl': playlist.imageUrl,
+                                'description': playlist.subtitle,
+                              },
+                            );
+                          },
+                          child: LibraryListTile(
+                            title: playlist.title,
+                            subtitle: playlist.subtitle.isEmpty
+                                ? 'Playlist'
+                                : playlist.subtitle,
+                            imageUrl: playlist.imageUrl,
+                            isPinned: index < 2, // Mock pinning for now
+                          ),
+                        );
+                      }, childCount: playlists.length),
+                    );
+                  },
+                  loading: () => const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, stack) => SliverFillRemaining(
+                    child: Center(
+                      child: Text(
+                        'Error: $err',
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ),
-                    const LibraryListTile(
-                      title: 'My Top 2023',
-                      subtitle: 'Playlist • Spotify',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1514525253440-b393452e8d26?auto=format&fit=crop&w=150&q=80',
-                      isPinned: true,
-                    ),
-                    const LibraryListTile(
-                      title: 'The Weeknd',
-                      subtitle: 'Artist',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
-                    ),
-                    const LibraryListTile(
-                      title: 'Rock Classics',
-                      subtitle: 'Playlist • Sonus',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?auto=format&fit=crop&w=150&q=80',
-                    ),
-                    const LibraryListTile(
-                      title: 'Chill Lofi Study',
-                      subtitle: 'Playlist • Lofi Girl',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=150&q=80',
-                    ),
-                    const LibraryListTile(
-                      title: 'Imagine Dragons',
-                      subtitle: 'Artist',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=150&q=80',
-                    ),
-                    const LibraryListTile(
-                      title: 'Dua Lipa',
-                      subtitle: 'Artist',
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-                    ),
-                    // Extra space
-                    SizedBox(height: 180.h),
-                  ]),
+                  ),
                 ),
+
+                // Extra space
+                SliverToBoxAdapter(child: SizedBox(height: 100.h)),
               ],
             ),
           ),
@@ -122,3 +132,9 @@ class LibraryPage extends StatelessWidget {
     );
   }
 }
+
+// Provider to fetch user playlists
+final userPlaylistsProvider = FutureProvider<List<Home>>((ref) async {
+  final repo = ref.read(libraryRepositoryProvider);
+  return repo.getUserPlaylists();
+});

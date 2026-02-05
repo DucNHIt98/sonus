@@ -1,52 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class PlayerControls extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
+
+class PlayerControls extends ConsumerWidget {
   const PlayerControls({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Progress Bar
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 4.h,
-            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
-            overlayShape: RoundSliderOverlayShape(overlayRadius: 14.r),
-            activeTrackColor: Colors.white,
-            inactiveTrackColor: Colors.white.withOpacity(0.3),
-            thumbColor: Colors.white,
-            overlayColor: Colors.white.withOpacity(0.2),
-          ),
-          child: Slider(value: 0.3, onChanged: (value) {}),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '1:24',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
-                  fontSize: 12.sp,
-                ),
-              ),
-              Text(
-                '3:52',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
-                  fontSize: 12.sp,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 16.h),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final playerController = ref.watch(playerControllerProvider.notifier);
 
-        // Buttons
-        Row(
+    // We need to access the underlying AudioPlayer.
+    // Since the controller exposes it, we can use a StreamBuilder.
+    return StreamBuilder<PlayerState>(
+      stream: playerController.audioPlayer.playerStateStream,
+      builder: (context, snapshot) {
+        final playerState = snapshot.data;
+        final processingState = playerState?.processingState;
+        final playing = playerState?.playing;
+
+        return Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
@@ -57,21 +32,43 @@ class PlayerControls extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.skip_previous_rounded, size: 36.r),
               color: Colors.white,
-              onPressed: () {},
+              onPressed: () {}, // TODO: Implement prev
             ),
-            Container(
-              width: 72.w,
-              height: 72.h,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+
+            // Play/Pause Button
+            GestureDetector(
+              onTap: playerController.togglePlay,
+              child: Container(
+                width: 72.w,
+                height: 72.h,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child:
+                    processingState == ProcessingState.loading ||
+                        processingState == ProcessingState.buffering
+                    ? const Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.black,
+                        ),
+                      )
+                    : Icon(
+                        (playing ?? false)
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        size: 40.r,
+                        color: Colors.black,
+                      ),
               ),
-              child: Icon(Icons.pause_rounded, size: 40.r, color: Colors.black),
             ),
+
             IconButton(
               icon: Icon(Icons.skip_next_rounded, size: 36.r),
               color: Colors.white,
-              onPressed: () {},
+              onPressed: () {}, // TODO: Implement next
             ),
             IconButton(
               icon: Icon(Icons.repeat, size: 28.r),
@@ -79,8 +76,8 @@ class PlayerControls extends StatelessWidget {
               onPressed: () {},
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

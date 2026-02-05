@@ -1,41 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonus/features/home/domain/entities/home.dart';
+import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 import 'package:sonus/features/player/presentation/widgets/player_controls.dart';
+import 'package:sonus/features/player/presentation/widgets/player_progress_bar.dart';
 
-class PlayerPage extends StatelessWidget {
+class PlayerPage extends ConsumerWidget {
   const PlayerPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Listen for errors to show SnackBar
+    ref.listen<AsyncValue<Home?>>(playerControllerProvider, (previous, next) {
+      next.whenOrNull(
+        error: (error, stack) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $error'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      );
+    });
+
+    final playerState = ref.watch(playerControllerProvider);
+    print("DEBUG: PlayerPage received state: $playerState");
+
+    // Reusable fallback UI for "No song" or "Hard Error" state
+    Widget buildFallbackUI() {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: const Center(
+          child: Text('No song playing', style: TextStyle(color: Colors.white)),
+        ),
+      );
+    }
+
+    // Check if we have data (metadata) even if there's an error
+    final currentSong = playerState.valueOrNull;
+
+    if (currentSong != null) {
+      return _buildPlayerScaffold(context, currentSong);
+    }
+
+    return playerState.when(
+      data: (song) => buildFallbackUI(), // song is null here (checked above)
+      loading: () => const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      ),
+      error: (error, stack) => buildFallbackUI(),
+    );
+  }
+
+  Widget _buildPlayerScaffold(BuildContext context, Home currentSong) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            // Dynamic gradient based on album art (Mocked here as Red/Black)
-            colors: [Color(0xFF7f0000), Colors.black],
-            stops: [0.0, 0.8],
+            colors: [const Color(0xFF400503).withOpacity(0.8), Colors.black],
+            stops: const [0.0, 0.6],
           ),
         ),
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
               final screenHeight = constraints.maxHeight;
-              final screenWidth = constraints.maxWidth;
 
-              // Scale album art based on available height (clamp for safety)
-              // We use .r for the clamp thresholds to ensure they scale with screen size.
-              final albumArtSize = (screenHeight * 0.45).clamp(
-                200.r,
-                screenWidth - 48.w,
-              );
+              // Dynamic sizing: Art is ~45% of screen height, but capped for smaller screens
+              final albumArtSize = (screenHeight * 0.45).clamp(200.0, 400.0);
 
               return Column(
                 children: [
-                  // Header
+                  // 1. Header
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
@@ -45,21 +96,32 @@ class PlayerPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.keyboard_arrow_down,
                             color: Colors.white,
-                            size: 32.r,
+                            size: 30,
                           ),
                           onPressed: () => context.pop(),
                         ),
-                        Text(
-                          'NOW PLAYING',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
-                          ),
+                        Column(
+                          children: [
+                            Text(
+                              'PLAYING FROM PLAYLIST',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 10.sp,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            Text(
+                              'Favorites',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                         IconButton(
                           icon: const Icon(
@@ -74,66 +136,77 @@ class PlayerPage extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Album Art (Responsive)
-                  Container(
+                  // 2. Artwork
+                  SizedBox(
                     width: albumArtSize,
                     height: albumArtSize,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 40.r,
-                          spreadRadius: 10.r,
-                          offset: Offset(0, 20.h),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: Image.network(
+                          currentSong.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.grey[850],
+                            child: Icon(
+                              Icons.music_note,
+                              size: 80.r,
+                              color: Colors.white24,
+                            ),
+                          ),
                         ),
-                      ],
-                      image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=600&q=80',
-                        ),
-                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
 
                   const Spacer(),
 
-                  // Song Info
+                  // 3. Title & Artist
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'On Repeat',
+                                currentSong.title,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24.sp,
+                                  fontSize: 22.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 4.h),
                               Text(
-                                'Songs you love',
+                                currentSong.subtitle,
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                  fontSize: 18.sp,
+                                  color: Colors.grey[400],
+                                  fontSize: 16.sp,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.favorite_border,
                             color: Colors.white,
-                            size: 28.r,
+                            size: 28,
                           ),
                           onPressed: () {},
                         ),
@@ -141,12 +214,43 @@ class PlayerPage extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 20.h),
 
-                  // Controls
+                  // 4. Progress Bar
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: PlayerProgressBar(),
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // 5. Controls
                   const PlayerControls(),
 
-                  const Spacer(flex: 2),
+                  const Spacer(), // More space at bottom
+                  // 6. Footer Devices
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: 20.h,
+                      left: 24.w,
+                      right: 24.w,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Icon(
+                          Icons.devices,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                        const Icon(
+                          Icons.share,
+                          color: Colors.white70,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               );
             },

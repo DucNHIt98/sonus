@@ -6,9 +6,11 @@ part 'splash_provider.g.dart';
 @riverpod
 class SplashController extends _$SplashController {
   @override
-  FutureOr<void> build() async {
+  FutureOr<bool> build() async {
     final repository = ref.read(splashRepositoryProvider);
-    await repository.checkAuthStatus();
-    // Logic navigation can be expanded here based on return value
+    // Simulate splash delay (aesthetic choice)
+    await Future.delayed(const Duration(seconds: 2));
+
+    return await repository.checkAuthStatus();
   }
 }

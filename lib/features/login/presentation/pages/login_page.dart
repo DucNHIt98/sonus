@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonus/features/splash/data/repositories/splash_repository_provider.dart';
 import '../providers/login_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -29,8 +30,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final success = await ref
         .read(loginControllerProvider.notifier)
         .login(_emailController.text, _passwordController.text);
+
     if (success && mounted) {
-      context.go('/home');
+      // Persist login state
+      final repository = ref.read(splashRepositoryProvider);
+      await repository.setAuthStatus(true);
+
+      if (mounted) {
+        context.go('/home');
+      }
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

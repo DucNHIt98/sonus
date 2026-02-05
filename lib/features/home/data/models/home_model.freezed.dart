@@ -24,6 +24,13 @@ mixin _$HomeModel {
   String get title => throw _privateConstructorUsedError;
   String get subtitle => throw _privateConstructorUsedError;
   String get imageUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'audio_url')
+  String get audioUrl => throw _privateConstructorUsedError;
+  String get source => throw _privateConstructorUsedError;
+  @JsonKey(name: 'youtube_id')
+  String? get youtubeId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'duration_ms')
+  int? get durationMs => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -36,7 +43,15 @@ abstract class $HomeModelCopyWith<$Res> {
   factory $HomeModelCopyWith(HomeModel value, $Res Function(HomeModel) then) =
       _$HomeModelCopyWithImpl<$Res, HomeModel>;
   @useResult
-  $Res call({String id, String title, String subtitle, String imageUrl});
+  $Res call(
+      {String id,
+      String title,
+      String subtitle,
+      String imageUrl,
+      @JsonKey(name: 'audio_url') String audioUrl,
+      String source,
+      @JsonKey(name: 'youtube_id') String? youtubeId,
+      @JsonKey(name: 'duration_ms') int? durationMs});
 }
 
 /// @nodoc
@@ -56,6 +71,10 @@ class _$HomeModelCopyWithImpl<$Res, $Val extends HomeModel>
     Object? title = null,
     Object? subtitle = null,
     Object? imageUrl = null,
+    Object? audioUrl = null,
+    Object? source = null,
+    Object? youtubeId = freezed,
+    Object? durationMs = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -74,6 +93,22 @@ class _$HomeModelCopyWithImpl<$Res, $Val extends HomeModel>
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      audioUrl: null == audioUrl
+          ? _value.audioUrl
+          : audioUrl // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      youtubeId: freezed == youtubeId
+          ? _value.youtubeId
+          : youtubeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      durationMs: freezed == durationMs
+          ? _value.durationMs
+          : durationMs // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -86,7 +121,15 @@ abstract class _$$HomeModelImplCopyWith<$Res>
       __$$HomeModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String id, String title, String subtitle, String imageUrl});
+  $Res call(
+      {String id,
+      String title,
+      String subtitle,
+      String imageUrl,
+      @JsonKey(name: 'audio_url') String audioUrl,
+      String source,
+      @JsonKey(name: 'youtube_id') String? youtubeId,
+      @JsonKey(name: 'duration_ms') int? durationMs});
 }
 
 /// @nodoc
@@ -104,6 +147,10 @@ class __$$HomeModelImplCopyWithImpl<$Res>
     Object? title = null,
     Object? subtitle = null,
     Object? imageUrl = null,
+    Object? audioUrl = null,
+    Object? source = null,
+    Object? youtubeId = freezed,
+    Object? durationMs = freezed,
   }) {
     return _then(_$HomeModelImpl(
       id: null == id
@@ -122,6 +169,22 @@ class __$$HomeModelImplCopyWithImpl<$Res>
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
               as String,
+      audioUrl: null == audioUrl
+          ? _value.audioUrl
+          : audioUrl // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      youtubeId: freezed == youtubeId
+          ? _value.youtubeId
+          : youtubeId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      durationMs: freezed == durationMs
+          ? _value.durationMs
+          : durationMs // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -133,7 +196,11 @@ class _$HomeModelImpl extends _HomeModel {
       {required this.id,
       required this.title,
       this.subtitle = '',
-      this.imageUrl = ''})
+      this.imageUrl = '',
+      @JsonKey(name: 'audio_url') this.audioUrl = '',
+      this.source = 'youtube',
+      @JsonKey(name: 'youtube_id') this.youtubeId,
+      @JsonKey(name: 'duration_ms') this.durationMs})
       : super._();
 
   factory _$HomeModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -149,10 +216,22 @@ class _$HomeModelImpl extends _HomeModel {
   @override
   @JsonKey()
   final String imageUrl;
+  @override
+  @JsonKey(name: 'audio_url')
+  final String audioUrl;
+  @override
+  @JsonKey()
+  final String source;
+  @override
+  @JsonKey(name: 'youtube_id')
+  final String? youtubeId;
+  @override
+  @JsonKey(name: 'duration_ms')
+  final int? durationMs;
 
   @override
   String toString() {
-    return 'HomeModel(id: $id, title: $title, subtitle: $subtitle, imageUrl: $imageUrl)';
+    return 'HomeModel(id: $id, title: $title, subtitle: $subtitle, imageUrl: $imageUrl, audioUrl: $audioUrl, source: $source, youtubeId: $youtubeId, durationMs: $durationMs)';
   }
 
   @override
@@ -165,12 +244,20 @@ class _$HomeModelImpl extends _HomeModel {
             (identical(other.subtitle, subtitle) ||
                 other.subtitle == subtitle) &&
             (identical(other.imageUrl, imageUrl) ||
-                other.imageUrl == imageUrl));
+                other.imageUrl == imageUrl) &&
+            (identical(other.audioUrl, audioUrl) ||
+                other.audioUrl == audioUrl) &&
+            (identical(other.source, source) || other.source == source) &&
+            (identical(other.youtubeId, youtubeId) ||
+                other.youtubeId == youtubeId) &&
+            (identical(other.durationMs, durationMs) ||
+                other.durationMs == durationMs));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, subtitle, imageUrl);
+  int get hashCode => Object.hash(runtimeType, id, title, subtitle, imageUrl,
+      audioUrl, source, youtubeId, durationMs);
 
   @JsonKey(ignore: true)
   @override
@@ -191,7 +278,11 @@ abstract class _HomeModel extends HomeModel {
       {required final String id,
       required final String title,
       final String subtitle,
-      final String imageUrl}) = _$HomeModelImpl;
+      final String imageUrl,
+      @JsonKey(name: 'audio_url') final String audioUrl,
+      final String source,
+      @JsonKey(name: 'youtube_id') final String? youtubeId,
+      @JsonKey(name: 'duration_ms') final int? durationMs}) = _$HomeModelImpl;
   const _HomeModel._() : super._();
 
   factory _HomeModel.fromJson(Map<String, dynamic> json) =
@@ -205,6 +296,17 @@ abstract class _HomeModel extends HomeModel {
   String get subtitle;
   @override
   String get imageUrl;
+  @override
+  @JsonKey(name: 'audio_url')
+  String get audioUrl;
+  @override
+  String get source;
+  @override
+  @JsonKey(name: 'youtube_id')
+  String? get youtubeId;
+  @override
+  @JsonKey(name: 'duration_ms')
+  int? get durationMs;
   @override
   @JsonKey(ignore: true)
   _$$HomeModelImplCopyWith<_$HomeModelImpl> get copyWith =>
