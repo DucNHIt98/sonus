@@ -6,31 +6,30 @@ import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 import 'package:sonus/features/player/presentation/widgets/player_controls.dart';
 import 'package:sonus/features/player/presentation/widgets/player_progress_bar.dart';
+import 'package:sonus/features/player/presentation/widgets/up_next_sheet.dart';
 
 class PlayerPage extends ConsumerWidget {
   const PlayerPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen for errors to show SnackBar
-    ref.listen<AsyncValue<Home?>>(playerControllerProvider, (previous, next) {
-      next.whenOrNull(
-        error: (error, stack) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $error'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        },
-      );
-    });
-
     final playerState = ref.watch(playerControllerProvider);
-    print("DEBUG: PlayerPage received state: $playerState");
+    final currentSong = playerState.currentSong;
 
-    // Reusable fallback UI for "No song" or "Hard Error" state
+    // Listen for errors
+    if (playerState.error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${playerState.error}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      });
+    }
+
+    // Reusable fallback UI for "No song" state
     Widget buildFallbackUI() {
       return Scaffold(
         backgroundColor: Colors.black,
@@ -41,30 +40,29 @@ class PlayerPage extends ConsumerWidget {
             onPressed: () => context.pop(),
           ),
         ),
-        body: const Center(
-          child: Text('No song playing', style: TextStyle(color: Colors.white)),
+        body: Center(
+          child: playerState.isLoading
+              ? const CircularProgressIndicator(color: Colors.white)
+              : const Text(
+                  'No song playing',
+                  style: TextStyle(color: Colors.white),
+                ),
         ),
       );
     }
 
-    // Check if we have data (metadata) even if there's an error
-    final currentSong = playerState.valueOrNull;
-
     if (currentSong != null) {
-      return _buildPlayerScaffold(context, currentSong);
+      return _buildPlayerScaffold(context, currentSong, playerState.isLoading);
     }
 
-    return playerState.when(
-      data: (song) => buildFallbackUI(), // song is null here (checked above)
-      loading: () => const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
-      ),
-      error: (error, stack) => buildFallbackUI(),
-    );
+    return buildFallbackUI();
   }
 
-  Widget _buildPlayerScaffold(BuildContext context, Home currentSong) {
+  Widget _buildPlayerScaffold(
+    BuildContext context,
+    Home currentSong,
+    bool isLoading,
+  ) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
@@ -228,7 +226,7 @@ class PlayerPage extends ConsumerWidget {
                   const PlayerControls(),
 
                   const Spacer(), // More space at bottom
-                  // 6. Footer Devices
+                  // 6. Footer Buttons
                   Padding(
                     padding: EdgeInsets.only(
                       bottom: 20.h,
@@ -243,10 +241,25 @@ class PlayerPage extends ConsumerWidget {
                           color: Colors.white70,
                           size: 20,
                         ),
-                        const Icon(
-                          Icons.share,
-                          color: Colors.white70,
-                          size: 20,
+                        GestureDetector(
+                          onTap: () => UpNextSheet.show(context),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.queue_music,
+                                color: Colors.white70,
+                                size: 22,
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                'Tiếp theo',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

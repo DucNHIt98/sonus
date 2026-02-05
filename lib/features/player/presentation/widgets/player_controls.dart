@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:just_audio/just_audio.dart' hide PlayerState;
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
 class PlayerControls extends ConsumerWidget {
@@ -11,15 +11,15 @@ class PlayerControls extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playerController = ref.watch(playerControllerProvider.notifier);
+    final player = playerController.audioPlayer;
 
-    // We need to access the underlying AudioPlayer.
-    // Since the controller exposes it, we can use a StreamBuilder.
-    return StreamBuilder<PlayerState>(
-      stream: playerController.audioPlayer.playerStateStream,
+    return StreamBuilder<PlayerStateJustAudio>(
+      stream: player.playerStateStream.map(
+        (state) => PlayerStateJustAudio(state.playing, state.processingState),
+      ),
       builder: (context, snapshot) {
-        final playerState = snapshot.data;
-        final processingState = playerState?.processingState;
-        final playing = playerState?.playing;
+        final processingState = snapshot.data?.processingState;
+        final playing = snapshot.data?.playing;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -32,7 +32,7 @@ class PlayerControls extends ConsumerWidget {
             IconButton(
               icon: Icon(Icons.skip_previous_rounded, size: 36.r),
               color: Colors.white,
-              onPressed: () {}, // TODO: Implement prev
+              onPressed: playerController.skipPrevious,
             ),
 
             // Play/Pause Button
@@ -68,7 +68,7 @@ class PlayerControls extends ConsumerWidget {
             IconButton(
               icon: Icon(Icons.skip_next_rounded, size: 36.r),
               color: Colors.white,
-              onPressed: () {}, // TODO: Implement next
+              onPressed: playerController.skipNext,
             ),
             IconButton(
               icon: Icon(Icons.repeat, size: 28.r),
@@ -80,4 +80,12 @@ class PlayerControls extends ConsumerWidget {
       },
     );
   }
+}
+
+/// Helper class to avoid name conflict with just_audio's PlayerState
+class PlayerStateJustAudio {
+  final bool playing;
+  final ProcessingState processingState;
+
+  PlayerStateJustAudio(this.playing, this.processingState);
 }

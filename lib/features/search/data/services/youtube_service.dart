@@ -88,6 +88,29 @@ class YoutubeService {
     }
   }
 
+  /// Get related songs/videos for autoplay
+  Future<List<Video>> getRelatedSongs(String videoId) async {
+    try {
+      print('Fetching related songs for $videoId...');
+      // First get the video object (required by getRelatedVideos API)
+      final video = await _yt.videos.get(videoId);
+      final relatedVideos = await _yt.videos.getRelatedVideos(video);
+
+      if (relatedVideos == null) {
+        print('No related videos found for $videoId');
+        return [];
+      }
+
+      // Convert to list and limit to first 10 results
+      final videos = relatedVideos.take(10).toList();
+      print('Found ${videos.length} related songs');
+      return videos;
+    } catch (e) {
+      print('Error getting related songs: $e');
+      return [];
+    }
+  }
+
   void dispose() {
     _yt.close();
   }

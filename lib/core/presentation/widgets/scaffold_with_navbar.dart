@@ -15,7 +15,7 @@ class ScaffoldWithNavbar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playerState = ref.watch(playerControllerProvider);
-    final hasSong = playerState.valueOrNull != null;
+    final hasSong = playerState.currentSong != null;
 
     return Scaffold(
       backgroundColor: Colors.black, // Default background

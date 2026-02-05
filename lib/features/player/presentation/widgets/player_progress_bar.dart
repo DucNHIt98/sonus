@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
-import 'dart:async';
-import 'package:sonus/features/home/domain/entities/home.dart';
 
 class PlayerProgressBar extends ConsumerWidget {
   const PlayerProgressBar({super.key});
@@ -16,7 +14,7 @@ class PlayerProgressBar extends ConsumerWidget {
     final playerController = ref.watch(playerControllerProvider.notifier);
     final player = playerController.audioPlayer;
 
-    final song = playerState.valueOrNull;
+    final song = playerState.currentSong;
 
     return StreamBuilder<Duration?>(
       stream: player.durationStream,
