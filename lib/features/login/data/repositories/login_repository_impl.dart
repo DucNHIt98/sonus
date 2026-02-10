@@ -1,28 +1,44 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/repositories/login_repository.dart';
 import '../../domain/entities/login.dart';
-import '../models/login_model.dart';
+import 'package:sonus/core/auth/auth_service.dart';
 
 part 'login_repository_impl.g.dart';
 
 class LoginRepositoryImpl implements LoginRepository {
+  final AuthService _authService;
+
+  LoginRepositoryImpl(this._authService);
+
   @override
   Future<Login?> login(String email, String password) async {
-    // Mock login for now
-    await Future.delayed(const Duration(seconds: 1));
-    if (email == 'admin@gmail.com' && password == 'password') {
-      return const Login(id: '1', email: 'admin@gmail.com', name: 'Admin');
+    try {
+      final response = await _authService.signIn(
+        email: email,
+        password: password,
+      );
+
+      if (response.user != null) {
+        return Login(
+          id: response.user!.id,
+          email: response.user!.email ?? '',
+          name: response.user!.userMetadata?['full_name'] ?? '',
+        );
+      }
+      return null;
+    } catch (e) {
+      rethrow;
     }
-    return null;
   }
 
   @override
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _authService.signOut();
   }
 }
 
 @riverpod
 LoginRepository loginRepository(LoginRepositoryRef ref) {
-  return LoginRepositoryImpl();
+  final authService = ref.watch(authServiceProvider);
+  return LoginRepositoryImpl(authService);
 }

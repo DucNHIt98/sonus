@@ -11,7 +11,9 @@ import '../../features/library/presentation/pages/library_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/login/presentation/pages/sign_in_page.dart';
+import '../../features/login/presentation/pages/sign_up_page.dart';
 import '../../features/login/presentation/pages/login_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 part 'router.g.dart';
 
@@ -51,6 +53,13 @@ GoRouter router(RouterRef ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+
+      // Sign Up Screen
+      GoRoute(
+        path: '/signup',
+        name: 'signup',
+        builder: (context, state) => const SignUpPage(),
       ),
 
       // Full Screen Player
@@ -128,7 +137,15 @@ GoRouter router(RouterRef ref) {
           );
         },
       ),
+
+      // Profile Screen
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
     ],
+
     // Redirect logic can be added here
     errorBuilder: (context, state) =>
         const Scaffold(body: Center(child: Text('Not Found'))),

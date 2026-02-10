@@ -42,7 +42,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Login failed. Try admin@gmail.com / password'),
+          backgroundColor: Color(0xFFB91C1C),
+          content: Text(
+            'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.',
+          ),
         ),
       );
     }
@@ -80,7 +83,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: Column(
                     children: [
                       SvgPicture.asset(
-                        'assets/logo/logo_sonus_red_background.svg',
+                        'assets/logo/logo_sonus_no_background_red_text.svg',
                         height: 100.h,
                       ),
                       SizedBox(height: 32.h),
@@ -223,7 +226,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () => context.push('/signup'),
                             child: Text(
                               "Sign Up",
                               style: TextStyle(

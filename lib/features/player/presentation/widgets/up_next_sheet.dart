@@ -68,20 +68,15 @@ class UpNextSheet extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (queue.isNotEmpty)
-                          TextButton(
-                            onPressed: () {
-                              playerController.clearQueue();
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              'Xóa tất cả',
-                              style: TextStyle(
-                                color: Colors.red.shade300,
-                                fontSize: 14.sp,
-                              ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(children: [
+
+                              ],
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -164,10 +159,11 @@ class UpNextSheet extends ConsumerWidget {
                                 index: index,
                                 isCurrentlyPlaying: isCurrentlyPlaying,
                                 onTap: () async {
-                                  await playerController.audioPlayer.seek(
-                                    Duration.zero,
-                                    index: index,
-                                  );
+                                  await playerController.seekToIndex(index);
+                                  // playerController.audioPlayer.play(); // seekToIndex handles playing if jumping, but if seeking locally we might need to ensure play?
+                                  // our seekToIndex implementation for "unloaded" calls play.
+                                  // for "loaded" it just seeks.
+                                  // best to ensure play here or in controller.
                                   playerController.audioPlayer.play();
                                 },
                               ),

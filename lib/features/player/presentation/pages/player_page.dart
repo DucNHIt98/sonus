@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
+
 import 'package:sonus/features/player/presentation/widgets/player_controls.dart';
 import 'package:sonus/features/player/presentation/widgets/player_progress_bar.dart';
 import 'package:sonus/features/player/presentation/widgets/up_next_sheet.dart';
@@ -82,180 +83,189 @@ class PlayerPage extends ConsumerWidget {
               // Dynamic sizing: Art is ~45% of screen height, but capped for smaller screens
               final albumArtSize = (screenHeight * 0.45).clamp(200.0, 400.0);
 
-              return Column(
-                children: [
-                  // 1. Header
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 12.h,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              return CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
                       children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.white,
-                            size: 30,
+                        // 1. Header
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
                           ),
-                          onPressed: () => context.pop(),
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              'PLAYING FROM PLAYLIST',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 10.sp,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            Text(
-                              'Favorites',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.more_vert,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  // 2. Artwork
-                  SizedBox(
-                    width: albumArtSize,
-                    height: albumArtSize,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.r),
-                        child: Image.network(
-                          currentSong.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey[850],
-                            child: Icon(
-                              Icons.music_note,
-                              size: 80.r,
-                              color: Colors.white24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  // 3. Title & Artist
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                currentSong.title,
-                                style: TextStyle(
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.keyboard_arrow_down,
                                   color: Colors.white,
-                                  fontSize: 22.sp,
-                                  fontWeight: FontWeight.bold,
+                                  size: 30,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                onPressed: () => context.pop(),
                               ),
-                              Text(
-                                currentSong.subtitle,
-                                style: TextStyle(
-                                  color: Colors.grey[400],
-                                  fontSize: 16.sp,
+                              Column(
+                                children: [
+                                  Text(
+                                    'PLAYING FROM PLAYLIST',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 10.sp,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Favorites',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.more_vert,
+                                  color: Colors.white,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                onPressed: () {},
                               ),
                             ],
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.favorite_border,
-                            color: Colors.white,
-                            size: 28,
+
+                        const Spacer(),
+
+                        // 2. Artwork
+                        SizedBox(
+                          width: albumArtSize,
+                          height: albumArtSize,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.4),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.r),
+                              child: Image.network(
+                                currentSong.imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: Colors.grey[850],
+                                  child: Icon(
+                                    Icons.music_note,
+                                    size: 80.r,
+                                    color: Colors.white24,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                          onPressed: () {},
                         ),
-                      ],
-                    ),
-                  ),
 
-                  SizedBox(height: 20.h),
+                        const Spacer(),
 
-                  // 4. Progress Bar
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    child: PlayerProgressBar(),
-                  ),
-
-                  SizedBox(height: 10.h),
-
-                  // 5. Controls
-                  const PlayerControls(),
-
-                  const Spacer(), // More space at bottom
-                  // 6. Footer Buttons
-                  Padding(
-                    padding: EdgeInsets.only(
-                      bottom: 20.h,
-                      left: 24.w,
-                      right: 24.w,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Icon(
-                          Icons.devices,
-                          color: Colors.white70,
-                          size: 20,
-                        ),
-                        GestureDetector(
-                          onTap: () => UpNextSheet.show(context),
+                        // 3. Title & Artist
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24.w),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      currentSong.title,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 22.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      currentSong.subtitle,
+                                      style: TextStyle(
+                                        color: Colors.grey[400],
+                                        fontSize: 16.sp,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.favorite_border,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 20.h),
+
+                        // 4. Progress Bar
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24.0),
+                          child: PlayerProgressBar(),
+                        ),
+
+                        SizedBox(height: 10.h),
+
+                        // 5. Controls
+                        const PlayerControls(),
+
+                        SizedBox(height: 20.h),
+
+                        const Spacer(), // More space at bottom
+                        // 7. Footer Buttons
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: 20.h,
+                            left: 24.w,
+                            right: 24.w,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Icon(
-                                Icons.queue_music,
+                                Icons.devices,
                                 color: Colors.white70,
-                                size: 22,
+                                size: 20,
                               ),
-                              SizedBox(width: 6.w),
-                              Text(
-                                'Tiếp theo',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12.sp,
+                              GestureDetector(
+                                onTap: () => UpNextSheet.show(context),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.queue_music,
+                                      color: Colors.white70,
+                                      size: 22,
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      'Tiếp theo',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

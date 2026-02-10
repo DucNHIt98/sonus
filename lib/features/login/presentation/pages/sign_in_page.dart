@@ -27,7 +27,7 @@ class SignInPage extends StatelessWidget {
               children: [
                 SizedBox(height: 50.h),
                 SvgPicture.asset(
-                  'assets/logo/logo_sonus_red_background.svg',
+                  'assets/logo/logo_sonus_no_background_red_text.svg',
                   height: 120.h,
                 ),
                 Text(
@@ -100,7 +100,7 @@ class SignInPage extends StatelessWidget {
                       style: TextStyle(color: Colors.white70, fontSize: 14.sp),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () => context.push('/signup'),
                       child: Text(
                         "Sign Up",
                         style: TextStyle(

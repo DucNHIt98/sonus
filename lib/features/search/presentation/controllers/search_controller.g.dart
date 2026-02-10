@@ -6,27 +6,12 @@ part of 'search_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$youtubeServiceHash() => r'8f7531361b6e655bf12adca594b5af5116a7ce2d';
-
-/// See also [youtubeService].
-@ProviderFor(youtubeService)
-final youtubeServiceProvider = Provider<YoutubeService>.internal(
-  youtubeService,
-  name: r'youtubeServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$youtubeServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef YoutubeServiceRef = ProviderRef<YoutubeService>;
-String _$searchControllerHash() => r'd7e87567f28ffb2ad0be923d4f94889e41c479b6';
+String _$searchControllerHash() => r'a943185068bb071c4f23ea6ee71480fabd500a2b';
 
 /// See also [SearchController].
 @ProviderFor(SearchController)
 final searchControllerProvider =
-    AutoDisposeAsyncNotifierProvider<SearchController, List<Video>>.internal(
+    AutoDisposeAsyncNotifierProvider<SearchController, SearchState>.internal(
   SearchController.new,
   name: r'searchControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -36,6 +21,6 @@ final searchControllerProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$SearchController = AutoDisposeAsyncNotifier<List<Video>>;
+typedef _$SearchController = AutoDisposeAsyncNotifier<SearchState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

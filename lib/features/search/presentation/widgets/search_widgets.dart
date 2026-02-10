@@ -3,8 +3,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 class CustomSearchBar extends StatelessWidget {
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final Function(String)? onChanged;
   final Function(String)? onSubmitted;
-  const CustomSearchBar({super.key, this.onSubmitted});
+
+  const CustomSearchBar({
+    super.key,
+    this.controller,
+    this.focusNode,
+    this.onChanged,
+    this.onSubmitted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +26,9 @@ class CustomSearchBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: TextField(
+        controller: controller,
+        focusNode: focusNode,
+        onChanged: onChanged,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -24,6 +37,15 @@ class CustomSearchBar extends StatelessWidget {
             color: Colors.white.withOpacity(0.6),
             size: 24.r,
           ),
+          suffixIcon: controller != null && controller!.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white54),
+                  onPressed: () {
+                    controller!.clear();
+                    if (onChanged != null) onChanged!('');
+                  },
+                )
+              : null,
           hintText: 'Search song, playlist, artist...',
           hintStyle: TextStyle(
             color: Colors.white.withOpacity(0.6),

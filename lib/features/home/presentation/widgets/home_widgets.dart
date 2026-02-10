@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
+import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
-class HomeShortcutCard extends StatelessWidget {
+class HomeShortcutCard extends ConsumerWidget {
   final Home item;
   const HomeShortcutCard({super.key, required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => context.push('/player'),
+      onTap: () {
+        ref.read(playerControllerProvider.notifier).playSong(item);
+        context.push('/player');
+      },
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.1),
@@ -133,6 +138,115 @@ class HomeHorizontalCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SupermixCard extends ConsumerWidget {
+  const SupermixCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GestureDetector(
+      onTap: () {
+        ref.read(playerControllerProvider.notifier).generateMySupermix();
+        context.push('/player');
+      },
+      child: Container(
+        width: double.infinity,
+        height: 180.h,
+        margin: EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24.r),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF301934), // Deep Purple
+              Color(0xFF7B1FA2), // Medium Purple
+              Color(0xFFFFD700), // Gold
+            ],
+            stops: [0.0, 0.4, 1.0],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.purple.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Decorative circles
+            Positioned(
+              right: -20.w,
+              top: -20.h,
+              child: CircleAvatar(
+                radius: 60.r,
+                backgroundColor: Colors.white.withOpacity(0.1),
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(24.r),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(12.r),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: const Color(0xFF301934),
+                      size: 32.r,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'My Supermix',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  Text(
+                    'Giai điệu dành riêng cho bạn',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Bottom abstract shape
+            Positioned(
+              right: 24.w,
+              bottom: 24.h,
+              child: Icon(
+                Icons.auto_awesome,
+                color: Colors.white.withOpacity(0.5),
+                size: 40.r,
+              ),
+            ),
           ],
         ),
       ),

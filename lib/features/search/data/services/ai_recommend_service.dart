@@ -11,17 +11,21 @@ class AiRecommendService {
   final GenerativeModel _model;
 
   AiRecommendService({required String apiKey})
-    : _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+    : _model = GenerativeModel(
+        model: 'gemini-1.5-flash-latest',
+        apiKey: apiKey,
+      );
 
   /// Get song recommendations based on current song
   /// Returns a list of {title, artist} maps
   Future<List<Map<String, String>>> getRecommendations(
     String title,
-    String artist,
-  ) async {
+    String artist, {
+    int count = 10,
+  }) async {
     final prompt =
         '''
-Dựa trên bài hát "$title" của $artist, hãy gợi ý 5 bài hát khác cùng tâm trạng và thể loại nhưng mang phong cách chill/sang trọng. 
+Dựa trên bài hát "$title" của $artist, hãy gợi ý $count bài hát khác cùng tâm trạng và thể loại nhưng mang phong cách chill/sang trọng. 
 Trả về kết quả dưới dạng JSON array thuần túy, mỗi object có key là "title" và "artist". 
 QUAN TRỌNG: Chỉ trả về JSON array, không có văn bản thừa, không có markdown code block.
 Ví dụ: [{"title": "Song Name", "artist": "Artist Name"}]
@@ -72,9 +76,14 @@ Ví dụ: [{"title": "Song Name", "artist": "Artist Name"}]
   Future<List<Home>> getRecommendedSongs(
     String title,
     String artist,
-    YoutubeService youtubeService,
-  ) async {
-    final recommendations = await getRecommendations(title, artist);
+    YoutubeService youtubeService, {
+    int count = 5,
+  }) async {
+    final recommendations = await getRecommendations(
+      title,
+      artist,
+      count: count,
+    );
     final List<Home> songs = [];
 
     for (final rec in recommendations) {

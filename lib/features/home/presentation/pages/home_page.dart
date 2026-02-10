@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/home/presentation/providers/home_provider.dart';
 import 'package:sonus/features/home/presentation/widgets/home_widgets.dart';
-import 'package:sonus/features/splash/data/repositories/splash_repository_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -30,7 +29,9 @@ class HomePage extends ConsumerWidget {
           child: homeState.when(
             data: (sections) {
               // Extract "Recently Played" for the top grid
-              final recentlyPlayed = sections['Recently Played'] ?? [];
+              final recentlyPlayed = (sections['Recently Played'] ?? [])
+                  .take(6)
+                  .toList();
               // Other sections
               final otherSections = Map<String, List<Home>>.from(sections)
                 ..remove('Recently Played');
@@ -64,21 +65,10 @@ class HomePage extends ConsumerWidget {
                             onPressed: () {},
                           ),
                           IconButton(
-                            icon: Icon(Icons.settings, size: 24.r),
+                            icon: Icon(Icons.person, size: 24.r),
                             color: Colors.white,
-                            onPressed: () async {
-                              // Logout logic
-                              final repository = ref.read(
-                                splashRepositoryProvider,
-                              );
-                              await repository.setAuthStatus(
-                                false,
-                              ); // Clear login state
-                              if (context.mounted) {
-                                context.go(
-                                  '/sign-in',
-                                ); // proper way to use router
-                              }
+                            onPressed: () {
+                              context.push('/profile');
                             },
                           ),
                         ],
@@ -103,7 +93,10 @@ class HomePage extends ConsumerWidget {
                       ),
                     ),
 
-                  SliverToBoxAdapter(child: SizedBox(height: 24.h)),
+                  SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+
+                  // Supermix Card
+                  const SliverToBoxAdapter(child: SupermixCard()),
 
                   // Horizontal Sections
                   SliverList(

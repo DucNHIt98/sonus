@@ -49,5 +49,7 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ứng dụng cần truy cập thư viện ảnh để bạn có thể tải lên ảnh đại diện.</string>
 </dict>
 </plist>

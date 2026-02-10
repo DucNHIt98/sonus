@@ -16,12 +16,15 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$PlayerState {
-  Home? get currentSong => throw _privateConstructorUsedError;
   List<Home> get queue => throw _privateConstructorUsedError;
   int get currentIndex => throw _privateConstructorUsedError;
+  Home? get currentSong => throw _privateConstructorUsedError;
+  bool get isPlaying => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
   List<Home> get aiRecommendations => throw _privateConstructorUsedError;
+  LoopMode get repeatMode => throw _privateConstructorUsedError;
+  bool get isShuffleModeEnabled => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $PlayerStateCopyWith<PlayerState> get copyWith =>
@@ -35,12 +38,15 @@ abstract class $PlayerStateCopyWith<$Res> {
       _$PlayerStateCopyWithImpl<$Res, PlayerState>;
   @useResult
   $Res call(
-      {Home? currentSong,
-      List<Home> queue,
+      {List<Home> queue,
       int currentIndex,
+      Home? currentSong,
+      bool isPlaying,
       bool isLoading,
       String? error,
-      List<Home> aiRecommendations});
+      List<Home> aiRecommendations,
+      LoopMode repeatMode,
+      bool isShuffleModeEnabled});
 
   $HomeCopyWith<$Res>? get currentSong;
 }
@@ -58,18 +64,17 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentSong = freezed,
     Object? queue = null,
     Object? currentIndex = null,
+    Object? currentSong = freezed,
+    Object? isPlaying = null,
     Object? isLoading = null,
     Object? error = freezed,
     Object? aiRecommendations = null,
+    Object? repeatMode = null,
+    Object? isShuffleModeEnabled = null,
   }) {
     return _then(_value.copyWith(
-      currentSong: freezed == currentSong
-          ? _value.currentSong
-          : currentSong // ignore: cast_nullable_to_non_nullable
-              as Home?,
       queue: null == queue
           ? _value.queue
           : queue // ignore: cast_nullable_to_non_nullable
@@ -78,6 +83,14 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
           ? _value.currentIndex
           : currentIndex // ignore: cast_nullable_to_non_nullable
               as int,
+      currentSong: freezed == currentSong
+          ? _value.currentSong
+          : currentSong // ignore: cast_nullable_to_non_nullable
+              as Home?,
+      isPlaying: null == isPlaying
+          ? _value.isPlaying
+          : isPlaying // ignore: cast_nullable_to_non_nullable
+              as bool,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -90,6 +103,14 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
           ? _value.aiRecommendations
           : aiRecommendations // ignore: cast_nullable_to_non_nullable
               as List<Home>,
+      repeatMode: null == repeatMode
+          ? _value.repeatMode
+          : repeatMode // ignore: cast_nullable_to_non_nullable
+              as LoopMode,
+      isShuffleModeEnabled: null == isShuffleModeEnabled
+          ? _value.isShuffleModeEnabled
+          : isShuffleModeEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -115,12 +136,15 @@ abstract class _$$PlayerStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {Home? currentSong,
-      List<Home> queue,
+      {List<Home> queue,
       int currentIndex,
+      Home? currentSong,
+      bool isPlaying,
       bool isLoading,
       String? error,
-      List<Home> aiRecommendations});
+      List<Home> aiRecommendations,
+      LoopMode repeatMode,
+      bool isShuffleModeEnabled});
 
   @override
   $HomeCopyWith<$Res>? get currentSong;
@@ -137,18 +161,17 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? currentSong = freezed,
     Object? queue = null,
     Object? currentIndex = null,
+    Object? currentSong = freezed,
+    Object? isPlaying = null,
     Object? isLoading = null,
     Object? error = freezed,
     Object? aiRecommendations = null,
+    Object? repeatMode = null,
+    Object? isShuffleModeEnabled = null,
   }) {
     return _then(_$PlayerStateImpl(
-      currentSong: freezed == currentSong
-          ? _value.currentSong
-          : currentSong // ignore: cast_nullable_to_non_nullable
-              as Home?,
       queue: null == queue
           ? _value._queue
           : queue // ignore: cast_nullable_to_non_nullable
@@ -157,6 +180,14 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
           ? _value.currentIndex
           : currentIndex // ignore: cast_nullable_to_non_nullable
               as int,
+      currentSong: freezed == currentSong
+          ? _value.currentSong
+          : currentSong // ignore: cast_nullable_to_non_nullable
+              as Home?,
+      isPlaying: null == isPlaying
+          ? _value.isPlaying
+          : isPlaying // ignore: cast_nullable_to_non_nullable
+              as bool,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -169,6 +200,14 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
           ? _value._aiRecommendations
           : aiRecommendations // ignore: cast_nullable_to_non_nullable
               as List<Home>,
+      repeatMode: null == repeatMode
+          ? _value.repeatMode
+          : repeatMode // ignore: cast_nullable_to_non_nullable
+              as LoopMode,
+      isShuffleModeEnabled: null == isShuffleModeEnabled
+          ? _value.isShuffleModeEnabled
+          : isShuffleModeEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -177,17 +216,18 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
 
 class _$PlayerStateImpl implements _PlayerState {
   const _$PlayerStateImpl(
-      {this.currentSong,
-      final List<Home> queue = const [],
-      this.currentIndex = 0,
+      {final List<Home> queue = const [],
+      this.currentIndex = -1,
+      this.currentSong,
+      this.isPlaying = false,
       this.isLoading = false,
       this.error,
-      final List<Home> aiRecommendations = const []})
+      final List<Home> aiRecommendations = const [],
+      this.repeatMode = LoopMode.off,
+      this.isShuffleModeEnabled = false})
       : _queue = queue,
         _aiRecommendations = aiRecommendations;
 
-  @override
-  final Home? currentSong;
   final List<Home> _queue;
   @override
   @JsonKey()
@@ -200,6 +240,11 @@ class _$PlayerStateImpl implements _PlayerState {
   @override
   @JsonKey()
   final int currentIndex;
+  @override
+  final Home? currentSong;
+  @override
+  @JsonKey()
+  final bool isPlaying;
   @override
   @JsonKey()
   final bool isLoading;
@@ -216,8 +261,15 @@ class _$PlayerStateImpl implements _PlayerState {
   }
 
   @override
+  @JsonKey()
+  final LoopMode repeatMode;
+  @override
+  @JsonKey()
+  final bool isShuffleModeEnabled;
+
+  @override
   String toString() {
-    return 'PlayerState(currentSong: $currentSong, queue: $queue, currentIndex: $currentIndex, isLoading: $isLoading, error: $error, aiRecommendations: $aiRecommendations)';
+    return 'PlayerState(queue: $queue, currentIndex: $currentIndex, currentSong: $currentSong, isPlaying: $isPlaying, isLoading: $isLoading, error: $error, aiRecommendations: $aiRecommendations, repeatMode: $repeatMode, isShuffleModeEnabled: $isShuffleModeEnabled)';
   }
 
   @override
@@ -225,27 +277,36 @@ class _$PlayerStateImpl implements _PlayerState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$PlayerStateImpl &&
-            (identical(other.currentSong, currentSong) ||
-                other.currentSong == currentSong) &&
             const DeepCollectionEquality().equals(other._queue, _queue) &&
             (identical(other.currentIndex, currentIndex) ||
                 other.currentIndex == currentIndex) &&
+            (identical(other.currentSong, currentSong) ||
+                other.currentSong == currentSong) &&
+            (identical(other.isPlaying, isPlaying) ||
+                other.isPlaying == isPlaying) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             (identical(other.error, error) || other.error == error) &&
             const DeepCollectionEquality()
-                .equals(other._aiRecommendations, _aiRecommendations));
+                .equals(other._aiRecommendations, _aiRecommendations) &&
+            (identical(other.repeatMode, repeatMode) ||
+                other.repeatMode == repeatMode) &&
+            (identical(other.isShuffleModeEnabled, isShuffleModeEnabled) ||
+                other.isShuffleModeEnabled == isShuffleModeEnabled));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      currentSong,
       const DeepCollectionEquality().hash(_queue),
       currentIndex,
+      currentSong,
+      isPlaying,
       isLoading,
       error,
-      const DeepCollectionEquality().hash(_aiRecommendations));
+      const DeepCollectionEquality().hash(_aiRecommendations),
+      repeatMode,
+      isShuffleModeEnabled);
 
   @JsonKey(ignore: true)
   @override
@@ -256,25 +317,34 @@ class _$PlayerStateImpl implements _PlayerState {
 
 abstract class _PlayerState implements PlayerState {
   const factory _PlayerState(
-      {final Home? currentSong,
-      final List<Home> queue,
+      {final List<Home> queue,
       final int currentIndex,
+      final Home? currentSong,
+      final bool isPlaying,
       final bool isLoading,
       final String? error,
-      final List<Home> aiRecommendations}) = _$PlayerStateImpl;
+      final List<Home> aiRecommendations,
+      final LoopMode repeatMode,
+      final bool isShuffleModeEnabled}) = _$PlayerStateImpl;
 
-  @override
-  Home? get currentSong;
   @override
   List<Home> get queue;
   @override
   int get currentIndex;
+  @override
+  Home? get currentSong;
+  @override
+  bool get isPlaying;
   @override
   bool get isLoading;
   @override
   String? get error;
   @override
   List<Home> get aiRecommendations;
+  @override
+  LoopMode get repeatMode;
+  @override
+  bool get isShuffleModeEnabled;
   @override
   @JsonKey(ignore: true)
   _$$PlayerStateImplCopyWith<_$PlayerStateImpl> get copyWith =>

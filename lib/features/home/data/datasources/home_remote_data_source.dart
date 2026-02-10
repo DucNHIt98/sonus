@@ -26,48 +26,64 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
   @override
   Future<void> addToRecentlyPlayed(HomeModel song) async {
     try {
-      // "Log nó ra" - Print song info
-      debugPrint('Saving song to History/DB: ${song.toString()}');
+      debugPrint('Saving song to History: ${song.title}');
 
-      // Attempt to save to 'recently_played' table in Supabase
-      // Assuming simple schema: id, title, artist, image_url, audio_url, created_at
-      // We map 'subtitle' (entity) back to 'artist' (db column) if needed.
-      // Or just dump the JSON if schema matches.
+      final user = _client.auth.currentUser;
+      if (user == null) return;
 
-      final data = {
-        'id': song.id, // ID from YouTube
+      // Ensure song exists in songs table
+      await _client.from('songs').upsert({
+        'id': song.id,
         'title': song.title,
         'subtitle': song.subtitle,
         'image_url': song.imageUrl,
         'source': song.source,
-        'youtube_id': song.youtubeId,
-        'created_at': DateTime.now().toIso8601String(),
-      };
+      });
 
-      await _client.from('recently_played').upsert(data);
-      debugPrint('Successfully saved to recently_played');
+      // Update play history
+      await _client.from('play_history').upsert({
+        'user_id': user.id,
+        'song_id': song.id,
+        'last_played': DateTime.now().toIso8601String(),
+      }, onConflict: 'user_id, song_id');
+
+      debugPrint('Successfully saved to play_history');
     } catch (e) {
-      debugPrint(
-        'Error saving to recently_played (DB might not have this table?): $e',
-      );
-      // Fallback: Just log it as requested
+      debugPrint('Error saving to play_history: $e');
     }
   }
 
   @override
   Future<List<HomeModel>> getRecentlyPlayed() async {
     try {
-      // Fetch directly from recently_played table
+      final user = _client.auth.currentUser;
+      if (user == null) return [];
+
+      // Fetch from play_history JOINED with songs
       final response = await _client
-          .from('recently_played')
-          .select()
-          .order('created_at', ascending: false)
+          .from('play_history')
+          .select('songs(*)')
+          .eq('user_id', user.id)
+          .order('last_played', ascending: false)
           .limit(20);
 
       final data = response as List<dynamic>;
-      debugPrint('Fetched ${data.length} recently played history items');
+      debugPrint(
+        'Fetched ${data.length} recently played items from play_history',
+      );
 
-      return data.map((json) => HomeModel.fromJson(json)).toList();
+      return data.where((item) => item['songs'] != null).map((item) {
+        final song = item['songs'];
+        return HomeModel(
+          id: song['id'] ?? '',
+          title: song['title'] ?? '',
+          subtitle: song['subtitle'] ?? '',
+          imageUrl: song['image_url'] ?? '',
+          source: song['source'] ?? 'youtube',
+          youtubeId: song['id'],
+          durationMs: (song['duration'] as int? ?? 0) * 1000,
+        );
+      }).toList();
     } catch (e, stack) {
       debugPrint('Error fetching recently played: $e');
       debugPrint('Stack trace: $stack');

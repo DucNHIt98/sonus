@@ -27,9 +27,9 @@ class PlayerProgressBar extends ConsumerWidget {
           builder: (context, snapshot) {
             var position = snapshot.data ?? Duration.zero;
             // Cap position to duration to avoid overflow if player duration is shorter
-            if (duration != Duration.zero && position > duration) {
-              position = duration;
-            }
+            // if (duration != Duration.zero && position > duration) {
+            //   position = duration;
+            // }
 
             return StreamBuilder<Duration>(
               stream: player.bufferedPositionStream,
