@@ -16,6 +16,7 @@ import '../../features/login/presentation/pages/sign_in_page.dart';
 import '../../features/login/presentation/pages/sign_up_page.dart';
 import '../../features/login/presentation/pages/login_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/premium/presentation/pages/premium_page.dart';
 
 part 'router.g.dart';
 
@@ -164,6 +165,13 @@ GoRouter router(RouterRef ref) {
         path: '/profile',
         name: 'profile',
         builder: (context, state) => const ProfilePage(),
+      ),
+
+      // Premium Subscription Screen
+      GoRoute(
+        path: '/premium',
+        name: 'premium',
+        builder: (context, state) => const PremiumPage(),
       ),
     ],
 

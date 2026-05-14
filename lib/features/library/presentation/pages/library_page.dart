@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/library/data/repositories/library_repository_impl.dart';
 import 'package:sonus/features/library/presentation/widgets/library_widgets.dart';
+import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
 class LibraryPage extends ConsumerWidget {
   const LibraryPage({super.key});
@@ -38,7 +39,15 @@ class LibraryPage extends ConsumerWidget {
                   ),
                 ),
 
-                // 2. Filter Chips
+                // 2. Premium Banner
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 12.h),
+                    child: _PremiumBanner(),
+                  ),
+                ),
+
+                // 3. Filter Chips
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 16.h),
@@ -138,3 +147,69 @@ final userPlaylistsProvider = FutureProvider<List<Home>>((ref) async {
   final repo = ref.read(libraryRepositoryProvider);
   return repo.getUserPlaylists();
 });
+
+class _PremiumBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statusAsync = ref.watch(premiumControllerProvider);
+
+    return statusAsync.when(
+      data: (status) {
+        if (status.isPremium) {
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.amber.shade700, Colors.amber.shade500],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.verified, color: Colors.white, size: 20.r),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    'Premium Active',
+                    style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return GestureDetector(
+          onTap: () => context.push('/premium'),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.red.shade800, Colors.red.shade600],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.stars, color: Colors.white, size: 20.r),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    'Upgrade to Premium',
+                    style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14.r),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => SizedBox.shrink(),
+      error: (_, __) => SizedBox.shrink(),
+    );
+  }
+}

@@ -133,31 +133,66 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         ),
                       ),
                       SizedBox(height: 16.h),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (context) =>
-                                EditProfileSheet(userProfile: user),
-                          );
-                        },
-                        icon: Icon(Icons.edit, size: 16.r, color: Colors.red),
-                        label: Text(
-                          'Edit Profile',
-                          style: TextStyle(color: Colors.red, fontSize: 14.sp),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20.r),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) =>
+                                    EditProfileSheet(userProfile: user),
+                              );
+                            },
+                            icon: Icon(Icons.edit, size: 16.r, color: Colors.red),
+                            label: Text(
+                              'Edit Profile',
+                              style: TextStyle(color: Colors.red, fontSize: 14.sp),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.red),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24.w,
+                                vertical: 8.h,
+                              ),
+                            ),
                           ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24.w,
-                            vertical: 8.h,
+                          SizedBox(width: 12.w),
+                          GestureDetector(
+                            onTap: () => context.push('/premium'),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                              decoration: BoxDecoration(
+                                color: (user['is_premium'] == true) ? Colors.amber : Colors.grey[800],
+                                borderRadius: BorderRadius.circular(16.r),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.stars,
+                                    color: (user['is_premium'] == true) ? Colors.black : Colors.grey,
+                                    size: 16.r,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    (user['is_premium'] == true) ? 'Premium' : 'Get Premium',
+                                    style: TextStyle(
+                                      color: (user['is_premium'] == true) ? Colors.black : Colors.white,
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),

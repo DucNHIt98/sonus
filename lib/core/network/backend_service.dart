@@ -13,14 +13,14 @@ BackendService backendService(BackendServiceRef ref) {
 }
 
 class BackendService {
-  final Dio _dio;
+  final Dio dio;
 
-  BackendService(this._dio);
+  BackendService(this.dio);
 
   /// Resolves the full YouTube audio URL for a Deezer preview track
   Future<Home?> getFullVersion(Home deezerSong) async {
     try {
-      final response = await _dio.post(
+      final response = await dio.post(
         '/api/music/resolve/',
         data: {
           'title': deezerSong.title,
@@ -46,7 +46,7 @@ class BackendService {
   /// Triggers conversion of a YouTube video to MP3
   Future<String?> convertYoutubeToMp3(String youtubeId) async {
     try {
-      final response = await _dio.post(
+      final response = await dio.post(
         '/api/music/resolve/',
         data: {'video_id': youtubeId},
       );
@@ -68,7 +68,7 @@ class BackendService {
     String sources = 'youtube,jamendo,nct',
   }) async {
     try {
-      final response = await _dio.get(
+      final response = await dio.get(
         '/api/music/search/',
         queryParameters: {'q': query, 'limit': limit, 'sources': sources},
       );
@@ -84,7 +84,7 @@ class BackendService {
   /// YouTube autocomplete suggestions
   Future<List<String>> autocomplete(String query) async {
     try {
-      final response = await _dio.get(
+      final response = await dio.get(
         '/api/music/autocomplete/',
         queryParameters: {'q': query},
       );
@@ -99,7 +99,7 @@ class BackendService {
   /// Home feed: trending + charts + genres
   Future<Map<String, dynamic>> getHomeFeed() async {
     try {
-      final response = await _dio.get('/api/music/feed/');
+      final response = await dio.get('/api/music/feed/');
       final data = response.data;
       return {
         'trending': _parseMusicList(data['trending']),
@@ -121,7 +121,7 @@ class BackendService {
   /// Chart tracks by region
   Future<List<MusicModel>> getChart(String region) async {
     try {
-      final response = await _dio.get(
+      final response = await dio.get(
         '/api/music/charts/',
         queryParameters: {'region': region},
       );
@@ -135,7 +135,7 @@ class BackendService {
   /// Genre tracks
   Future<List<MusicModel>> getGenreTracks(String genre) async {
     try {
-      final response = await _dio.get(
+      final response = await dio.get(
         '/api/music/genres/',
         queryParameters: {'genre': genre},
       );
@@ -161,7 +161,7 @@ class BackendService {
       Map<String, dynamic> params) async {
     try {
       final response =
-          await _dio.get('/api/recommendations/', queryParameters: params);
+          await dio.get('/api/recommendations/', queryParameters: params);
       return _parseMusicList(response.data['recommendations']);
     } catch (e) {
       debugPrint('Backend recommendations error: $e');
