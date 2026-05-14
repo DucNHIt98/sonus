@@ -7,11 +7,9 @@ part of 'ai_recommend_service.dart';
 // **************************************************************************
 
 String _$aiRecommendServiceHash() =>
-    r'366b70160496a74f5893748b069f62d9ce2bb8e7';
+    r'075d5034ec8692b102c34387cdd53ba98dabc8f0';
 
-/// Provider for AiRecommendService
-///
-/// Copied from [aiRecommendService].
+/// See also [aiRecommendService].
 @ProviderFor(aiRecommendService)
 final aiRecommendServiceProvider = Provider<AiRecommendService>.internal(
   aiRecommendService,

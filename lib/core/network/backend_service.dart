@@ -146,6 +146,29 @@ class BackendService {
     }
   }
 
+  /// AI song recommendations based on current song
+  Future<List<MusicModel>> getRecommendations(String songId) async {
+    return _fetchRecommendations({'song_id': songId});
+  }
+
+  /// AI recommendations by title+artist (for queue expansion when no song_id)
+  Future<List<MusicModel>> getRecommendationsByTitle(
+      String title, String artist) async {
+    return _fetchRecommendations({'title': title, 'artist': artist});
+  }
+
+  Future<List<MusicModel>> _fetchRecommendations(
+      Map<String, dynamic> params) async {
+    try {
+      final response =
+          await _dio.get('/api/recommendations/', queryParameters: params);
+      return _parseMusicList(response.data['recommendations']);
+    } catch (e) {
+      debugPrint('Backend recommendations error: $e');
+      return [];
+    }
+  }
+
   List<MusicModel> _parseMusicList(dynamic data) {
     if (data is! List) return [];
     return data
