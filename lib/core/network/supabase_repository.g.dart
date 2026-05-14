@@ -7,7 +7,7 @@ part of 'supabase_repository.dart';
 // **************************************************************************
 
 String _$supabaseRepositoryHash() =>
-    r'e8465560807b6e6e40ad3df94a115d1b2239b3db';
+    r'2ed6520a7c25447cd209c3daabe52ec60766cf7b';
 
 /// See also [supabaseRepository].
 @ProviderFor(supabaseRepository)

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:sonus/core/network/supabase_provider.dart';
+import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/features/home/data/models/home_model.dart';
 
 part 'library_remote_data_source.g.dart';
@@ -10,7 +9,7 @@ part 'library_remote_data_source.g.dart';
 LibraryRemoteDataSource libraryRemoteDataSource(
   LibraryRemoteDataSourceRef ref,
 ) {
-  return LibraryRemoteDataSourceImpl(ref.read(supabaseClientProvider));
+  return LibraryRemoteDataSourceImpl(ref.read(backendServiceProvider));
 }
 
 abstract class LibraryRemoteDataSource {
@@ -18,24 +17,18 @@ abstract class LibraryRemoteDataSource {
 }
 
 class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
-  final SupabaseClient _client;
+  final BackendService _backend;
 
-  LibraryRemoteDataSourceImpl(this._client);
+  LibraryRemoteDataSourceImpl(this._backend);
 
   @override
   Future<List<HomeModel>> getUserPlaylists() async {
     try {
-      // Fetch playlists where user_id matches current user OR is public
-      // For now, fetching all public playlists or just all playlists as per RLS
-      final response = await _client.from('playlists').select();
-
-      final data = response as List<dynamic>;
-      debugPrint('Library: Fetched ${data.length} playlists');
-
-      return data.map((json) {
+      final playlists = await _backend.getPlaylists();
+      return playlists.map((json) {
         return HomeModel(
-          id: json['id'],
-          title: json['title'],
+          id: json['id'] ?? '',
+          title: json['title'] ?? '',
           subtitle: json['description'] ?? 'Playlist',
           imageUrl: json['image_url'] ?? '',
         );

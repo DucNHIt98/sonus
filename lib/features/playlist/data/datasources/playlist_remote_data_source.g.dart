@@ -7,7 +7,7 @@ part of 'playlist_remote_data_source.dart';
 // **************************************************************************
 
 String _$playlistRemoteDataSourceHash() =>
-    r'79cf13e53b33fd93df7eb9ca77584921e7f4230f';
+    r'20ebe43c5e3e37fb2e6ea9d0006d79751c0b9cab';
 
 /// See also [playlistRemoteDataSource].
 @ProviderFor(playlistRemoteDataSource)

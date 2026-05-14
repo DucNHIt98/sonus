@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/auth/auth_service.dart';
+import '../../../../core/network/backend_service.dart';
 import '../../../home/domain/entities/home.dart';
 
 part 'profile_controller.freezed.dart';
@@ -51,14 +52,16 @@ class ProfileController extends _$ProfileController {
 
     try {
       if (avatarFile != null) {
-        throw 'Avatar upload sẽ được chuyển sang backend ở phase sau';
+        final backendService = ref.read(backendServiceProvider);
+        await backendService.uploadAvatar(avatarFile);
       }
 
-      await ref
-          .read(authServiceProvider)
-          .updateCurrentUser(displayName: displayName);
+      if (displayName != null) {
+        await ref
+            .read(authServiceProvider)
+            .updateCurrentUser(displayName: displayName);
+      }
 
-      // Refresh data to update UI
       state = await AsyncValue.guard(() => _loadProfileData());
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);

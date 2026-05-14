@@ -822,11 +822,10 @@ class PlayerController extends _$PlayerController {
       return; // Already loaded
 
     try {
-      final youtubeService = ref.read(youtubeServiceProvider);
-      final url = await youtubeService.getStreamUrl(videoId);
+      final backendService = ref.read(backendServiceProvider);
+      final url = await backendService.convertYoutubeToMp3(videoId);
 
       if (url != null) {
-        // Cache the URL string
         _preloadedVideoId = videoId;
         _preloadedUrlString = url;
         print('DEBUG: Successfully preloaded search result URL: $videoId');
@@ -868,8 +867,8 @@ class PlayerController extends _$PlayerController {
     try {
       // Check if we need to resolve URL (e.g. YouTube)
       if (song.source == 'youtube' && song.audioUrl.isEmpty) {
-        final youtubeService = ref.read(youtubeServiceProvider);
-        final url = await youtubeService.getStreamUrl(
+        final backendService = ref.read(backendServiceProvider);
+        final url = await backendService.convertYoutubeToMp3(
           song.youtubeId ?? song.id,
         );
         if (url != null) {

@@ -7,7 +7,7 @@ part of 'library_remote_data_source.dart';
 // **************************************************************************
 
 String _$libraryRemoteDataSourceHash() =>
-    r'716a4063dd75d0618e163fda0e2dcb1932208e2f';
+    r'4c51c5aa9934f81e56fc8b14841e5d78f1876c3c';
 
 /// See also [libraryRemoteDataSource].
 @ProviderFor(libraryRemoteDataSource)

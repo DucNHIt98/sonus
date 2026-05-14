@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:sonus/core/network/supabase_provider.dart';
-import 'package:sonus/features/home/data/models/home_model.dart'; // Using HomeModel for songs as well for simplicity
+import 'package:sonus/core/network/backend_service.dart';
+import 'package:sonus/features/home/data/models/home_model.dart';
 
 part 'playlist_remote_data_source.g.dart';
 
@@ -10,7 +9,7 @@ part 'playlist_remote_data_source.g.dart';
 PlaylistRemoteDataSource playlistRemoteDataSource(
   PlaylistRemoteDataSourceRef ref,
 ) {
-  return PlaylistRemoteDataSourceImpl(ref.read(supabaseClientProvider));
+  return PlaylistRemoteDataSourceImpl(ref.read(backendServiceProvider));
 }
 
 abstract class PlaylistRemoteDataSource {
@@ -18,43 +17,27 @@ abstract class PlaylistRemoteDataSource {
 }
 
 class PlaylistRemoteDataSourceImpl implements PlaylistRemoteDataSource {
-  final SupabaseClient _client;
+  final BackendService _backend;
 
-  PlaylistRemoteDataSourceImpl(this._client);
+  PlaylistRemoteDataSourceImpl(this._backend);
 
   @override
   Future<List<HomeModel>> getPlaylistSongs(String playlistId) async {
     try {
-      // Join playlist_songs -> songs -> artists
-      final response = await _client
-          .from('playlist_songs')
-          .select('*, songs(*, artists(name))')
-          .eq('playlist_id', playlistId);
+      final detail = await _backend.getPlaylistDetail(playlistId);
+      if (detail == null) return [];
 
-      final data = response as List<dynamic>;
-      debugPrint(
-        'Playlist: Fetched ${data.length} songs for playlist $playlistId',
-      );
-
-      return data
-          .map((json) {
-            final songData = json['songs'];
-            if (songData == null) return null;
-
-            final artist = songData['artists'] != null
-                ? songData['artists']['name']
-                : 'Unknown Artist';
-
-            return HomeModel(
-              id: songData['id'],
-              title: songData['title'],
-              subtitle: artist,
-              imageUrl: songData['image_url'] ?? '',
-              audioUrl: songData['audio_url'] ?? '',
-            );
-          })
-          .whereType<HomeModel>()
-          .toList();
+      final songs = (detail['songs'] as List?) ?? [];
+      return songs.map((json) {
+        final map = json as Map<String, dynamic>;
+        return HomeModel(
+          id: map['id'] ?? '',
+          title: map['title'] ?? '',
+          subtitle: map['subtitle'] ?? 'Unknown Artist',
+          imageUrl: map['image_url'] ?? '',
+          audioUrl: map['audio_url'] ?? '',
+        );
+      }).toList();
     } catch (e, stack) {
       debugPrint('Error fetching playlist songs: $e');
       debugPrint('Stack trace: $stack');
