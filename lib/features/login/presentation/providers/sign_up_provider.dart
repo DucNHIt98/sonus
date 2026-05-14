@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sonus/core/auth/auth_service.dart';
+import 'package:sonus/features/splash/data/repositories/splash_repository_provider.dart';
 
 part 'sign_up_provider.g.dart';
 
@@ -27,6 +28,7 @@ class SignUpController extends _$SignUpController {
             username: username,
             fullName: fullName,
           );
+      await ref.read(splashRepositoryProvider).setAuthStatus(true);
 
       state = const AsyncData(null);
       return true;

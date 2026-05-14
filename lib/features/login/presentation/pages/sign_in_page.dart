@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/login_provider.dart';
 
-class SignInPage extends StatelessWidget {
+class SignInPage extends ConsumerWidget {
   const SignInPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: const Color(0xFFB91C1C),
       body: Container(
@@ -42,7 +44,25 @@ class SignInPage extends StatelessWidget {
                 _SocialButton(
                   asset: 'assets/icons/google.svg',
                   label: 'Continue with Google',
-                  onTap: () {},
+                  onTap: () async {
+                    final success = await ref
+                        .read(loginControllerProvider.notifier)
+                        .signInWithGoogle();
+                    if (success) {
+                      if (context.mounted) context.go('/home');
+                    } else {
+                      // Check if there was an error (not just a cancellation)
+                      final state = ref.read(loginControllerProvider);
+                      if (state is AsyncError && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: const Color(0xFFB91C1C),
+                            content: Text('Đã xảy ra lỗi: ${state.error}'),
+                          ),
+                        );
+                      }
+                    }
+                  },
                 ),
                 SizedBox(height: 16.h),
                 _SocialButton(

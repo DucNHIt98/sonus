@@ -202,7 +202,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         children: [
                           _SocialIcon(
                             asset: 'assets/icons/google.svg',
-                            onTap: () {},
+                            onTap: () async {
+                              final success = await ref
+                                  .read(loginControllerProvider.notifier)
+                                  .signInWithGoogle();
+                              if (success) {
+                                if (mounted) context.go('/home');
+                              } else {
+                                final state = ref.read(loginControllerProvider);
+                                if (state is AsyncError && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: const Color(0xFFB91C1C),
+                                      content: Text(
+                                        'Đã xảy ra lỗi: ${state.error}',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
                           ),
                           _SocialIcon(
                             asset: 'assets/icons/facebook.svg',

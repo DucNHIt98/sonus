@@ -127,6 +127,7 @@ class FeaturedCard extends StatelessWidget {
   final String subtitle;
   final String imageUrl;
   final Color dummyColor;
+  final VoidCallback? onTap;
 
   const FeaturedCard({
     super.key,
@@ -134,12 +135,13 @@ class FeaturedCard extends StatelessWidget {
     required this.subtitle,
     required this.imageUrl,
     this.dummyColor = Colors.purple,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/player'),
+      onTap: onTap ?? () => context.push('/player'),
       child: Container(
         width: 260.w,
         margin: EdgeInsets.only(right: 16.w),

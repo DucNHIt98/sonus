@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../network/supabase_provider.dart';
 
@@ -13,48 +15,87 @@ AuthService authService(AuthServiceRef ref) {
 }
 
 class AuthService {
+  static const _baseUrl = String.fromEnvironment(
+    'SONUS_API_BASE_URL',
+    defaultValue: 'http://localhost:8000/api',
+  );
+  static const _tokenKey = 'sonus_backend_token';
+
   final SupabaseClient _supabase;
+  final Dio _dio = Dio(BaseOptions(baseUrl: _baseUrl));
+
+  // Single instance of GoogleSignIn for consistency
+  final _googleSignIn = GoogleSignIn(
+    clientId: defaultTargetPlatform == TargetPlatform.iOS
+        ? '715942914082-1h6dtjhb9400oa8n70gkbmn4g56amalo.apps.googleusercontent.com'
+        : null,
+    serverClientId:
+        '715942914082-69ef0n1657t80mktp9jo3imera2vv91m.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
+  );
 
   AuthService(this._supabase);
 
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_tokenKey);
+  }
+
+  Future<void> _saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, token);
+  }
+
+  Future<void> _clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+  }
+
+  Future<BackendAuthResult> _storeAuthResponse(Response response) async {
+    final data = Map<String, dynamic>.from(response.data as Map);
+    final token = data['token'] as String;
+    await _saveToken(token);
+    return BackendAuthResult(
+      user: Map<String, dynamic>.from(data['user'] as Map),
+      token: token,
+      expiresAt: data['expires_at'] as String?,
+    );
+  }
+
+  String _messageFromDioError(DioException error, String fallback) {
+    final data = error.response?.data;
+    if (data is Map && data['detail'] != null) return data['detail'].toString();
+    if (data is Map && data['non_field_errors'] is List) {
+      return (data['non_field_errors'] as List).join('\n');
+    }
+    if (data is Map && data.isNotEmpty) {
+      final first = data.values.first;
+      if (first is List && first.isNotEmpty) return first.first.toString();
+      return first.toString();
+    }
+    return fallback;
+  }
+
   /// Performs user registration with username uniqueness check.
-  Future<AuthResponse> signUpWithUsername({
+  Future<BackendAuthResult> signUpWithUsername({
     required String email,
     required String password,
     required String username,
     String? fullName,
   }) async {
     try {
-      // 1. Check if username already exists
-      final existing = await _supabase
-          .from('users')
-          .select('username')
-          .eq('username', username)
-          .maybeSingle();
-
-      if (existing != null) {
-        throw 'Tên người dùng đã bị chiếm';
-      }
-
-      // 2. Proceed with sign up
-      final response = await _supabase.auth.signUp(
-        email: email,
-        password: password,
-        data: {'username': username, 'full_name': fullName ?? username},
+      final response = await _dio.post(
+        '/auth/register/',
+        data: {
+          'email': email,
+          'password': password,
+          'username': username,
+          'display_name': fullName ?? username,
+        },
       );
-
-      return response;
-    } on AuthException catch (e) {
-      debugPrint(
-        'DEBUG: AuthException during sign up: ${e.message} (Code: ${e.statusCode})',
-      );
-      if (e.message == 'User already registered') {
-        throw 'Email này đã được đăng ký';
-      }
-      if (e.message.contains('Database error saving new user')) {
-        throw 'Tên người dùng đã bị chiếm hoặc lỗi hệ thống. Vui lòng thử username khác.';
-      }
-      rethrow;
+      return _storeAuthResponse(response);
+    } on DioException catch (e) {
+      throw _messageFromDioError(e, 'Đăng ký thất bại');
     } catch (e) {
       if (e is String) rethrow;
       debugPrint('DEBUG: Unexpected error during sign up: $e');
@@ -64,7 +105,7 @@ class AuthService {
 
   /// Performs user registration with detailed error handling.
   @Deprecated('Use signUpWithUsername instead')
-  Future<AuthResponse> signUp({
+  Future<BackendAuthResult> signUp({
     required String email,
     required String password,
     required String name,
@@ -79,34 +120,14 @@ class AuthService {
   }
 
   /// Performs user login using username instead of email.
-  Future<AuthResponse> loginWithUsername({
+  Future<BackendAuthResult> loginWithUsername({
     required String username,
     required String password,
   }) async {
     try {
-      // 1. Find email by username in public.users
-      final userRow = await _supabase
-          .from('users')
-          .select('email')
-          .eq('username', username)
-          .maybeSingle();
-
-      if (userRow == null) {
-        throw 'Thông tin đăng nhập không chính xác';
-      }
-
-      final email = userRow['email'] as String;
-
-      // 2. Sign in with the retrieved email
-      final response = await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-
-      return response;
-    } on AuthException catch (_) {
-      // General error for security reasons
-      throw 'Thông tin đăng nhập không chính xác';
+      return signIn(email: username, password: password);
+    } on DioException catch (e) {
+      throw _messageFromDioError(e, 'Thông tin đăng nhập không chính xác');
     } catch (e) {
       if (e is String) rethrow;
       debugPrint('DEBUG: Unexpected error during login: $e');
@@ -115,28 +136,30 @@ class AuthService {
   }
 
   /// Performs user login.
-  Future<AuthResponse> signIn({
+  Future<BackendAuthResult> signIn({
     required String email,
     required String password,
   }) async {
-    final response = await _supabase.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
-
-    if (response.user != null) {
-      await _syncUser(response.user!);
+    try {
+      final response = await _dio.post(
+        '/auth/login/',
+        data: {'email': email, 'password': password},
+      );
+      return _storeAuthResponse(response);
+    } on DioException catch (e) {
+      throw _messageFromDioError(e, 'Thông tin đăng nhập không chính xác');
     }
-
-    return response;
   }
 
   /// Performs Google Sign-In and syncs user info to database.
-  Future<AuthResponse?> signInWithGoogle() async {
+  Future<BackendAuthResult?> signInWithGoogle() async {
     try {
-      // 1. Initial Google Sign-In
-      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
-      final googleUser = await googleSignIn.signIn();
+      // Note: For iOS, you may need to provide the iosClientId here if you
+      // don't have GoogleService-Info.plist correctly integrated.
+      // For Supabase to receive an ID Token, you MUST provide the webClientId
+      // (from Google Cloud Console -> Credentials -> Web Client ID) as serverClientId.
+
+      final googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) return null;
 
@@ -145,7 +168,7 @@ class AuthService {
       final accessToken = googleAuth.accessToken;
 
       if (idToken == null) {
-        throw 'No ID Token found.';
+        throw 'Không tìm thấy ID Token từ Google.';
       }
 
       // 2. Sign in with Supabase using ID Token
@@ -155,62 +178,87 @@ class AuthService {
         accessToken: accessToken,
       );
 
-      // 3. Sync user info to database
-      if (response.user != null) {
-        await _syncUser(response.user!);
+      final supabaseAccessToken = response.session?.accessToken;
+      if (supabaseAccessToken == null) {
+        throw 'Không nhận được Supabase access token.';
       }
 
-      return response;
+      final backendResponse = await _dio.post(
+        '/auth/google/',
+        data: {'token': supabaseAccessToken},
+      );
+      return _storeAuthResponse(backendResponse);
     } catch (e) {
       debugPrint('DEBUG: Error during Google Sign-In: $e');
       rethrow;
     }
   }
 
-  /// Syncs user basic information to 'public.users' table
-  Future<void> _syncUser(User user) async {
-    try {
-      final userData = {
-        'id': user.id,
-        'email': user.email,
-        'full_name':
-            user.userMetadata?['full_name'] ?? user.userMetadata?['name'] ?? '',
-        'avatar_url':
-            user.userMetadata?['avatar_url'] ??
-            user.userMetadata?['picture'] ??
-            '',
-        'created_at': DateTime.now().toIso8601String(),
-      };
-
-      await _supabase.from('users').upsert(userData);
-      debugPrint('Supabase: Synced user profile for ${user.email}');
-    } catch (e) {
-      // Log error but don't block login
-      debugPrint('DEBUG: Error syncing user to database: $e');
-    }
+  Future<bool> hasValidSession() async {
+    return await getCurrentUser() != null;
   }
 
-  /// Retrieves the current user information from 'public.users' table.
-  /// Assumes the table 'users' exists in the public schema and is keyed by 'id'.
+  /// Retrieves the current user information from the Sonus backend.
   Future<Map<String, dynamic>?> getCurrentUser() async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) return null;
+    final token = await getToken();
+    if (token == null) return null;
 
     try {
-      final response = await _supabase
-          .from('users')
-          .select()
-          .eq('id', user.id)
-          .single();
-
-      return response;
-    } catch (_) {
+      final response = await _dio.get(
+        '/auth/me/',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return Map<String, dynamic>.from(response.data as Map);
+    } on DioException {
+      await _clearToken();
       return null;
     }
   }
 
+  Future<Map<String, dynamic>> updateCurrentUser({String? displayName}) async {
+    final token = await getToken();
+    if (token == null) throw 'Bạn chưa đăng nhập';
+    final response = await _dio.patch(
+      '/auth/me/',
+      data: {'display_name': displayName},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return Map<String, dynamic>.from(response.data as Map);
+  }
+
   /// Sign out
   Future<void> signOut() async {
+    final token = await getToken();
+    if (token != null) {
+      try {
+        await _dio.post(
+          '/auth/logout/',
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+        );
+      } catch (e) {
+        debugPrint('DEBUG: Backend logout failed: $e');
+      }
+    }
+    await _clearToken();
     await _supabase.auth.signOut();
+    try {
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+      }
+    } catch (e) {
+      debugPrint('DEBUG: Error signing out from Google: $e');
+    }
   }
+}
+
+class BackendAuthResult {
+  final Map<String, dynamic> user;
+  final String token;
+  final String? expiresAt;
+
+  BackendAuthResult({
+    required this.user,
+    required this.token,
+    required this.expiresAt,
+  });
 }

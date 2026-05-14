@@ -14,6 +14,9 @@ _$HomeImpl _$$HomeImplFromJson(Map<String, dynamic> json) => _$HomeImpl(
       audioUrl: json['audioUrl'] as String? ?? '',
       source: json['source'] as String? ?? 'youtube',
       youtubeId: json['youtubeId'] as String?,
+      deezerId: json['deezerId'] as String?,
+      jamendoId: json['jamendoId'] as String?,
+      nctId: json['nctId'] as String?,
       duration: json['duration'] == null
           ? null
           : Duration(microseconds: (json['duration'] as num).toInt()),
@@ -28,5 +31,8 @@ Map<String, dynamic> _$$HomeImplToJson(_$HomeImpl instance) =>
       'audioUrl': instance.audioUrl,
       'source': instance.source,
       'youtubeId': instance.youtubeId,
+      'deezerId': instance.deezerId,
+      'jamendoId': instance.jamendoId,
+      'nctId': instance.nctId,
       'duration': instance.duration?.inMicroseconds,
     };

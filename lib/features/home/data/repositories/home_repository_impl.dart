@@ -1,46 +1,50 @@
-import 'package:sonus/features/home/data/datasources/home_remote_data_source.dart';
-import 'package:sonus/features/home/data/models/home_model.dart';
+import 'package:sonus/core/models/music_model.dart';
+import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/home/domain/repositories/home_repository.dart';
 
 class HomeRepositoryImpl implements HomeRepository {
-  final HomeRemoteDataSource _remoteDataSource;
+  final BackendService _backend;
 
-  HomeRepositoryImpl(this._remoteDataSource);
+  HomeRepositoryImpl(this._backend);
 
   @override
   Future<Map<String, List<Home>>> getHomeData() async {
-    // Parallel fetch
-    final results = await Future.wait([
-      _remoteDataSource.getRecentlyPlayed(),
-      _remoteDataSource.getPlaylists(),
-    ]);
+    final feed = await _backend.getHomeFeed();
 
-    final recentlyPlayed = results[0];
-    final playlists = results[1];
+    final trending = (feed['trending'] as List<MusicModel>)
+        .map((e) => e.toEntity())
+        .toList();
 
-    // MOCK: Still keeping some mock sections if arrays are empty or to fill up UI
-    // In real app, you might have separate endpoints for each section.
+    final bySource = <String, List<Home>>{};
+    bySource['Trending'] = trending;
 
-    return {
-      'Recently Played': recentlyPlayed.map((e) => e.toEntity()).toList(),
-      'Your Top Mixes': playlists.map((e) => e.toEntity()).toList(),
-      // 'Made For You': ...,
-    };
+    final charts = feed['charts'] as Map<String, List<MusicModel>>;
+    for (final entry in charts.entries) {
+      final label = _chartLabel(entry.key);
+      bySource[label] = entry.value.map((e) => e.toEntity()).toList();
+    }
+
+    final genres = feed['genres'] as Map<String, List<MusicModel>>;
+    for (final entry in genres.entries) {
+      final label = entry.key.toUpperCase();
+      bySource[label] = entry.value.map((e) => e.toEntity()).toList();
+    }
+
+    return bySource;
   }
 
   @override
-  Future<void> addToRecentlyPlayed(Home song) async {
-    // Convert Entity to Model
-    final model = HomeModel(
-      id: song.id,
-      title: song.title,
-      subtitle: song.subtitle,
-      imageUrl: song.imageUrl,
-      audioUrl: song.audioUrl,
-      source: song.source,
-      youtubeId: song.youtubeId,
-    );
-    await _remoteDataSource.addToRecentlyPlayed(model);
+  Future<void> addToRecentlyPlayed(Home song) async {}
+
+  String _chartLabel(String region) {
+    const labels = {
+      'v-pop': 'V-Pop Chart',
+      'us-uk': 'US-UK Chart',
+      'k-pop': 'K-Pop Chart',
+      'v-rap': 'V-Rap Chart',
+      'billboard': 'Billboard Chart',
+    };
+    return labels[region] ?? '${region.toUpperCase()} Chart';
   }
 }

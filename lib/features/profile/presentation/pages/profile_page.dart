@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/features/profile/presentation/controllers/profile_controller.dart';
-import 'package:sonus/core/auth/auth_service.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 import 'package:sonus/features/profile/presentation/widgets/edit_profile_sheet.dart';
+import 'package:sonus/features/login/presentation/providers/login_provider.dart';
 
 /// Helper to parse avatar URL: supports both HTTP URLs and base64 data URIs
 ImageProvider? parseAvatarImage(String url) {
@@ -44,10 +44,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         actions: [
           IconButton(
             onPressed: () async {
-              // Logout logic
-              await ref.read(authServiceProvider).signOut();
+              // Logout logic - use the controller to ensure all flags are cleared
+              await ref.read(loginControllerProvider.notifier).logout();
               if (context.mounted) {
-                context.go('/login');
+                // Ensure we go to the very beginning (sign-in or login)
+                context.go('/sign-in');
               }
             },
             icon: Icon(Icons.logout, color: Colors.white, size: 24.r),
@@ -69,7 +70,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             );
           }
 
-          final rawName = user['full_name'] as String?;
+          final rawName = user['display_name'] as String?;
           final displayName = (rawName != null && rawName.isNotEmpty)
               ? rawName
               : 'User';

@@ -18,11 +18,26 @@ class LoginRepositoryImpl implements LoginRepository {
         password: password,
       );
 
-      if (response.user != null) {
+      return Login(
+        id: response.user['id']?.toString() ?? '',
+        email: response.user['email']?.toString() ?? '',
+        name: response.user['display_name']?.toString() ?? '',
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Login?> signInWithGoogle() async {
+    try {
+      final response = await _authService.signInWithGoogle();
+
+      if (response != null) {
         return Login(
-          id: response.user!.id,
-          email: response.user!.email ?? '',
-          name: response.user!.userMetadata?['full_name'] ?? '',
+          id: response.user['id']?.toString() ?? '',
+          email: response.user['email']?.toString() ?? '',
+          name: response.user['display_name']?.toString() ?? '',
         );
       }
       return null;

@@ -75,6 +75,7 @@ class YoutubeService {
             YoutubeApiClient.tv,
             YoutubeApiClient.ios,
             YoutubeApiClient.safari,
+            YoutubeApiClient.mweb, // Added mweb
           ],
         );
 
@@ -99,9 +100,13 @@ class YoutubeService {
         return url;
       } catch (e) {
         final errorStr = e.toString();
+        print(
+          'DEBUG: YoutubeService - getStreamUrl error (Attempt ${retryCount + 1}): $e',
+        );
         if (errorStr.contains('403') || errorStr.contains('Forbidden')) {
           retryCount++;
-          await Future.delayed(Duration(milliseconds: 500 * retryCount));
+          // Increase delay between retries
+          await Future.delayed(Duration(milliseconds: 1000 * retryCount));
           continue;
         }
         break;

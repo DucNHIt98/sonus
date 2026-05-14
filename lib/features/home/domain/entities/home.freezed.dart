@@ -26,8 +26,11 @@ mixin _$Home {
   String get imageUrl => throw _privateConstructorUsedError;
   String get audioUrl => throw _privateConstructorUsedError;
   String get source =>
-      throw _privateConstructorUsedError; // 'youtube' | 'local'
-  String? get youtubeId => throw _privateConstructorUsedError; // nullable
+      throw _privateConstructorUsedError; // 'youtube' | 'jamendo' | 'deezer_preview'
+  String? get youtubeId => throw _privateConstructorUsedError;
+  String? get deezerId => throw _privateConstructorUsedError;
+  String? get jamendoId => throw _privateConstructorUsedError;
+  String? get nctId => throw _privateConstructorUsedError;
   Duration? get duration => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -48,6 +51,9 @@ abstract class $HomeCopyWith<$Res> {
       String audioUrl,
       String source,
       String? youtubeId,
+      String? deezerId,
+      String? jamendoId,
+      String? nctId,
       Duration? duration});
 }
 
@@ -71,6 +77,9 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
     Object? audioUrl = null,
     Object? source = null,
     Object? youtubeId = freezed,
+    Object? deezerId = freezed,
+    Object? jamendoId = freezed,
+    Object? nctId = freezed,
     Object? duration = freezed,
   }) {
     return _then(_value.copyWith(
@@ -102,6 +111,18 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
           ? _value.youtubeId
           : youtubeId // ignore: cast_nullable_to_non_nullable
               as String?,
+      deezerId: freezed == deezerId
+          ? _value.deezerId
+          : deezerId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      jamendoId: freezed == jamendoId
+          ? _value.jamendoId
+          : jamendoId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      nctId: freezed == nctId
+          ? _value.nctId
+          : nctId // ignore: cast_nullable_to_non_nullable
+              as String?,
       duration: freezed == duration
           ? _value.duration
           : duration // ignore: cast_nullable_to_non_nullable
@@ -125,6 +146,9 @@ abstract class _$$HomeImplCopyWith<$Res> implements $HomeCopyWith<$Res> {
       String audioUrl,
       String source,
       String? youtubeId,
+      String? deezerId,
+      String? jamendoId,
+      String? nctId,
       Duration? duration});
 }
 
@@ -145,6 +169,9 @@ class __$$HomeImplCopyWithImpl<$Res>
     Object? audioUrl = null,
     Object? source = null,
     Object? youtubeId = freezed,
+    Object? deezerId = freezed,
+    Object? jamendoId = freezed,
+    Object? nctId = freezed,
     Object? duration = freezed,
   }) {
     return _then(_$HomeImpl(
@@ -176,6 +203,18 @@ class __$$HomeImplCopyWithImpl<$Res>
           ? _value.youtubeId
           : youtubeId // ignore: cast_nullable_to_non_nullable
               as String?,
+      deezerId: freezed == deezerId
+          ? _value.deezerId
+          : deezerId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      jamendoId: freezed == jamendoId
+          ? _value.jamendoId
+          : jamendoId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      nctId: freezed == nctId
+          ? _value.nctId
+          : nctId // ignore: cast_nullable_to_non_nullable
+              as String?,
       duration: freezed == duration
           ? _value.duration
           : duration // ignore: cast_nullable_to_non_nullable
@@ -195,6 +234,9 @@ class _$HomeImpl implements _Home {
       this.audioUrl = '',
       this.source = 'youtube',
       this.youtubeId,
+      this.deezerId,
+      this.jamendoId,
+      this.nctId,
       this.duration});
 
   factory _$HomeImpl.fromJson(Map<String, dynamic> json) =>
@@ -216,16 +258,21 @@ class _$HomeImpl implements _Home {
   @override
   @JsonKey()
   final String source;
-// 'youtube' | 'local'
+// 'youtube' | 'jamendo' | 'deezer_preview'
   @override
   final String? youtubeId;
-// nullable
+  @override
+  final String? deezerId;
+  @override
+  final String? jamendoId;
+  @override
+  final String? nctId;
   @override
   final Duration? duration;
 
   @override
   String toString() {
-    return 'Home(id: $id, title: $title, subtitle: $subtitle, imageUrl: $imageUrl, audioUrl: $audioUrl, source: $source, youtubeId: $youtubeId, duration: $duration)';
+    return 'Home(id: $id, title: $title, subtitle: $subtitle, imageUrl: $imageUrl, audioUrl: $audioUrl, source: $source, youtubeId: $youtubeId, deezerId: $deezerId, jamendoId: $jamendoId, nctId: $nctId, duration: $duration)';
   }
 
   @override
@@ -244,6 +291,11 @@ class _$HomeImpl implements _Home {
             (identical(other.source, source) || other.source == source) &&
             (identical(other.youtubeId, youtubeId) ||
                 other.youtubeId == youtubeId) &&
+            (identical(other.deezerId, deezerId) ||
+                other.deezerId == deezerId) &&
+            (identical(other.jamendoId, jamendoId) ||
+                other.jamendoId == jamendoId) &&
+            (identical(other.nctId, nctId) || other.nctId == nctId) &&
             (identical(other.duration, duration) ||
                 other.duration == duration));
   }
@@ -251,7 +303,7 @@ class _$HomeImpl implements _Home {
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, title, subtitle, imageUrl,
-      audioUrl, source, youtubeId, duration);
+      audioUrl, source, youtubeId, deezerId, jamendoId, nctId, duration);
 
   @JsonKey(ignore: true)
   @override
@@ -276,6 +328,9 @@ abstract class _Home implements Home {
       final String audioUrl,
       final String source,
       final String? youtubeId,
+      final String? deezerId,
+      final String? jamendoId,
+      final String? nctId,
       final Duration? duration}) = _$HomeImpl;
 
   factory _Home.fromJson(Map<String, dynamic> json) = _$HomeImpl.fromJson;
@@ -292,9 +347,15 @@ abstract class _Home implements Home {
   String get audioUrl;
   @override
   String get source;
-  @override // 'youtube' | 'local'
+  @override // 'youtube' | 'jamendo' | 'deezer_preview'
   String? get youtubeId;
-  @override // nullable
+  @override
+  String? get deezerId;
+  @override
+  String? get jamendoId;
+  @override
+  String? get nctId;
+  @override
   Duration? get duration;
   @override
   @JsonKey(ignore: true)

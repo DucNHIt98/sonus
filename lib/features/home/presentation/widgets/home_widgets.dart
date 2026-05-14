@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
+import 'package:sonus/features/home/presentation/providers/home_provider.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
 class HomeShortcutCard extends ConsumerWidget {
@@ -150,6 +151,8 @@ class SupermixCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final homeDataAsync = ref.watch(homeControllerProvider);
+
     return GestureDetector(
       onTap: () {
         ref.read(playerControllerProvider.notifier).generateMySupermix();
@@ -161,16 +164,7 @@ class SupermixCard extends ConsumerWidget {
         margin: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24.r),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF301934), // Deep Purple
-              Color(0xFF7B1FA2), // Medium Purple
-              Color(0xFFFFD700), // Gold
-            ],
-            stops: [0.0, 0.4, 1.0],
-          ),
+          color: const Color(0xFF301934), // Fallback base color
           boxShadow: [
             BoxShadow(
               color: Colors.purple.withOpacity(0.3),
@@ -179,75 +173,161 @@ class SupermixCard extends ConsumerWidget {
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            // Decorative circles
-            Positioned(
-              right: -20.w,
-              top: -20.h,
-              child: CircleAvatar(
-                radius: 60.r,
-                backgroundColor: Colors.white.withOpacity(0.1),
-              ),
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24.r),
+          child: Stack(
+            children: [
+              // Background Thumbnail
+              homeDataAsync.when(
+                data: (data) {
+                  // Try to find an image from any section (Recently Played, Discovery, etc.)
+                  String? imageUrl;
+                  for (final list in data.values) {
+                    final itemWithImage = list.firstWhere(
+                      (item) => item.imageUrl.isNotEmpty,
+                      orElse: () =>
+                          Home(id: '', title: '', imageUrl: '', source: ''),
+                    );
+                    if (itemWithImage.imageUrl.isNotEmpty) {
+                      imageUrl = itemWithImage.imageUrl;
+                      break;
+                    }
+                  }
 
-            Padding(
-              padding: EdgeInsets.all(24.r),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(12.r),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (imageUrl != null)
+                        Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              _buildDefaultGradient(),
+                        )
+                      else
+                        _buildDefaultGradient(),
+
+                      // Dark Overlay
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF301934).withOpacity(0.8),
+                              const Color(0xFF7B1FA2).withOpacity(0.6),
+                              const Color(0xFFFFD700).withOpacity(0.4),
+                            ],
+                            stops: const [0.0, 0.4, 1.0],
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      color: const Color(0xFF301934),
-                      size: 32.r,
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'My Supermix',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  Text(
-                    'Giai điệu dành riêng cho bạn',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                      ),
+                    ],
+                  );
+                },
+                loading: () => _buildDefaultGradient(),
+                error: (_, __) => _buildDefaultGradient(),
               ),
-            ),
 
-            // Bottom abstract shape
-            Positioned(
-              right: 24.w,
-              bottom: 24.h,
-              child: Icon(
-                Icons.auto_awesome,
-                color: Colors.white.withOpacity(0.5),
-                size: 40.r,
+              // Decorative circles
+              Positioned(
+                right: -20.w,
+                top: -20.h,
+                child: CircleAvatar(
+                  radius: 60.r,
+                  backgroundColor: Colors.white.withOpacity(0.1),
+                ),
               ),
-            ),
+
+              Padding(
+                padding: EdgeInsets.all(24.r),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(12.r),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        color: const Color(0xFF301934),
+                        size: 32.r,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'My Supermix',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.5),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      'Giai điệu dành riêng cho bạn',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.5),
+                            offset: const Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Bottom abstract shape
+              Positioned(
+                right: 24.w,
+                bottom: 24.h,
+                child: Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white.withOpacity(0.5),
+                  size: 40.r,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultGradient() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF301934), // Deep Purple
+            Color(0xFF7B1FA2), // Medium Purple
+            Color(0xFFFFD700), // Gold
           ],
+          stops: [0.0, 0.4, 1.0],
         ),
       ),
     );

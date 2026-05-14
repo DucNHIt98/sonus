@@ -1,15 +1,24 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonus/core/auth/auth_service.dart';
 
 import '../../domain/repositories/splash_repository.dart';
 
 class SplashRepositoryImpl implements SplashRepository {
+  final AuthService _authService;
   static const String _isLoggedInKey = 'is_logged_in';
+
+  SplashRepositoryImpl(this._authService);
 
   @override
   Future<bool> checkAuthStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Default to false if not set
-    return prefs.getBool(_isLoggedInKey) ?? false;
+    final isValid = await _authService.hasValidSession();
+    if (isValid) {
+      await setAuthStatus(true);
+      return true;
+    }
+
+    await setAuthStatus(false);
+    return false;
   }
 
   @override

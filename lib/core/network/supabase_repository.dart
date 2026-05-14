@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:sonus/core/models/music_model.dart';
+import 'package:sonus/core/network/jamendo_service.dart';
 import 'package:sonus/core/network/supabase_provider.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 
@@ -10,13 +12,17 @@ part 'supabase_repository.g.dart';
 
 @Riverpod(keepAlive: true)
 SupabaseRepository supabaseRepository(SupabaseRepositoryRef ref) {
-  return SupabaseRepository(ref.read(supabaseClientProvider));
+  return SupabaseRepository(
+    ref.read(supabaseClientProvider),
+    ref.read(jamendoServiceProvider),
+  );
 }
 
 class SupabaseRepository {
   final SupabaseClient _client;
+  final JamendoService _jamendoService;
 
-  SupabaseRepository(this._client);
+  SupabaseRepository(this._client, this._jamendoService);
 
   /// Updates last_played timestamp for the current song immediately.
   /// Does NOT increment play count.
@@ -301,6 +307,197 @@ class SupabaseRepository {
     } catch (e) {
       debugPrint('Error converting avatar: $e');
       rethrow;
+    }
+  }
+
+  /// Search songs by title or artist (Level 1 SmartSearch)
+  Future<List<MusicModel>> searchSongs(String query) async {
+    try {
+      final response = await _client
+          .from('songs')
+          .select()
+          .or('title.ilike.%$query%,artist_names.ilike.%$query%')
+          .limit(20); // Limit to top 20 matches
+
+      return (response as List).map((e) => MusicModel.fromSupabase(e)).toList();
+    } catch (e) {
+      debugPrint('Supabase Search Error: $e');
+      return [];
+    }
+  }
+
+  /// Saves song metadata to Supabase 'songs' table (Hybrid Logic)
+  Future<void> saveSongToLibrary(MusicModel song) async {
+    try {
+      // Check if song already exists
+      final existing = await _client
+          .from('songs')
+          .select('id')
+          .eq('id', song.id)
+          .maybeSingle();
+
+      if (existing == null) {
+        final songData = song.toMap();
+
+        // Handling logic for Deezer (audio_url handled by Python backend later)
+        if (song.source == MusicSource.deezer) {
+          songData['audio_url'] = null;
+        }
+
+        await _client.from('songs').insert(songData);
+        debugPrint('Supabase: Saved new track: ${song.title}');
+      }
+    } catch (e) {
+      debugPrint('Supabase Error saving song: $e');
+    }
+  }
+
+  /// Syncs Jamendo track metadata to Supabase 'songs' table
+  Future<void> syncJamendoToSupabase(Home song) async {
+    // Legacy support or fallback
+    try {
+      final songId = song.jamendoId ?? song.id;
+
+      // Check if song already exists
+      final existing = await _client
+          .from('songs')
+          .select('id')
+          .eq('id', songId)
+          .maybeSingle();
+
+      if (existing == null) {
+        await _client.from('songs').upsert({
+          'id': songId,
+          'title': song.title,
+          'subtitle': song.subtitle,
+          'image_url': song.imageUrl,
+          'audio_url': song.audioUrl,
+          'source': 'jamendo',
+          'duration': song.duration?.inSeconds ?? 0,
+        });
+        debugPrint('Supabase: Synced new Jamendo track: ${song.title}');
+      }
+    } catch (e) {
+      debugPrint('Supabase Error syncing Jamendo track: $e');
+    }
+  }
+
+  /// Fetches top tracks from Jamendo and syncs them to Supabase 'songs' table
+  Future<void> fetchAndSyncJamendo() async {
+    try {
+      // 1. Fetch top tracks from Jamendo
+      final List<MusicModel> songs = await _jamendoService.getDiscoveryMusic();
+
+      if (songs.isEmpty) {
+        debugPrint('Supabase: No songs fetched from Jamendo to sync.');
+        return;
+      }
+
+      // 2. Prepare data for batch upsert
+      final List<Map<String, dynamic>> syncData = songs
+          .map(
+            (song) => {
+              'id': song.id,
+              'title': song.title,
+              'subtitle': song.artist, // Standardizing to 'subtitle'
+              'album_name': song.albumName,
+              'image_url': song.albumArt,
+              'audio_url': song.audioUrl,
+              'source': 'jamendo',
+              'duration': song.duration?.inSeconds ?? 0,
+            },
+          )
+          .toList();
+
+      // 3. Perform batch upsert with onConflict: 'id'
+      await _client.from('songs').upsert(syncData, onConflict: 'id');
+
+      debugPrint(
+        'Supabase: Successfully fetched and synced ${songs.length} songs from Jamendo.',
+      );
+    } catch (e) {
+      debugPrint('Supabase Error in fetchAndSyncJamendo: $e');
+    }
+  }
+
+  /// Get songs by genre from Supabase
+  Future<List<MusicModel>> getSongsByGenre(String genre) async {
+    try {
+      final response = await _client
+          .from('songs')
+          .select()
+          .eq('genre', genre)
+          .limit(20);
+
+      final List<dynamic> data = response as List<dynamic>;
+      return data.map((json) => MusicModel.fromSupabase(json)).toList();
+    } catch (e) {
+      debugPrint('Supabase Error in getSongsByGenre: $e');
+      return [];
+    }
+  }
+
+  /// Upsert a list of genre-tagged songs to Supabase
+  Future<void> upsertGenreSongs(List<MusicModel> songs, String genre) async {
+    try {
+      if (songs.isEmpty) return;
+
+      final List<Map<String, dynamic>> syncData = songs.map((song) {
+        final map = song.toMap();
+        map['genre'] = genre; // Ensure genre is set
+        return map;
+      }).toList();
+
+      await _client.from('songs').upsert(syncData, onConflict: 'id');
+      debugPrint(
+        'Supabase: Successfully upserted ${songs.length} songs for genre: $genre',
+      );
+    } catch (e) {
+      debugPrint('Supabase Error in upsertGenreSongs: $e');
+    }
+  }
+
+  /// Get trending songs by region from Supabase
+  Future<List<MusicModel>> getTrendingSongs(String region) async {
+    try {
+      final response = await _client
+          .from('songs')
+          .select()
+          .eq('region', region)
+          .eq('region', region)
+          .eq('is_trending', true);
+      // .order('trending_rank', ascending: true); // Removed as per user request
+
+      final List<dynamic> data = response as List<dynamic>;
+      return data.map((json) => MusicModel.fromSupabase(json)).toList();
+    } catch (e) {
+      debugPrint('Supabase Error in getTrendingSongs: $e');
+      return [];
+    }
+  }
+
+  /// Upsert trending songs with region and rank
+  Future<void> upsertTrendingSongs(
+    List<MusicModel> songs,
+    String region,
+  ) async {
+    try {
+      if (songs.isEmpty) return;
+
+      final List<Map<String, dynamic>> syncData = songs.map((song) {
+        final map = song.toMap();
+        map['region'] = region;
+        map['is_trending'] = true;
+        // Rank is already in song data if fetched from Deezer
+        return map;
+      }).toList();
+
+      await _client.from('songs').upsert(syncData, onConflict: 'id');
+      debugPrint(
+        'Supabase: Successfully upserted ${songs.length} trending songs for region: $region',
+      );
+    } catch (e) {
+      debugPrint('Supabase Error in upsertTrendingSongs: $e');
     }
   }
 }

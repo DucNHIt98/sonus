@@ -16,7 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$SearchState {
-  List<Video> get results => throw _privateConstructorUsedError;
+  List<MusicModel> get results => throw _privateConstructorUsedError;
   List<String> get suggestions => throw _privateConstructorUsedError;
   List<String> get history => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
@@ -34,7 +34,7 @@ abstract class $SearchStateCopyWith<$Res> {
       _$SearchStateCopyWithImpl<$Res, SearchState>;
   @useResult
   $Res call(
-      {List<Video> results,
+      {List<MusicModel> results,
       List<String> suggestions,
       List<String> history,
       bool isLoading,
@@ -64,7 +64,7 @@ class _$SearchStateCopyWithImpl<$Res, $Val extends SearchState>
       results: null == results
           ? _value.results
           : results // ignore: cast_nullable_to_non_nullable
-              as List<Video>,
+              as List<MusicModel>,
       suggestions: null == suggestions
           ? _value.suggestions
           : suggestions // ignore: cast_nullable_to_non_nullable
@@ -94,7 +94,7 @@ abstract class _$$SearchStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {List<Video> results,
+      {List<MusicModel> results,
       List<String> suggestions,
       List<String> history,
       bool isLoading,
@@ -122,7 +122,7 @@ class __$$SearchStateImplCopyWithImpl<$Res>
       results: null == results
           ? _value._results
           : results // ignore: cast_nullable_to_non_nullable
-              as List<Video>,
+              as List<MusicModel>,
       suggestions: null == suggestions
           ? _value._suggestions
           : suggestions // ignore: cast_nullable_to_non_nullable
@@ -147,7 +147,7 @@ class __$$SearchStateImplCopyWithImpl<$Res>
 
 class _$SearchStateImpl implements _SearchState {
   const _$SearchStateImpl(
-      {final List<Video> results = const [],
+      {final List<MusicModel> results = const [],
       final List<String> suggestions = const [],
       final List<String> history = const [],
       this.isLoading = false,
@@ -156,10 +156,10 @@ class _$SearchStateImpl implements _SearchState {
         _suggestions = suggestions,
         _history = history;
 
-  final List<Video> _results;
+  final List<MusicModel> _results;
   @override
   @JsonKey()
-  List<Video> get results {
+  List<MusicModel> get results {
     if (_results is EqualUnmodifiableListView) return _results;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_results);
@@ -226,14 +226,14 @@ class _$SearchStateImpl implements _SearchState {
 
 abstract class _SearchState implements SearchState {
   const factory _SearchState(
-      {final List<Video> results,
+      {final List<MusicModel> results,
       final List<String> suggestions,
       final List<String> history,
       final bool isLoading,
       final String? error}) = _$SearchStateImpl;
 
   @override
-  List<Video> get results;
+  List<MusicModel> get results;
   @override
   List<String> get suggestions;
   @override

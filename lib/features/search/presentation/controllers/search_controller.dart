@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sonus/core/models/music_model.dart';
+import 'package:sonus/features/search/data/services/smart_search_service.dart';
 import 'package:sonus/features/search/data/services/youtube_service.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 part 'search_controller.freezed.dart';
 part 'search_controller.g.dart';
@@ -11,7 +13,7 @@ part 'search_controller.g.dart';
 @freezed
 class SearchState with _$SearchState {
   const factory SearchState({
-    @Default([]) List<Video> results,
+    @Default([]) List<MusicModel> results,
     @Default([]) List<String> suggestions,
     @Default([]) List<String> history,
     @Default(false) bool isLoading,
@@ -63,9 +65,16 @@ class SearchController extends _$SearchController {
       state = AsyncValue.data(state.value!.copyWith(suggestions: []));
       return;
     }
+    // Keep using YoutubeService for suggestions if SmartSearch doesn't have autocomplete
+    // Or just disable suggestions for now if not needed.
+    // Given usage of YoutubeService in existing code, let's keep it for autocomplete
     final service = ref.read(youtubeServiceProvider);
-    final suggestions = await service.getSearchSuggestions(query);
-    state = AsyncValue.data(state.value!.copyWith(suggestions: suggestions));
+    try {
+      final suggestions = await service.getSearchSuggestions(query);
+      state = AsyncValue.data(state.value!.copyWith(suggestions: suggestions));
+    } catch (_) {
+      // Ignore suggestion errors
+    }
   }
 
   Future<void> search(String query) async {
@@ -79,16 +88,8 @@ class SearchController extends _$SearchController {
     await _saveHistory(query);
 
     final results = await AsyncValue.guard(() async {
-      final service = ref.read(youtubeServiceProvider);
-      final results = await service.searchSongs(query);
-
-      if (results.isNotEmpty) {
-        final notifier = ref.read(playerControllerProvider.notifier);
-        for (var i = 0; i < (results.length > 3 ? 3 : results.length); i++) {
-          notifier.preLoadSong(results[i].id.value);
-        }
-      }
-      return results;
+      final service = ref.read(smartSearchServiceProvider);
+      return await service.search(query);
     });
 
     results.when(

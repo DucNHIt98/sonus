@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../core/network/supabase_repository.dart';
+import '../../../../core/auth/auth_service.dart';
 import '../../../home/domain/entities/home.dart';
 
 part 'profile_controller.freezed.dart';
@@ -28,23 +28,15 @@ class ProfileController extends _$ProfileController {
   }
 
   Future<ProfileState> _loadProfileData() async {
-    final repository = ref.read(supabaseRepositoryProvider);
-
-    // Parallel fetch for efficiency
-    final results = await Future.wait([
-      repository.getUserProfile(),
-      repository.getPlayHistoryCount(),
-      repository.getFavoritesCount(),
-      repository.getPlaylistsCount(),
-      repository.getMostPlayedSongs(5), // Top 5 tracks based on play count
-    ]);
+    final userProfile = await ref.read(authServiceProvider).getCurrentUser();
+    final stats = userProfile?['stats'] as Map<String, dynamic>?;
 
     return ProfileState(
-      userProfile: results[0] as Map<String, dynamic>?,
-      playHistoryCount: results[1] as int,
-      favoritesCount: results[2] as int,
-      playlistsCount: results[3] as int,
-      topTracks: results[4] as List<Home>,
+      userProfile: userProfile,
+      playHistoryCount: stats?['listened_count'] as int? ?? 0,
+      favoritesCount: stats?['favorites_count'] as int? ?? 0,
+      playlistsCount: stats?['playlists_count'] as int? ?? 0,
+      topTracks: const [],
       isLoading: false,
     );
   }
@@ -58,17 +50,13 @@ class ProfileController extends _$ProfileController {
     state = const AsyncValue.loading();
 
     try {
-      final repository = ref.read(supabaseRepositoryProvider);
-      String? avatarUrl;
-
       if (avatarFile != null) {
-        avatarUrl = await repository.uploadAvatar(avatarFile);
+        throw 'Avatar upload sẽ được chuyển sang backend ở phase sau';
       }
 
-      await repository.updateProfile(
-        displayName: displayName,
-        avatarUrl: avatarUrl,
-      );
+      await ref
+          .read(authServiceProvider)
+          .updateCurrentUser(displayName: displayName);
 
       // Refresh data to update UI
       state = await AsyncValue.guard(() => _loadProfileData());

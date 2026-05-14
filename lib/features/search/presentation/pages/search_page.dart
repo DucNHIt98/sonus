@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 import 'package:sonus/features/search/presentation/controllers/search_controller.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
+import 'package:sonus/core/models/music_model.dart';
+import 'package:sonus/core/network/supabase_repository.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -210,32 +212,46 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       ),
       SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
-          final video = searchState.results[index];
+          final song = searchState.results[index];
           return InkWell(
             onTap: () async {
+              // Map MusicModel to Home entity
               final songMetadata = Home(
-                id: video.id.value,
-                title: video.title,
-                subtitle: video.author,
-                imageUrl: video.thumbnails.highResUrl,
-                source: 'youtube',
-                youtubeId: video.id.value,
-                duration: video.duration,
+                id: song.id,
+                title: song.title,
+                subtitle: song.artist,
+                imageUrl: song.albumArt,
+                source: song.source.name, // 'nct', 'jamendo', 'youtube'
+                youtubeId: song.source == MusicSource.youtube ? song.id : null,
+                audioUrl: song.audioUrl ?? '',
+                duration: song.duration,
               );
 
+              // 1. Play (Single song, let AI generate the rest)
               ref
                   .read(playerControllerProvider.notifier)
                   .playSelectedSongWithMetadata(songMetadata);
+
+              // 2. Auto Sync to Supabase (Upsert)
+              // We do this silently in background
+              // Note: We need to convert Home back to MusicModel or just use MusicModel directly
+              // But SupabaseRepository expects MusicModel.
+              // We already have 'song' which is MusicModel.
+              // Only diff is duration might be 0 if not fetched.
+              // We'll upsert what we have.
+              ref.read(supabaseRepositoryProvider).saveSongToLibrary(song);
 
               if (context.mounted) {
                 context.pushNamed('player');
               }
             },
             child: SongTile(
-              title: video.title,
-              artist: video.author,
-              duration: video.duration?.toString().split('.').first ?? '',
-              imageUrl: video.thumbnails.mediumResUrl,
+              title: song.title,
+              artist: song.artist,
+              duration: song.duration != null
+                  ? '${song.duration!.inMinutes}:${(song.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
+                  : '',
+              imageUrl: song.albumArt,
             ),
           );
         }, childCount: searchState.results.length),
@@ -257,8 +273,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           height: 240.h,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: const [
+            children: [
               FeaturedCard(
+                title: 'Discover Jamendo',
+                subtitle: 'Open content music',
+                imageUrl:
+                    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
+                dummyColor: Colors.orange,
+                onTap: () => context.push('/discover'),
+              ),
+              const FeaturedCard(
                 title: 'R&B Playlist',
                 subtitle: 'Chill your mind',
                 imageUrl:

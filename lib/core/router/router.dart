@@ -9,6 +9,8 @@ import '../../features/create/presentation/pages/create_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/library/presentation/pages/library_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
+import '../../features/search/presentation/pages/discover_page.dart';
+import '../../features/playlist/presentation/pages/genre_playlist_detail_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/login/presentation/pages/sign_in_page.dart';
 import '../../features/login/presentation/pages/sign_up_page.dart';
@@ -135,6 +137,25 @@ GoRouter router(RouterRef ref) {
             imageUrl: extra?['imageUrl'],
             description: extra?['description'],
           );
+        },
+      ),
+
+      // Discover Jamendo Screen
+      GoRoute(
+        path: '/discover',
+        name: 'discover',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DiscoverPage(),
+      ),
+
+      // Genre Detail Screen
+      GoRoute(
+        path: '/genre/:name',
+        name: 'genre-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final name = state.pathParameters['name']!;
+          return GenrePlaylistDetailPage(genre: name);
         },
       ),
 

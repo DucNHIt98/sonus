@@ -155,18 +155,27 @@ class PlayerPage extends ConsumerWidget {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.r),
-                              child: Image.network(
-                                currentSong.imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  color: Colors.grey[850],
-                                  child: Icon(
-                                    Icons.music_note,
-                                    size: 80.r,
-                                    color: Colors.white24,
-                                  ),
-                                ),
-                              ),
+                              child: currentSong.imageUrl.isNotEmpty
+                                  ? Image.network(
+                                      currentSong.imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: Colors.grey[850],
+                                        child: Icon(
+                                          Icons.music_note,
+                                          size: 80.r,
+                                          color: Colors.white24,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      color: Colors.grey[850],
+                                      child: Icon(
+                                        Icons.music_note,
+                                        size: 80.r,
+                                        color: Colors.white24,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),

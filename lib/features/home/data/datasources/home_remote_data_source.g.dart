@@ -7,7 +7,7 @@ part of 'home_remote_data_source.dart';
 // **************************************************************************
 
 String _$homeRemoteDataSourceHash() =>
-    r'95d0108135f58f10b920367fba7944bd8850c123';
+    r'f82626725e93dc8c8b69aa18f746d87e96abb95c';
 
 /// See also [homeRemoteDataSource].
 @ProviderFor(homeRemoteDataSource)

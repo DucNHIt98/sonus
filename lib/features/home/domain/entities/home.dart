@@ -11,8 +11,12 @@ class Home with _$Home {
     @Default('') String subtitle,
     @Default('') String imageUrl,
     @Default('') String audioUrl,
-    @Default('youtube') String source, // 'youtube' | 'local'
-    String? youtubeId, // nullable
+    @Default('youtube')
+    String source, // 'youtube' | 'jamendo' | 'deezer_preview'
+    String? youtubeId,
+    String? deezerId,
+    String? jamendoId,
+    String? nctId,
     Duration? duration,
   }) = _Home;
 

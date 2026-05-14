@@ -11,10 +11,7 @@ class AiRecommendService {
   final GenerativeModel _model;
 
   AiRecommendService({required String apiKey})
-    : _model = GenerativeModel(
-        model: 'gemini-1.5-flash-latest',
-        apiKey: apiKey,
-      );
+    : _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
 
   /// Get song recommendations based on current song
   /// Returns a list of {title, artist} maps
