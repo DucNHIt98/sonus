@@ -1,9 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/features/create/presentation/widgets/create_widgets.dart';
 
-class CreatePage extends StatelessWidget {
+class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({super.key});
+
+  @override
+  ConsumerState<CreatePage> createState() => _CreatePageState();
+}
+
+class _CreatePageState extends ConsumerState<CreatePage> {
+  final _nameController = TextEditingController();
+  bool _isCreating = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createPlaylist() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a playlist name'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    setState(() => _isCreating = true);
+
+    final backend = ref.read(backendServiceProvider);
+    final result = await backend.createPlaylist(title: name);
+
+    setState(() => _isCreating = false);
+
+    if (result != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Playlist "$name" created!'), backgroundColor: Colors.green),
+      );
+      _nameController.clear();
+      context.pushNamed('playlist-detail', pathParameters: {'id': result['id'] ?? ''}, extra: result);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create playlist'), backgroundColor: Colors.red),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +60,6 @@ class CreatePage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            // Consistent Gradient
             colors: [Color(0xFF400503), Colors.black],
             stops: [0.0, 0.3],
           ),
@@ -24,40 +69,56 @@ class CreatePage extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: CustomScrollView(
               slivers: [
-                // 1. Header
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 24.h),
                     child: const CreateHeader(),
                   ),
                 ),
-
-                // 2. Input Section
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: 40.h),
-                    child: const CreateInputSection(),
+                    padding: EdgeInsets.only(bottom: 16.h),
+                    child: CreateInputSection(controller: _nameController),
                   ),
                 ),
-
-                // 3. Create Options Grid
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 24.h),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: ElevatedButton(
+                        onPressed: _isCreating ? null : _createPlaylist,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        ),
+                        child: _isCreating
+                            ? SizedBox(width: 20.r, height: 20.r, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : Text('Create Playlist', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ),
                 SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 16.h,
                     crossAxisSpacing: 16.w,
-                    childAspectRatio: 0.7, // Taller cards to prevent overflow
+                    childAspectRatio: 0.7,
                   ),
                   delegate: SliverChildListDelegate([
-                    const CreateOptionCard(
+                    CreateOptionCard(
                       icon: Icons.playlist_add,
                       title: 'Playlist',
                       subtitle: 'Build a playlist with songs, or episodes',
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         colors: [Color(0xFF450af5), Color(0xFFc4efd9)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
+                      onTap: () {},
                     ),
                     const CreateOptionCard(
                       icon: Icons.group_add,
@@ -91,57 +152,30 @@ class CreatePage extends StatelessWidget {
                     ),
                   ]),
                 ),
-
                 SliverToBoxAdapter(child: SizedBox(height: 32.h)),
-
-                // 4. Templates Section Title
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 16.h),
                     child: Text(
                       'Start with a template',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-
-                // 5. Templates List
                 SliverToBoxAdapter(
                   child: SizedBox(
                     height: 180.h,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: const [
-                        TemplateCard(
-                          title: 'Running',
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1552674605-46f538355272?auto=format&fit=crop&w=300&q=80',
-                        ),
-                        TemplateCard(
-                          title: 'Party',
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=80',
-                        ),
-                        TemplateCard(
-                          title: 'Relax',
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=300&q=80',
-                        ),
-                        TemplateCard(
-                          title: 'Focus',
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1456324504439-367cee10d6b1?auto=format&fit=crop&w=300&q=80',
-                        ),
+                        TemplateCard(title: 'Running', imageUrl: 'https://images.unsplash.com/photo-1552674605-46f538355272?auto=format&fit=crop&w=300&q=80'),
+                        TemplateCard(title: 'Party', imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=80'),
+                        TemplateCard(title: 'Relax', imageUrl: 'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=300&q=80'),
+                        TemplateCard(title: 'Focus', imageUrl: 'https://images.unsplash.com/photo-1456324504439-367cee10d6b1?auto=format&fit=crop&w=300&q=80'),
                       ],
                     ),
                   ),
                 ),
-
-                // Extra space
                 SliverToBoxAdapter(child: SizedBox(height: 180.h)),
               ],
             ),

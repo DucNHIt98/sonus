@@ -85,7 +85,7 @@ class HomePage extends ConsumerWidget {
                             IconButton(
                               icon: Icon(Icons.history, size: 24.r),
                               color: Colors.white,
-                              onPressed: () {},
+                              onPressed: () => context.push('/recently-played'),
                             ),
                             IconButton(
                               icon: Icon(Icons.person, size: 24.r),

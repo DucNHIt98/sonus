@@ -43,11 +43,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         elevation: 0,
         actions: [
           IconButton(
+            onPressed: () => context.push('/settings'),
+            icon: Icon(Icons.settings, color: Colors.white, size: 24.r),
+            tooltip: 'Settings',
+          ),
+          IconButton(
             onPressed: () async {
-              // Logout logic - use the controller to ensure all flags are cleared
               await ref.read(loginControllerProvider.notifier).logout();
               if (context.mounted) {
-                // Ensure we go to the very beginning (sign-in or login)
                 context.go('/sign-in');
               }
             },

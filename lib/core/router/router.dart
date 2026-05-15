@@ -17,6 +17,9 @@ import '../../features/login/presentation/pages/sign_up_page.dart';
 import '../../features/login/presentation/pages/login_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
+import '../../features/favorites/presentation/pages/favorites_list_page.dart';
+import '../../features/history/presentation/pages/recently_played_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 
 part 'router.g.dart';
 
@@ -172,6 +175,27 @@ GoRouter router(RouterRef ref) {
         path: '/premium',
         name: 'premium',
         builder: (context, state) => const PremiumPage(),
+      ),
+
+      // Favorites List Screen
+      GoRoute(
+        path: '/favorites',
+        name: 'favorites',
+        builder: (context, state) => const FavoritesListPage(),
+      ),
+
+      // Recently Played Screen
+      GoRoute(
+        path: '/recently-played',
+        name: 'recently-played',
+        builder: (context, state) => const RecentlyPlayedPage(),
+      ),
+
+      // Settings Screen
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsPage(),
       ),
     ],
 
