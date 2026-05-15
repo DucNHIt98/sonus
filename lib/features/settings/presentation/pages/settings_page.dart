@@ -2,11 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/features/login/presentation/providers/login_provider.dart';
 import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
+
+  Future<void> _clearHistory(BuildContext context, WidgetRef ref) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text('Clear History', style: TextStyle(color: Colors.white)),
+        content: Text('Delete all listening history permanently?', style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('Cancel', style: TextStyle(color: Colors.white70))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('Clear', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    final backend = ref.read(backendServiceProvider);
+    final ok = await backend.clearAllHistory();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ok ? 'History cleared' : 'Failed to clear'), backgroundColor: ok ? Colors.green : Colors.red),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,8 +51,7 @@ class SettingsPage extends ConsumerWidget {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
             colors: [Color(0xFF400503), Colors.black],
             stops: [0.0, 0.3],
           ),
@@ -50,6 +73,7 @@ class SettingsPage extends ConsumerWidget {
               _buildSectionHeader('Library'),
               _buildSettingTile(context, Icons.favorite, 'Favorites', subtitle: 'View your liked songs', onTap: () => context.push('/favorites')),
               _buildSettingTile(context, Icons.history, 'Recently Played', subtitle: 'Your listening history', onTap: () => context.push('/recently-played')),
+              _buildSettingTile(context, Icons.delete_sweep, 'Clear Listening History', onTap: () => _clearHistory(context, ref)),
               Divider(color: Colors.white12, height: 32.h),
 
               _buildSectionHeader('Preferences'),
