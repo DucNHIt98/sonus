@@ -1,63 +1,32 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
 
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.perspectivev3
+!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+# Android Studio will place build artifacts here
+# Android related
+# Exceptions to above rules.
+# Flutter/Dart/Pub related
 # IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
+# Miscellaneous
+# Obfuscation related
+# Proguard checks
+# Symbolication related
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this is
-# commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-/build/
-
 # Web related
-lib/generated_plugin_registrant.dart
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/libs/
-/android/key.properties
-/android/local.properties
-
-# Proguard checks
-/android/app/proguard-rules.pro
-
-# Android related
+# commented out by default.
+# iOS/XCode related
+#.vscode/
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
+**/android/GeneratedPluginRegistrant.java
 **/android/captures/
 **/android/gradlew
 **/android/gradlew.bat
 **/android/local.properties
-**/android/GeneratedPluginRegistrant.java
-
-# iOS/XCode related
+**/doc/api/
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
 **/ios/**/*.moved-aside
@@ -66,22 +35,47 @@ app.*.map.json
 **/ios/**/*sync/
 **/ios/**/.xcode.env.local
 **/ios/**/GCNOcov
+**/ios/.symlinks/
+**/ios/DerivedData/
+**/ios/Flutter/.last_build_id
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
-**/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Pods/
-**/ios/.symlinks/
 **/ios/Profile/
 **/ios/Release/
-**/ios/DerivedData/
-
-# Exceptions to above rules.
-!**/ios/**/default.mode1v3
-!**/ios/**/default.mode2v3
-!**/ios/**/default.pbxuser
-!**/ios/**/default.perspectivev3
-!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/ServiceDefinitions.json
+*.class
+*.freezed.dart
+*.g.dart
+*.iml
+*.ipr
+*.iws
+*.log
+*.pyc
+*.riverpod.g.dart
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.history
+.idea/
+.packages
+.pub-cache/
+.pub/
+.svn/
+/android/app/libs/
+/android/app/proguard-rules.pro
+/android/key.properties
+/android/local.properties
+/build/
+app.*.map.json
+app.*.symbols
+build/
+lib/generated_plugin_registrant.dart

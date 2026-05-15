@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/features/create/presentation/widgets/create_widgets.dart';
+import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({super.key});
@@ -45,10 +46,35 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       _nameController.clear();
       context.pushNamed('playlist-detail', pathParameters: {'id': result['id'] ?? ''}, extra: result);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create playlist'), backgroundColor: Colors.red),
-      );
+      _showUpgradeDialog(context, 'playlist');
     }
+  }
+
+  void _showUpgradeDialog(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text('$feature Limit Reached', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Free accounts have a limit on $feature count. Upgrade to Premium for unlimited $feature.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.push('/premium');
+            },
+            child: Text('Upgrade', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

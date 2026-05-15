@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/core/network/backend_service.dart';
+import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
 class RecentlyPlayedPage extends ConsumerStatefulWidget {
   const RecentlyPlayedPage({super.key});
@@ -123,9 +124,36 @@ class _RecentlyPlayedPageState extends ConsumerState<RecentlyPlayedPage> {
                   ],
                 ),
               )
-            : Column(
+              : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (!(ref.watch(premiumControllerProvider).valueOrNull?.isPremium ?? false))
+                    GestureDetector(
+                      onTap: () => context.push('/premium'),
+                      child: Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                        padding: EdgeInsets.all(12.r),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.stars, color: Colors.amber, size: 20.r),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: Text(
+                                'Showing last 7 days. Upgrade to Premium for full history.',
+                                style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14.r),
+                          ],
+                        ),
+                      ),
+                    ),
                   Padding(
                     padding: EdgeInsets.only(left: 16.w, top: 12.h),
                     child: Text('$_total entries', style: TextStyle(color: Colors.grey[500], fontSize: 12.sp)),

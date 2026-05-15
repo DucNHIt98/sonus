@@ -7,6 +7,7 @@ import 'package:sonus/features/library/data/repositories/library_repository_impl
 import 'package:sonus/features/library/presentation/widgets/library_widgets.dart';
 import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
+
 class LibraryPage extends ConsumerWidget {
   const LibraryPage({super.key});
 
@@ -51,7 +52,9 @@ class LibraryPage extends ConsumerWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 16.h),
-                    child: const LibraryFilterChips(),
+                    child: LibraryFilterChips(
+                      onDownloadsTap: () => context.push('/downloads'),
+                    ),
                   ),
                 ),
 

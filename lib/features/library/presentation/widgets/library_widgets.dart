@@ -44,7 +44,9 @@ class LibraryHeader extends StatelessWidget {
 }
 
 class LibraryFilterChips extends StatelessWidget {
-  const LibraryFilterChips({super.key});
+  final VoidCallback? onDownloadsTap;
+
+  const LibraryFilterChips({super.key, this.onDownloadsTap});
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,7 @@ class LibraryFilterChips extends StatelessWidget {
           _buildChip('Artists'),
           _buildChip('Albums'),
           _buildChip('Podcasts & Shows'),
+          _buildClickableChip('Downloaded', onTap: onDownloadsTap),
         ],
       ),
     );
@@ -69,7 +72,7 @@ class LibraryFilterChips extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.white.withOpacity(0.5)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
       ),
       child: Text(
         label,
@@ -77,6 +80,36 @@ class LibraryFilterChips extends StatelessWidget {
           color: Colors.white,
           fontSize: 13.sp,
           fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClickableChip(String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(right: 8.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: Colors.red.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.download, color: Colors.red, size: 14.r),
+            SizedBox(width: 4.w),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );

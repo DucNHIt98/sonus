@@ -4,14 +4,12 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
-import 'package:sonus/features/search/data/services/youtube_service.dart';
 import 'package:sonus/features/home/presentation/providers/home_provider.dart';
 import 'package:sonus/features/search/data/services/ai_recommend_service.dart';
 import 'package:sonus/core/models/music_model.dart';
 import 'package:sonus/core/network/backend_service.dart';
-import 'package:sonus/core/network/song_sync_service.dart';
 import 'package:sonus/core/network/supabase_repository.dart';
-import 'package:sonus/core/network/nct_service.dart';
+
 
 part 'player_controller.freezed.dart';
 part 'player_controller.g.dart';
@@ -102,8 +100,7 @@ class PlayerController extends _$PlayerController {
         final newSong = state.queue[eventIndex];
         state = state.copyWith(currentIndex: eventIndex, currentSong: newSong);
 
-        // Sync to Supabase & Update History
-        ref.read(songSyncServiceProvider).syncSong(newSong);
+        // Update History
         ref.read(supabaseRepositoryProvider).updateLastPlayed(newSong);
 
         // Invalidate Home Controller to refresh Recently Played list
@@ -148,8 +145,7 @@ class PlayerController extends _$PlayerController {
             currentSong: state.queue[index],
           );
 
-          // Sync to Supabase & Update History
-          ref.read(songSyncServiceProvider).syncSong(state.queue[index]);
+          // Update History
           ref
               .read(supabaseRepositoryProvider)
               .updateLastPlayed(state.queue[index]);
@@ -356,38 +352,86 @@ class PlayerController extends _$PlayerController {
   Future<void> _preloadNextSong() async {
     if (_isPreloading) return;
 
-    final nextIndex = state.currentIndex + 1;
-    if (nextIndex >= state.queue.length) return; // End of queue
-
-    // Check if already loaded
-    if (_lastLoadedIndex >= nextIndex) return;
-
     _isPreloading = true;
-    print('DEBUG: Preloading next song: ${state.queue[nextIndex].title}');
-
     try {
-      final nextSong = state.queue[nextIndex];
-      final audioSource = await _createAudioSource(nextSong);
+      // Preload up to 2 songs ahead
+      for (int offset = 1; offset <= 2; offset++) {
+        final nextIndex = state.currentIndex + offset;
+        if (nextIndex >= state.queue.length) break;
+        // Check if already loaded
+        if (_lastLoadedIndex >= nextIndex) continue;
 
-      if (audioSource != null) {
-        // FIX: Ensure playlist hasn't been cleared/modified while we were fetching the audio source
-        final currentPlaylistLen = _playlist.length;
-        if (currentPlaylistLen == _lastLoadedIndex + 1) {
-          await _playlist.add(audioSource);
-          _lastLoadedIndex = nextIndex;
-          print(
-            'DEBUG: Successfully preloaded ${nextSong.title} | PLAYLIST LENGTH NOW: ${_playlist.length}',
-          );
-        } else {
-          print('DEBUG: Playlist state changed during preload, skipping add.');
+        final nextSong = state.queue[nextIndex];
+        final audioSource = await _createAudioSource(nextSong);
+
+        if (audioSource != null) {
+          final currentPlaylistLen = _playlist.length;
+          if (currentPlaylistLen == _lastLoadedIndex + 1) {
+            await _playlist.add(audioSource);
+            _lastLoadedIndex = nextIndex;
+          }
         }
-      } else {
-        print('DEBUG: Failed to preload ${nextSong.title}');
+      }
+
+      // If queue is running low, fetch related songs to refill
+      final remaining = state.queue.length - state.currentIndex;
+      if (remaining <= 3 && state.currentSong != null) {
+        _fetchRelatedSongs(state.currentSong!);
       }
     } catch (e) {
       print('DEBUG: Error preloading song: $e');
     } finally {
       _isPreloading = false;
+    }
+  }
+
+  Future<void> _fetchRelatedSongs(Home seedSong) async {
+    try {
+      final backend = ref.read(backendServiceProvider);
+      final results = await backend.getRelatedSongs(seedSong.id);
+      if (results.isEmpty) return;
+
+      final newSongs = results
+          .where((m) => !state.queue.any((h) => h.id == m.id))
+          .map((m) => m.toEntity())
+          .toList();
+      if (newSongs.isEmpty) return;
+
+      state = state.copyWith(queue: [...state.queue, ...newSongs]);
+    } catch (e) {
+      print('DEBUG: Error fetching related songs: $e');
+    }
+  }
+        }
+      }
+
+      // If queue is running low, fetch related songs to refill
+      final remaining = state.queue.length - state.currentIndex;
+      if (remaining <= 3 && state.currentSong != null) {
+        _fetchRelatedSongs(state.currentSong!);
+      }
+    } catch (e) {
+      print('DEBUG: Error preloading song: $e');
+    } finally {
+      _isPreloading = false;
+    }
+  }
+
+  Future<void> _fetchRelatedSongs(Home seedSong) async {
+    try {
+      final backend = ref.read(backendServiceProvider);
+      final results = await backend.getRelatedSongs(seedSong.id);
+      if (results.isEmpty) return;
+
+      final newSongs = results
+          .where((m) => !state.queue.any((h) => h.id == m.id))
+          .map((m) => m.toEntity())
+          .toList();
+      if (newSongs.isEmpty) return;
+
+      state = state.copyWith(queue: [...state.queue, ...newSongs]);
+    } catch (e) {
+      print('DEBUG: Error fetching related songs: $e');
     }
   }
 
@@ -398,34 +442,23 @@ class PlayerController extends _$PlayerController {
     );
 
     try {
-      final youtubeService = ref.read(youtubeServiceProvider);
-      final videoId = currentSong.youtubeId ?? currentSong.id;
+      final artistName = currentSong.subtitle;
+      final backend = ref.read(backendServiceProvider);
+      final results = await backend.search(
+        query: '$artistName official audio',
+        limit: 20,
+        sources: 'youtube',
+      );
 
-      // Get songs from channel
-      final artistSongs = await youtubeService.getSongsFromChannel(videoId);
+      if (results.isEmpty) return;
 
-      if (artistSongs.isEmpty) return;
-
-      // Filter out songs already in queue
       final currentQueueIds = state.queue
           .map((s) => s.youtubeId ?? s.id)
           .toSet();
 
-      final newSongs = artistSongs
-          .where((video) {
-            return !currentQueueIds.contains(video.id.value);
-          })
-          .map(
-            (video) => Home(
-              id: video.id.value,
-              title: video.title,
-              subtitle: video.author,
-              imageUrl: video.thumbnails.highResUrl,
-              source: 'youtube',
-              youtubeId: video.id.value,
-              duration: video.duration,
-            ),
-          )
+      final newSongs = results
+          .where((m) => !currentQueueIds.contains(m.id))
+          .map((m) => m.toEntity())
           .toList();
 
       if (newSongs.isEmpty) return;
@@ -545,8 +578,6 @@ class PlayerController extends _$PlayerController {
           print("DEBUG: Falling back to 30s preview for: ${song.title}");
         }
       } else if (song.source == 'jamendo' || song.source == 'jamendo_preview') {
-        // Sync to Supabase in background
-        ref.read(supabaseRepositoryProvider).syncJamendoToSupabase(song);
       }
 
       // 2. Standard Playback Logic
@@ -616,9 +647,6 @@ class PlayerController extends _$PlayerController {
 
       _audioPlayer.play();
 
-      // Sync to Supabase
-      ref.read(songSyncServiceProvider).syncSong(song);
-
       // Reset count flag
       _hasCountedPlay = false;
 
@@ -657,63 +685,46 @@ class PlayerController extends _$PlayerController {
     }
   }
 
-  /// Generate an auto-playlist based on the seed song's channel with smart filtering
+  /// Generate an auto-playlist based on the seed song's artist
   Future<void> generateAutoPlaylist(String videoId) async {
     print('DEBUG: Generating Auto-Playlist for video: $videoId');
 
     try {
-      final youtubeService = ref.read(youtubeServiceProvider);
-
-      // Get smart filtered songs from channel
-      final smartSongs = await youtubeService.getSmartArtistSongsFromChannel(
-        videoId,
-      );
-
-      if (smartSongs.isEmpty) return;
-
-      // Filter out the seed song if it appears in the list
       final currentSong = state.currentSong;
       if (currentSong == null) return;
 
+      final backend = ref.read(backendServiceProvider);
+      final results = await backend.search(
+        query: '${currentSong.subtitle} official audio',
+        limit: 20,
+        sources: 'youtube',
+      );
+
+      if (results.isEmpty) return;
+
       final seedId = videoId;
-      // 1. DEDUPLICATION LOGIC
       final seenIds = <String>{seedId};
       final seenTitles = <String>{_normalizeTitle(currentSong.title)};
       final uniqueSongs = <Home>[];
 
-      for (final video in smartSongs) {
-        final id = video.id.value;
-        final normalizedTitle = _normalizeTitle(video.title);
+      for (final song in results) {
+        final id = song.id;
+        final normalizedTitle = _normalizeTitle(song.title);
 
-        // Skip if ID already seen
         if (seenIds.contains(id)) continue;
-
-        // Skip if title is too similar to something already in queue
-        // This helps filter out "MV" vs "Lyric Video" vs "Official Audio"
         if (seenTitles.contains(normalizedTitle)) continue;
 
         seenIds.add(id);
         seenTitles.add(normalizedTitle);
-        uniqueSongs.add(
-          Home(
-            id: video.id.value,
-            title: video.title,
-            subtitle: video.author,
-            imageUrl: video.thumbnails.highResUrl,
-            source: 'youtube',
-            youtubeId: video.id.value,
-            duration: video.duration,
-          ),
-        );
+        uniqueSongs.add(song.toEntity());
       }
 
       final newQueue = [currentSong, ...uniqueSongs];
       state = state.copyWith(queue: newQueue, currentIndex: 0);
 
-      // 2. FALLBACK TO SMART EXPANSION IF QUEUE IS SMALL (Less than 20 songs total)
       if (newQueue.length < 20) {
         print(
-          'DEBUG: Queue small (${newQueue.length}), expanding with Related & AI...',
+          'DEBUG: Queue small (${newQueue.length}), expanding with AI...',
         );
         _expandQueueSmart(currentSong);
       }
@@ -723,31 +734,14 @@ class PlayerController extends _$PlayerController {
     } catch (_) {}
   }
 
-  /// Internal helper to expand queue using YouTube Related Videos AND AI
+  /// Internal helper to expand queue using AI recommendations
   Future<void> _expandQueueSmart(Home seedSong) async {
     try {
-      final youtubeService = ref.read(youtubeServiceProvider);
       final aiService = ref.read(aiRecommendServiceProvider);
-
-      // STEP 1: Get YouTube Related Videos (Fast & Relevant)
-      final videoId = seedSong.youtubeId ?? seedSong.id;
-      final relatedVideos = await youtubeService.getRelatedSongs(videoId);
-
-      final relatedSongs = relatedVideos
-          .map(
-            (video) => Home(
-              id: video.id.value,
-              title: video.title,
-              subtitle: video.author,
-              imageUrl: video.thumbnails.highResUrl,
-              source: 'youtube',
-              youtubeId: video.id.value,
-              duration: video.duration,
-            ),
-          )
-          .toList();
-
-      List<Home> songsToAdd = [...relatedSongs];
+      final recs = await aiService.getRecommendations(
+        seedSong.youtubeId ?? seedSong.id,
+      );
+      List<Home> songsToAdd = recs.map((m) => m.toEntity()).toList();
 
       // STEP 2: If still not enough, ask AI (Slower but creative)
       if (songsToAdd.length < 5) {
@@ -810,40 +804,51 @@ class PlayerController extends _$PlayerController {
         .trim();
   }
 
-  // Preloading Cache
-  String? _preloadedVideoId;
-  String?
-  _preloadedUrlString; // Cache the raw URL string instead of AudioSource
+  // Preloading Cache (multi-item)
+  final Map<String, String> _preloadedUrls = {};
 
-  /// Preload a song's URL without playing it
+  /// Cache an already-resolved audio URL for instant playback later
+  void cacheAudioUrl(String videoId, String url) {
+    _preloadedUrls[videoId] = url;
+  }
+
+  /// Preload a single song's URL without playing it
   Future<void> preLoadSong(String videoId) async {
-    print('DEBUG: preLoadSong called for $videoId');
-    if (_preloadedVideoId == videoId && _preloadedUrlString != null)
-      return; // Already loaded
-
+    if (_preloadedUrls.containsKey(videoId)) return;
     try {
       final backendService = ref.read(backendServiceProvider);
       final url = await backendService.convertYoutubeToMp3(videoId);
-
       if (url != null) {
-        _preloadedVideoId = videoId;
-        _preloadedUrlString = url;
-        print('DEBUG: Successfully preloaded search result URL: $videoId');
+        _preloadedUrls[videoId] = url;
       }
     } catch (e) {
       print('DEBUG: Error preloading song $videoId: $e');
     }
   }
 
+  /// Preload multiple songs in parallel (for visible list items)
+  Future<void> preloadSongs(Iterable<String> videoIds) async {
+    final toLoad = videoIds.where((id) => !_preloadedUrls.containsKey(id)).toList();
+    if (toLoad.isEmpty) return;
+    try {
+      final backendService = ref.read(backendServiceProvider);
+      await Future.wait(toLoad.map((id) async {
+        final url = await backendService.convertYoutubeToMp3(id);
+        if (url != null) _preloadedUrls[id] = url;
+      }));
+    } catch (e) {
+      print('DEBUG: Error preloading songs: $e');
+    }
+  }
+
   Future<AudioSource?> _createAudioSource(Home song) async {
     // Check cache first
     final videoId = song.youtubeId ?? song.id;
-    if (_preloadedVideoId == videoId && _preloadedUrlString != null) {
-      final secureUrl = _preloadedUrlString!.replaceFirst(
+    if (_preloadedUrls.containsKey(videoId)) {
+      final secureUrl = _preloadedUrls[videoId]!.replaceFirst(
         'http://',
         'https://',
       );
-      print('DEBUG: Using preloaded URL for $videoId: $secureUrl');
 
       final isJamendo = secureUrl.contains('jamendo.com');
 
@@ -892,39 +897,34 @@ class PlayerController extends _$PlayerController {
           );
         }
       } else if (song.source == 'nct') {
-        // LAZY LOADING FOR NCT
-        print('DEBUG: Resolving NCT URL for lazy loading: ${song.id}');
-        final nctService = ref.read(nctServiceProvider);
+        print('DEBUG: Resolving NCT via backend: ${song.title}');
+        final backendService = ref.read(backendServiceProvider);
+        final resolved = await backendService.getFullVersion(song);
 
-        // song.id is the page URL for NCT scraped songs
-        final fullSong = await nctService.fetchNCTSong(song.id);
-
-        if (fullSong != null &&
-            fullSong.audioUrl != null &&
-            fullSong.audioUrl!.isNotEmpty) {
-          final secureUrl = fullSong.audioUrl!.replaceFirst(
+        if (resolved != null && resolved.audioUrl.isNotEmpty) {
+          final secureUrl = resolved.audioUrl.replaceFirst(
             'http://',
             'https://',
           );
-          print('DEBUG: Resolved NCT Audio URL: $secureUrl');
-
-          // Update Home object in queue if possible?
-          // Ideally we shouldn't mutate state here directly during playback creation,
-          // but we rely on just_audio to play this source.
+          print('DEBUG: Resolved NCT via YouTube: $secureUrl');
 
           return AudioSource.uri(
             Uri.parse(secureUrl),
+            headers: {
+              'User-Agent':
+                  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            },
             tag: MediaItem(
-              id: song.id, // Keep original ID (Page URL) to match queue
-              title: song.title,
-              artist: song.subtitle,
+              id: song.id,
+              title: resolved.title,
+              artist: resolved.subtitle,
               artUri: song.imageUrl.isNotEmpty
                   ? Uri.parse(song.imageUrl)
                   : null,
             ),
           );
         } else {
-          print('DEBUG: Failed to resolve NCT URL for ${song.title}');
+          print('DEBUG: Failed to resolve NCT via backend for ${song.title}');
         }
       } else if (song.audioUrl.isNotEmpty) {
         final secureUrl = song.audioUrl.replaceFirst('http://', 'https://');
@@ -1141,12 +1141,10 @@ class PlayerController extends _$PlayerController {
 
     try {
       final aiService = ref.read(aiRecommendServiceProvider);
-      final youtubeService = ref.read(youtubeServiceProvider);
 
       final recommendations = await aiService.getRecommendedSongs(
         currentSong.title,
         currentSong.subtitle,
-        youtubeService,
       );
 
       state = state.copyWith(aiRecommendations: recommendations);
@@ -1196,8 +1194,6 @@ class PlayerController extends _$PlayerController {
         _lastLoadedIndex = 0;
         await _audioPlayer.play();
 
-        // Sync first song to Supabase
-        ref.read(songSyncServiceProvider).syncSong(topSongs.first);
         _hasCountedPlay = false;
 
         // Preload next
@@ -1219,7 +1215,6 @@ class PlayerController extends _$PlayerController {
     try {
       state = state.copyWith(isLoading: true);
       final repository = ref.read(supabaseRepositoryProvider);
-      final youtubeService = ref.read(youtubeServiceProvider);
 
       // Step 1: Get top 5 most played songs
       final allTopSongs = await repository.getMostPlayedSongs(10);
@@ -1306,8 +1301,6 @@ class PlayerController extends _$PlayerController {
         _lastLoadedIndex = 0;
         await _audioPlayer.play();
 
-        // Sync first song and reset count flag
-        ref.read(songSyncServiceProvider).syncSong(supermixSongs.first);
         _hasCountedPlay = false;
 
         _preloadNextSong();

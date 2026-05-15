@@ -3,8 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sonus/core/models/music_model.dart';
+import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/features/search/data/services/smart_search_service.dart';
-import 'package:sonus/features/search/data/services/youtube_service.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
 part 'search_controller.freezed.dart';
@@ -17,6 +17,7 @@ class SearchState with _$SearchState {
     @Default([]) List<String> suggestions,
     @Default([]) List<String> history,
     @Default(false) bool isLoading,
+    @Default(false) bool truncated,
     String? error,
   }) = _SearchState;
 }
@@ -65,16 +66,9 @@ class SearchController extends _$SearchController {
       state = AsyncValue.data(state.value!.copyWith(suggestions: []));
       return;
     }
-    // Keep using YoutubeService for suggestions if SmartSearch doesn't have autocomplete
-    // Or just disable suggestions for now if not needed.
-    // Given usage of YoutubeService in existing code, let's keep it for autocomplete
-    final service = ref.read(youtubeServiceProvider);
-    try {
-      final suggestions = await service.getSearchSuggestions(query);
-      state = AsyncValue.data(state.value!.copyWith(suggestions: suggestions));
-    } catch (_) {
-      // Ignore suggestion errors
-    }
+    final backend = ref.read(backendServiceProvider);
+    final suggestions = await backend.autocomplete(query);
+    state = AsyncValue.data(state.value!.copyWith(suggestions: suggestions));
   }
 
   Future<void> search(String query) async {
@@ -87,15 +81,15 @@ class SearchController extends _$SearchController {
 
     await _saveHistory(query);
 
-    final results = await AsyncValue.guard(() async {
+    final result = await AsyncValue.guard(() async {
       final service = ref.read(smartSearchServiceProvider);
       return await service.search(query);
     });
 
-    results.when(
+    result.when(
       data: (data) {
         state = AsyncValue.data(
-          state.value!.copyWith(results: data, isLoading: false, error: null),
+          state.value!.copyWith(results: data.results, truncated: data.truncated, isLoading: false, error: null),
         );
       },
       error: (err, stack) {

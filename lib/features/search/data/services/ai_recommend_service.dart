@@ -25,11 +25,9 @@ class AiRecommendService {
     }
   }
 
-  /// Kept for backward compatibility with player controller
   Future<List<Home>> getRecommendedSongs(
     String title,
-    String artist,
-    dynamic youtubeService, {
+    String artist, {
     int count = 5,
   }) async {
     final recs = await _backend.getRecommendationsByTitle(title, artist);

@@ -20,6 +20,7 @@ import '../../features/premium/presentation/pages/premium_page.dart';
 import '../../features/favorites/presentation/pages/favorites_list_page.dart';
 import '../../features/history/presentation/pages/recently_played_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/downloads/presentation/pages/downloads_page.dart';
 
 part 'router.g.dart';
 
@@ -196,6 +197,13 @@ GoRouter router(RouterRef ref) {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+
+      // Downloads Screen
+      GoRoute(
+        path: '/downloads',
+        name: 'downloads',
+        builder: (context, state) => const DownloadsPage(),
       ),
     ],
 

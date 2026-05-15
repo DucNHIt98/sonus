@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/core/models/music_model.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
-import 'package:sonus/core/network/supabase_repository.dart';
+
 
 class MusicTile extends ConsumerWidget {
   final MusicModel song;
@@ -72,8 +72,6 @@ class MusicTile extends ConsumerWidget {
             context.pushNamed('player');
           }
 
-          // Background sync to Supabase
-          ref.read(supabaseRepositoryProvider).saveSongToLibrary(song);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

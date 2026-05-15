@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/core/network/backend_service.dart';
+import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
 class FavoritesListPage extends ConsumerStatefulWidget {
   const FavoritesListPage({super.key});
@@ -73,43 +74,77 @@ class _FavoritesListPageState extends ConsumerState<FavoritesListPage> {
                   ],
                 ),
               )
-            : NotificationListener<ScrollNotification>(
-                onNotification: (scroll) {
-                  if (scroll is ScrollEndNotification && scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
-                    _loadMore();
-                  }
-                  return false;
-                },
-                child: ListView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-                  itemCount: _favorites.length + (_hasMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= _favorites.length) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        child: Center(child: CircularProgressIndicator(color: Colors.red, strokeWidth: 2)),
-                      );
-                    }
-                    final item = _favorites[index];
-                    final song = item['song'] as Map<String, dynamic>? ?? {};
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      onTap: () => context.push('/player'),
-                      leading: Container(
-                        width: 50.w, height: 50.h,
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.r), color: Colors.grey[800],
-                          image: (song['image_url'] as String? ?? '').isNotEmpty
-                            ? DecorationImage(image: NetworkImage(song['image_url']), fit: BoxFit.cover)
-                            : null,
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!(ref.watch(premiumControllerProvider).valueOrNull?.isPremium ?? false) && _favorites.length >= 80)
+                    GestureDetector(
+                      onTap: () => context.push('/premium'),
+                      child: Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                        padding: EdgeInsets.all(12.r),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: Colors.red.withOpacity(0.3)),
                         ),
-                        child: (song['image_url'] as String? ?? '').isEmpty
-                            ? Icon(Icons.music_note, color: Colors.white54, size: 24.r) : null,
+                        child: Row(
+                          children: [
+                            Icon(Icons.stars, color: Colors.amber, size: 20.r),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: Text(
+                                'Upgrade to Premium for unlimited favorites',
+                                style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14.r),
+                          ],
+                        ),
                       ),
-                      title: Text(song['title'] ?? '', style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      subtitle: Text(song['subtitle'] ?? '', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12.sp), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    );
-                  },
-                ),
+                    ),
+                  Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (scroll) {
+                        if (scroll is ScrollEndNotification && scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
+                          _loadMore();
+                        }
+                        return false;
+                      },
+                      child: ListView.builder(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                        itemCount: _favorites.length + (_hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index >= _favorites.length) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16.h),
+                              child: Center(child: CircularProgressIndicator(color: Colors.red, strokeWidth: 2)),
+                            );
+                          }
+                          final item = _favorites[index];
+                          final song = item['song'] as Map<String, dynamic>? ?? {};
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            onTap: () => context.push('/player'),
+                            leading: Container(
+                              width: 50.w, height: 50.h,
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.r), color: Colors.grey[800],
+                                image: (song['image_url'] as String? ?? '').isNotEmpty
+                                  ? DecorationImage(image: NetworkImage(song['image_url']), fit: BoxFit.cover)
+                                  : null,
+                              ),
+                              child: (song['image_url'] as String? ?? '').isEmpty
+                                  ? Icon(Icons.music_note, color: Colors.white54, size: 24.r) : null,
+                            ),
+                            title: Text(song['title'] ?? '', style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            subtitle: Text(song['subtitle'] ?? '', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12.sp), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
         ),
       ),

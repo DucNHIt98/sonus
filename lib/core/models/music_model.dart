@@ -1,6 +1,6 @@
 import 'package:sonus/features/home/domain/entities/home.dart';
 
-enum MusicSource { jamendo, youtube, deezer, nct }
+enum MusicSource { jamendo, youtube, nct }
 
 class MusicModel {
   final String id;
@@ -30,42 +30,6 @@ class MusicModel {
     this.duration,
   });
 
-  // Chuyển đổi từ dữ liệu Jamendo API
-  factory MusicModel.fromJamendo(Map<String, dynamic> json, {String? genre}) {
-    return MusicModel(
-      id: json['id'].toString(),
-      title: json['name'] ?? 'Unknown',
-      artist: json['artist_name'] ?? 'Unknown Artist',
-      albumArt: json['image'] ?? '',
-      albumName: json['album_name'],
-      audioUrl:
-          (json['audio'] as String?)?.replaceFirst('http://', 'https://') ??
-          'https://api.jamendo.com/v3.0/tracks/file/?client_id=b5094ba5&id=${json['id']}&audioformat=mp31',
-      source: MusicSource.jamendo,
-      genre: genre,
-      duration: json['duration'] != null
-          ? Duration(seconds: json['duration'])
-          : null,
-    );
-  }
-
-  // Chuyển đổi từ dữ liệu Deezer API (Trending)
-  factory MusicModel.fromDeezer(Map<String, dynamic> json, {int? rank}) {
-    return MusicModel(
-      id: json['id'].toString(),
-      title: json['title'] ?? 'Unknown',
-      artist: json['artist']['name'] ?? 'Unknown Artist',
-      albumArt: json['album'] != null ? json['album']['cover_big'] : '',
-      albumName: json['album'] != null ? json['album']['title'] : '',
-      audioUrl: json['preview'],
-      source: MusicSource.deezer,
-      rank: rank,
-      duration: json['duration'] != null
-          ? Duration(seconds: json['duration'])
-          : null,
-    );
-  }
-
   // Chuyển đổi từ bảng 'songs' của Supabase
   factory MusicModel.fromSupabase(Map<String, dynamic> json) {
     return MusicModel(
@@ -79,21 +43,6 @@ class MusicModel {
       genre: json['genre'],
       region: json['region'],
       // rank: json['trending_rank'], // Removed as per user request
-      duration: json['duration'] != null
-          ? Duration(seconds: json['duration'])
-          : null,
-    );
-  }
-
-  // Chuyển đổi từ dữ liệu YouTube (Ví dụ từ youtube_explode)
-  factory MusicModel.fromYoutube(Map<String, dynamic> json) {
-    return MusicModel(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      artist: json['subtitle'] ?? '',
-      albumArt: json['image_url'] ?? '',
-      audioUrl: json['audio_url'],
-      source: MusicSource.youtube,
       duration: json['duration'] != null
           ? Duration(seconds: json['duration'])
           : null,
@@ -125,9 +74,8 @@ class MusicModel {
       subtitle: artist,
       imageUrl: albumArt,
       audioUrl: audioUrl ?? '',
-      source: source == MusicSource.deezer ? 'deezer_preview' : source.name,
+      source: source.name,
       duration: duration,
-      deezerId: source == MusicSource.deezer ? id : null,
       jamendoId: source == MusicSource.jamendo ? id : null,
       nctId: source == MusicSource.nct ? id : null,
     );

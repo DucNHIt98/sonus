@@ -15,15 +15,13 @@ class SmartSearchService {
 
   SmartSearchService(this._backend);
 
-  Future<List<MusicModel>> search(String query) async {
-    if (query.trim().isEmpty) return [];
+  Future<({List<MusicModel> results, bool truncated})> search(String query) async {
+    if (query.trim().isEmpty) return (results: [], truncated: false);
     try {
-      final results = await _backend.search(query: query);
-      debugPrint('SmartSearch: returned ${results.length} results via backend');
-      return results;
+      return await _backend.search(query: query);
     } catch (e) {
       debugPrint('SmartSearch Error: $e');
-      return [];
+      return (results: [], truncated: false);
     }
   }
 }

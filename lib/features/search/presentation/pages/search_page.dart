@@ -9,7 +9,8 @@ import 'package:sonus/features/player/presentation/controllers/player_controller
 import 'package:sonus/features/search/presentation/controllers/search_controller.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/core/models/music_model.dart';
-import 'package:sonus/core/network/supabase_repository.dart';
+import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
+
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -19,9 +20,19 @@ class SearchPage extends ConsumerStatefulWidget {
 }
 
 class _SearchPageState extends ConsumerState<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  late final TextEditingController _searchController;
+  late final FocusNode _focusNode;
   bool _isSearching = false;
+
+  Future<void> _preloadAudio(List<MusicModel> results) async {
+    final youtubeIds = results
+        .where((m) => m.source == MusicSource.youtube && (m.audioUrl == null || m.audioUrl!.isEmpty))
+        .take(3)
+        .map((m) => m.id)
+        .toList();
+    if (youtubeIds.isEmpty) return;
+    await ref.read(playerControllerProvider.notifier).preloadSongs(youtubeIds);
+  }
 
   @override
   void dispose() {
@@ -33,6 +44,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   @override
   Widget build(BuildContext context) {
     final searchAsync = ref.watch(searchControllerProvider);
+
+    // Preload audio for visible search results
+    ref.listen(searchControllerProvider, (_, next) {
+      if (next.results.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _preloadAudio(next.results);
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -210,6 +230,36 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
         ),
       ),
+      if (searchState.truncated)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 12.h),
+            child: GestureDetector(
+              onTap: () => context.push('/premium'),
+              child: Container(
+                padding: EdgeInsets.all(12.r),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.stars, color: Colors.amber, size: 20.r),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Text(
+                        'Upgrade to Premium to see all results',
+                        style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14.r),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
           final song = searchState.results[index];
@@ -232,19 +282,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   .read(playerControllerProvider.notifier)
                   .playSelectedSongWithMetadata(songMetadata);
 
-              // 2. Auto Sync to Supabase (Upsert)
-              // We do this silently in background
-              // Note: We need to convert Home back to MusicModel or just use MusicModel directly
-              // But SupabaseRepository expects MusicModel.
-              // We already have 'song' which is MusicModel.
-              // Only diff is duration might be 0 if not fetched.
-              // We'll upsert what we have.
-              ref.read(supabaseRepositoryProvider).saveSongToLibrary(song);
-
               if (context.mounted) {
                 context.pushNamed('player');
               }
             },
+            onHover: (_) {}, // Dummy to avoid InkWell flicker on mobile
             child: SongTile(
               title: song.title,
               artist: song.artist,

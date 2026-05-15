@@ -8,6 +8,7 @@ import 'package:sonus/features/home/presentation/providers/genre_provider.dart';
 import 'package:sonus/features/home/presentation/widgets/home_widgets.dart';
 import 'package:sonus/features/home/presentation/widgets/chart_widgets.dart';
 import 'package:sonus/features/home/presentation/providers/chart_provider.dart';
+import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -15,6 +16,8 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeControllerProvider);
+    final premiumAsync = ref.watch(premiumControllerProvider);
+    final isPremium = premiumAsync.valueOrNull?.isPremium ?? false;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -171,11 +174,12 @@ class HomePage extends ConsumerWidget {
 
                     SliverToBoxAdapter(child: SizedBox(height: 24.h)),
 
-                    // Supermix Card
-                    const SliverToBoxAdapter(child: SupermixCard()),
+                    if (isPremium) ...[
+                      // Supermix Card
+                      const SliverToBoxAdapter(child: SupermixCard()),
 
-                    // Horizontal Sections
-                    SliverList(
+                      // Horizontal Sections
+                      SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final title = otherSections.keys.elementAt(index);
                         final items = otherSections[title]!;
@@ -198,48 +202,48 @@ class HomePage extends ConsumerWidget {
                         );
                       }, childCount: otherSections.length),
                     ),
+                    ],
 
                     SliverToBoxAdapter(child: SizedBox(height: 24.h)),
 
-                    // Regional Charts
-                    const SliverToBoxAdapter(
-                      child: ChartSection(
-                        title: 'Top V-Pop',
-                        region: 'V-Pop',
-                        playlistId: 'PL4fGSI1pDJn5nSvnBmqp6Yrk6z8WpI9lY',
+                    if (isPremium) ...[
+                      // Regional Charts
+                      const SliverToBoxAdapter(
+                        child: ChartSection(
+                          title: 'Top V-Pop',
+                          region: 'V-Pop',
+                          playlistId: 'PL4fGSI1pDJn5nSvnBmqp6Yrk6z8WpI9lY',
+                        ),
                       ),
-                    ),
-
-                    const SliverToBoxAdapter(
-                      child: ChartSection(
-                        title: 'K-Pop Rising',
-                        region: 'K-Pop',
-                        playlistId: 'PL4fGSI1pDJn6jXS_Tv_N9B8Z0HTRVJE0m',
+                      const SliverToBoxAdapter(
+                        child: ChartSection(
+                          title: 'K-Pop Rising',
+                          region: 'K-Pop',
+                          playlistId: 'PL4fGSI1pDJn6jXS_Tv_N9B8Z0HTRVJE0m',
+                        ),
                       ),
-                    ),
-
-                    const SliverToBoxAdapter(
-                      child: ChartSection(
-                        title: 'US-UK Hits',
-                        region: 'US-UK',
-                        playlistId: 'PL4fGSI1pDJn5kI81J1fYxTz8uUXpZAzp1',
+                      const SliverToBoxAdapter(
+                        child: ChartSection(
+                          title: 'US-UK Hits',
+                          region: 'US-UK',
+                          playlistId: 'PL4fGSI1pDJn5kI81J1fYxTz8uUXpZAzp1',
+                        ),
                       ),
-                    ),
-
-                    const SliverToBoxAdapter(
-                      child: ChartSection(
-                        title: 'Top 50 V-Rap',
-                        region: 'V-Rap',
-                        playlistId: 'NCT_V_Rap',
+                      const SliverToBoxAdapter(
+                        child: ChartSection(
+                          title: 'Top 50 V-Rap',
+                          region: 'V-Rap',
+                          playlistId: 'NCT_V_Rap',
+                        ),
                       ),
-                    ),
-                    const SliverToBoxAdapter(
-                      child: ChartSection(
-                        title: 'Top 50 Billboard Global',
-                        region: 'Billboard',
-                        playlistId: 'NCT_Billboard',
+                      const SliverToBoxAdapter(
+                        child: ChartSection(
+                          title: 'Top 50 Billboard Global',
+                          region: 'Billboard',
+                          playlistId: 'NCT_Billboard',
+                        ),
                       ),
-                    ),
+                    ],
 
                     SliverToBoxAdapter(child: SizedBox(height: 100.h)),
                   ],

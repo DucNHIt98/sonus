@@ -42,14 +42,7 @@ class ChartSection extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Tính năng $title đang được phát triển'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
+                onPressed: () => context.push('/premium'),
                 child: Text(
                   'Xem tất cả',
                   style: TextStyle(color: Colors.grey, fontSize: 14.sp),

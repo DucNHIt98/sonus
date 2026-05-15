@@ -84,7 +84,7 @@ class BackendService {
   // ==================== Search ====================
 
   /// Multi-source search
-  Future<List<MusicModel>> search({
+  Future<({List<MusicModel> results, bool truncated})> search({
     required String query,
     int limit = 10,
     String sources = 'youtube,jamendo,nct',
@@ -96,9 +96,45 @@ class BackendService {
       );
       final data = response.data;
       final results = List<Map<String, dynamic>>.from(data['results'] ?? []);
-      return results.map((json) => MusicModel.fromSupabase(json)).toList();
+      final truncated = data['truncated'] == true;
+      return (
+        results: results.map((json) => MusicModel.fromSupabase(json)).toList(),
+        truncated: truncated,
+      );
     } catch (e) {
       debugPrint('Backend search error: $e');
+      return (results: [], truncated: false);
+    }
+  }
+
+  /// Related songs for a given song ID
+  Future<List<MusicModel>> getRelatedSongs(String songId) async {
+    try {
+      final response = await dio.get(
+        '/api/music/related/$songId/',
+        queryParameters: {'limit': 10},
+      );
+      final data = response.data;
+      final results = List<Map<String, dynamic>>.from(data['results'] ?? []);
+      return results.map((json) => MusicModel.fromSupabase(json)).toList();
+    } catch (e) {
+      debugPrint('Backend getRelatedSongs error: $e');
+      return [];
+    }
+  }
+
+  /// Related songs for a given song ID
+  Future<List<MusicModel>> getRelatedSongs(String songId) async {
+    try {
+      final response = await dio.get(
+        '/api/music/related/$songId/',
+        queryParameters: {'limit': 10},
+      );
+      final data = response.data;
+      final results = List<Map<String, dynamic>>.from(data['results'] ?? []);
+      return results.map((json) => MusicModel.fromSupabase(json)).toList();
+    } catch (e) {
+      debugPrint('Backend getRelatedSongs error: $e');
       return [];
     }
   }
@@ -307,6 +343,14 @@ class BackendService {
         data: {'liked': liked},
       );
       return true;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 403) {
+        final detail = e.response?.data?['detail'] as String? ?? '';
+        debugPrint('Backend toggleFavorite 403: $detail');
+      } else {
+        debugPrint('Backend toggleFavorite error: $e');
+      }
+      return false;
     } catch (e) {
       debugPrint('Backend toggleFavorite error: $e');
       return false;
@@ -488,6 +532,73 @@ class BackendService {
       return response.data['avatar_url'] as String?;
     } catch (e) {
       debugPrint('Backend uploadAvatar error: $e');
+      return null;
+    }
+  }
+
+  // ==================== Offline Downloads ====================
+
+  /// Mark a song as downloaded (quota check server-side)
+  Future<Map<String, dynamic>?> downloadSong(
+    String songId, {
+    String title = '',
+    String subtitle = '',
+    String imageUrl = '',
+    String audioUrl = '',
+    int? duration,
+    String source = '',
+  }) async {
+    try {
+      final response = await dio.post(
+        '/api/downloads/$songId/',
+        data: {
+          'title': title,
+          'subtitle': subtitle,
+          'image_url': imageUrl,
+          'audio_url': audioUrl,
+          'duration': duration,
+          'source': source,
+        },
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('Backend downloadSong error: $e');
+      return null;
+    }
+  }
+
+  /// Remove a download marker
+  Future<bool> removeDownload(String songId) async {
+    try {
+      await dio.delete('/api/downloads/$songId/');
+      return true;
+    } catch (e) {
+      debugPrint('Backend removeDownload error: $e');
+      return false;
+    }
+  }
+
+  /// List downloaded songs
+  Future<Map<String, dynamic>> getDownloads({int offset = 0, int limit = 20}) async {
+    try {
+      final response = await dio.get(
+        '/api/downloads/',
+        queryParameters: {'offset': offset, 'limit': limit},
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('Backend getDownloads error: $e');
+      return {'downloads': <Map<String, dynamic>>[], 'total': 0};
+    }
+  }
+
+  /// Get download quota info
+  Future<Map<String, dynamic>?> getDownloadQuota() async {
+    try {
+      final response = await dio.get('/api/downloads/quota/');
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('Backend getDownloadQuota error: $e');
       return null;
     }
   }

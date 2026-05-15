@@ -28,6 +28,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // TODO: Replace with your WEB_CLIENT_ID from Google Cloud Console
+        resValue("string", "default_web_client_id", "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
     }
 
     buildTypes {
