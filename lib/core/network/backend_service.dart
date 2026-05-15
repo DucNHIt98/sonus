@@ -224,18 +224,23 @@ class BackendService {
   }
 
   /// Get play history (most recently played first)
-  Future<List<Map<String, dynamic>>> getPlayHistory({int offset = 0, int limit = 20}) async {
+  /// If [returnTotal] is true, returns Map with 'entries' and 'total' keys.
+  /// Otherwise returns just the list.
+  Future<dynamic> getPlayHistory({int offset = 0, int limit = 20, bool returnTotal = false}) async {
     try {
       final response = await dio.get(
         '/api/history/',
         queryParameters: {'offset': offset, 'limit': limit},
       );
-      final history = List<Map<String, dynamic>>.from(
-          (response.data as Map)['history'] ?? []);
-      return history;
+      final data = response.data as Map;
+      final entries = List<Map<String, dynamic>>.from(data['history'] ?? []);
+      if (returnTotal) {
+        return {'entries': entries, 'total': data['total'] as int? ?? 0};
+      }
+      return entries;
     } catch (e) {
       debugPrint('Backend getPlayHistory error: $e');
-      return [];
+      return returnTotal ? {'entries': <Map<String, dynamic>>[], 'total': 0} : <Map<String, dynamic>>[];
     }
   }
 
@@ -407,11 +412,11 @@ class BackendService {
   /// Add a song to playlist
   Future<bool> addSongToPlaylist(String playlistId, String songId) async {
     try {
-      await dio.post(
+      final response = await dio.post(
         '/api/playlists/$playlistId/songs/',
         data: {'song_id': songId},
       );
-      return true;
+      return response.statusCode == 201;
     } catch (e) {
       debugPrint('Backend addSongToPlaylist error: $e');
       return false;
@@ -426,6 +431,21 @@ class BackendService {
       return true;
     } catch (e) {
       debugPrint('Backend removeSongFromPlaylist error: $e');
+      return false;
+    }
+  }
+
+  /// Reorder songs in a playlist
+  Future<bool> reorderPlaylistSongs(
+      String playlistId, List<String> songIds) async {
+    try {
+      await dio.patch(
+        '/api/playlists/$playlistId/songs/reorder/',
+        data: {'song_ids': songIds},
+      );
+      return true;
+    } catch (e) {
+      debugPrint('Backend reorderPlaylistSongs error: $e');
       return false;
     }
   }

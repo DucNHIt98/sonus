@@ -15,6 +15,7 @@ class _RecentlyPlayedPageState extends ConsumerState<RecentlyPlayedPage> {
   final List<Map<String, dynamic>> _entries = [];
   bool _isLoading = false;
   bool _hasMore = true;
+  int _total = 0;
   int _offset = 0;
   static const int _pageSize = 20;
 
@@ -28,8 +29,13 @@ class _RecentlyPlayedPageState extends ConsumerState<RecentlyPlayedPage> {
     if (_isLoading || !_hasMore) return;
     setState(() => _isLoading = true);
     final backend = ref.read(backendServiceProvider);
-    final batch = await backend.getPlayHistory(offset: _offset, limit: _pageSize);
+    final result = await backend.getPlayHistory(offset: _offset, limit: _pageSize,
+      returnTotal: true,
+    );
+    final batch = result['entries'] as List<Map<String, dynamic>>;
+    final totalFromApi = result['total'] as int;
     if (batch.length < _pageSize) _hasMore = false;
+    if (totalFromApi > 0) _total = totalFromApi;
     setState(() {
       _entries.addAll(batch);
       _offset += batch.length;
@@ -117,54 +123,65 @@ class _RecentlyPlayedPageState extends ConsumerState<RecentlyPlayedPage> {
                   ],
                 ),
               )
-            : NotificationListener<ScrollNotification>(
-                onNotification: (scroll) {
-                  if (scroll is ScrollEndNotification && scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
-                    _loadMore();
-                  }
-                  return false;
-                },
-                child: ListView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-                  itemCount: _entries.length + (_hasMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= _entries.length) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        child: Center(child: CircularProgressIndicator(color: Colors.red, strokeWidth: 2)),
-                      );
-                    }
-                    final item = _entries[index];
-                    final song = item['song'] as Map<String, dynamic>? ?? {};
-                    return Dismissible(
-                      key: ValueKey(song['id']),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 16.w),
-                        color: Colors.red,
-                        child: Icon(Icons.delete_outline, color: Colors.white, size: 24.r),
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w, top: 12.h),
+                    child: Text('$_total entries', style: TextStyle(color: Colors.grey[500], fontSize: 12.sp)),
+                  ),
+                  Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (scroll) {
+                        if (scroll is ScrollEndNotification && scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
+                          _loadMore();
+                        }
+                        return false;
+                      },
+                      child: ListView.builder(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                        itemCount: _entries.length + (_hasMore ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index >= _entries.length) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16.h),
+                              child: Center(child: CircularProgressIndicator(color: Colors.red, strokeWidth: 2)),
+                            );
+                          }
+                          final item = _entries[index];
+                          final song = item['song'] as Map<String, dynamic>? ?? {};
+                          return Dismissible(
+                            key: ValueKey(song['id']),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: EdgeInsets.only(right: 16.w),
+                              color: Colors.red,
+                              child: Icon(Icons.delete_outline, color: Colors.white, size: 24.r),
+                            ),
+                            onDismissed: (_) => _deleteEntry(song['id'] ?? ''),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              onTap: () => context.push('/player'),
+                              leading: Container(
+                                width: 50.w, height: 50.h,
+                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.r), color: Colors.grey[800],
+                                  image: (song['image_url'] as String? ?? '').isNotEmpty
+                                    ? DecorationImage(image: NetworkImage(song['image_url']), fit: BoxFit.cover)
+                                    : null,
+                                ),
+                                child: (song['image_url'] as String? ?? '').isEmpty
+                                    ? Icon(Icons.music_note, color: Colors.white54, size: 24.r) : null,
+                              ),
+                              title: Text(song['title'] ?? '', style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              subtitle: Text('${song['subtitle'] ?? ''}  •  ${item['count'] ?? 0} plays', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12.sp), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
+                          );
+                        },
                       ),
-                      onDismissed: (_) => _deleteEntry(song['id'] ?? ''),
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        onTap: () => context.push('/player'),
-                        leading: Container(
-                          width: 50.w, height: 50.h,
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.r), color: Colors.grey[800],
-                            image: (song['image_url'] as String? ?? '').isNotEmpty
-                              ? DecorationImage(image: NetworkImage(song['image_url']), fit: BoxFit.cover)
-                              : null,
-                          ),
-                          child: (song['image_url'] as String? ?? '').isEmpty
-                              ? Icon(Icons.music_note, color: Colors.white54, size: 24.r) : null,
-                        ),
-                        title: Text(song['title'] ?? '', style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        subtitle: Text('${song['subtitle'] ?? ''}  •  ${item['count'] ?? 0} plays', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12.sp), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      ),
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                ],
               ),
         ),
       ),
