@@ -402,38 +402,6 @@ class PlayerController extends _$PlayerController {
       print('DEBUG: Error fetching related songs: $e');
     }
   }
-        }
-      }
-
-      // If queue is running low, fetch related songs to refill
-      final remaining = state.queue.length - state.currentIndex;
-      if (remaining <= 3 && state.currentSong != null) {
-        _fetchRelatedSongs(state.currentSong!);
-      }
-    } catch (e) {
-      print('DEBUG: Error preloading song: $e');
-    } finally {
-      _isPreloading = false;
-    }
-  }
-
-  Future<void> _fetchRelatedSongs(Home seedSong) async {
-    try {
-      final backend = ref.read(backendServiceProvider);
-      final results = await backend.getRelatedSongs(seedSong.id);
-      if (results.isEmpty) return;
-
-      final newSongs = results
-          .where((m) => !state.queue.any((h) => h.id == m.id))
-          .map((m) => m.toEntity())
-          .toList();
-      if (newSongs.isEmpty) return;
-
-      state = state.copyWith(queue: [...state.queue, ...newSongs]);
-    } catch (e) {
-      print('DEBUG: Error fetching related songs: $e');
-    }
-  }
 
   /// Fetch songs from the current artist's channel and add to queue
   Future<void> fetchAndQueueArtistSongs(Home currentSong) async {
@@ -444,11 +412,12 @@ class PlayerController extends _$PlayerController {
     try {
       final artistName = currentSong.subtitle;
       final backend = ref.read(backendServiceProvider);
-      final results = await backend.search(
+      final searchResult = await backend.search(
         query: '$artistName official audio',
         limit: 20,
         sources: 'youtube',
       );
+      final results = searchResult.results;
 
       if (results.isEmpty) return;
 
@@ -694,11 +663,12 @@ class PlayerController extends _$PlayerController {
       if (currentSong == null) return;
 
       final backend = ref.read(backendServiceProvider);
-      final results = await backend.search(
+      final searchResult = await backend.search(
         query: '${currentSong.subtitle} official audio',
         limit: 20,
         sources: 'youtube',
       );
+      final results = searchResult.results;
 
       if (results.isEmpty) return;
 
@@ -748,7 +718,6 @@ class PlayerController extends _$PlayerController {
         final aiSongs = await aiService.getRecommendedSongs(
           seedSong.title,
           seedSong.subtitle,
-          youtubeService,
           count: 10,
         );
         songsToAdd.addAll(aiSongs);
@@ -1238,6 +1207,7 @@ class PlayerController extends _$PlayerController {
 
       // Get history IDs to ensure we suggest "never heard" songs
       final historyIds = await repository.getHistoryVideoIds();
+      final backend = ref.read(backendServiceProvider);
       final List<Home> supermixSongs = List.from(topSongs);
       final Set<String> currentSupermixIds = topSongs
           .map((s) => s.youtubeId ?? s.id)
@@ -1246,32 +1216,23 @@ class PlayerController extends _$PlayerController {
       // Step 2: For each top song, get 2 related songs never heard before
       for (final song in topSongs) {
         final videoId = song.youtubeId ?? song.id;
-        final relatedVideos = await youtubeService.getRelatedSongs(videoId);
+        final relatedVideos = await backend.getRelatedSongs(videoId);
 
         int addedFromThisSong = 0;
         for (final video in relatedVideos) {
           if (addedFromThisSong >= 2) break;
 
-          final vidId = video.id.value;
+          final vidId = video.id;
 
           // Extra safety check for duration (though already filtered in service)
-          if (video.duration != null && video.duration!.inSeconds > 900)
+          if (video.duration != null && video.duration!.inSeconds > 900) {
             continue;
+          }
 
           // Filter: Never heard (not in history) AND not already in this supermix
           if (!historyIds.contains(vidId) &&
               !currentSupermixIds.contains(vidId)) {
-            supermixSongs.add(
-              Home(
-                id: vidId,
-                title: video.title,
-                subtitle: video.author,
-                imageUrl: video.thumbnails.highResUrl,
-                source: 'youtube',
-                youtubeId: vidId,
-                duration: video.duration,
-              ),
-            );
+            supermixSongs.add(video.toEntity());
             currentSupermixIds.add(vidId);
             addedFromThisSong++;
           }

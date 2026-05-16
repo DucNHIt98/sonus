@@ -87,7 +87,7 @@ class BackendService {
   Future<({List<MusicModel> results, bool truncated})> search({
     required String query,
     int limit = 10,
-    String sources = 'youtube,jamendo,nct',
+    String sources = 'db',
   }) async {
     try {
       final response = await dio.get(
@@ -103,7 +103,7 @@ class BackendService {
       );
     } catch (e) {
       debugPrint('Backend search error: $e');
-      return (results: [], truncated: false);
+      return (results: <MusicModel>[], truncated: false);
     }
   }
 
@@ -111,23 +111,7 @@ class BackendService {
   Future<List<MusicModel>> getRelatedSongs(String songId) async {
     try {
       final response = await dio.get(
-        '/api/music/related/$songId/',
-        queryParameters: {'limit': 10},
-      );
-      final data = response.data;
-      final results = List<Map<String, dynamic>>.from(data['results'] ?? []);
-      return results.map((json) => MusicModel.fromSupabase(json)).toList();
-    } catch (e) {
-      debugPrint('Backend getRelatedSongs error: $e');
-      return [];
-    }
-  }
-
-  /// Related songs for a given song ID
-  Future<List<MusicModel>> getRelatedSongs(String songId) async {
-    try {
-      final response = await dio.get(
-        '/api/music/related/$songId/',
+        '/api/related/$songId/',
         queryParameters: {'limit': 10},
       );
       final data = response.data;
@@ -164,12 +148,14 @@ class BackendService {
       return {
         'trending': _parseMusicList(data['trending']),
         'charts': data['charts'] is Map
-            ? (data['charts'] as Map).map((k, v) =>
-                MapEntry(k.toString(), _parseMusicList(v)))
+            ? (data['charts'] as Map).map(
+                (k, v) => MapEntry(k.toString(), _parseMusicList(v)),
+              )
             : <String, List<MusicModel>>{},
         'genres': data['genres'] is Map
-            ? (data['genres'] as Map).map((k, v) =>
-                MapEntry(k.toString(), _parseMusicList(v)))
+            ? (data['genres'] as Map).map(
+                (k, v) => MapEntry(k.toString(), _parseMusicList(v)),
+              )
             : <String, List<MusicModel>>{},
       };
     } catch (e) {
@@ -215,15 +201,20 @@ class BackendService {
 
   /// AI recommendations by title+artist (for queue expansion when no song_id)
   Future<List<MusicModel>> getRecommendationsByTitle(
-      String title, String artist) async {
+    String title,
+    String artist,
+  ) async {
     return _fetchRecommendations({'title': title, 'artist': artist});
   }
 
   Future<List<MusicModel>> _fetchRecommendations(
-      Map<String, dynamic> params) async {
+    Map<String, dynamic> params,
+  ) async {
     try {
-      final response =
-          await dio.get('/api/recommendations/', queryParameters: params);
+      final response = await dio.get(
+        '/api/recommendations/',
+        queryParameters: params,
+      );
       return _parseMusicList(response.data['recommendations']);
     } catch (e) {
       debugPrint('Backend recommendations error: $e');
@@ -262,7 +253,11 @@ class BackendService {
   /// Get play history (most recently played first)
   /// If [returnTotal] is true, returns Map with 'entries' and 'total' keys.
   /// Otherwise returns just the list.
-  Future<dynamic> getPlayHistory({int offset = 0, int limit = 20, bool returnTotal = false}) async {
+  Future<dynamic> getPlayHistory({
+    int offset = 0,
+    int limit = 20,
+    bool returnTotal = false,
+  }) async {
     try {
       final response = await dio.get(
         '/api/history/',
@@ -276,7 +271,9 @@ class BackendService {
       return entries;
     } catch (e) {
       debugPrint('Backend getPlayHistory error: $e');
-      return returnTotal ? {'entries': <Map<String, dynamic>>[], 'total': 0} : <Map<String, dynamic>>[];
+      return returnTotal
+          ? {'entries': <Map<String, dynamic>>[], 'total': 0}
+          : <Map<String, dynamic>>[];
     }
   }
 
@@ -310,7 +307,8 @@ class BackendService {
         queryParameters: {'limit': limit},
       );
       final top = List<Map<String, dynamic>>.from(
-          (response.data as Map)['top'] ?? []);
+        (response.data as Map)['top'] ?? [],
+      );
       return top;
     } catch (e) {
       debugPrint('Backend getTopPlayed error: $e');
@@ -321,14 +319,18 @@ class BackendService {
   // ==================== Favorites ====================
 
   /// Get user's favorite songs
-  Future<List<Map<String, dynamic>>> getFavorites({int offset = 0, int limit = 20}) async {
+  Future<List<Map<String, dynamic>>> getFavorites({
+    int offset = 0,
+    int limit = 20,
+  }) async {
     try {
       final response = await dio.get(
         '/api/favorites/',
         queryParameters: {'offset': offset, 'limit': limit},
       );
       return List<Map<String, dynamic>>.from(
-          (response.data as Map)['favorites'] ?? []);
+        (response.data as Map)['favorites'] ?? [],
+      );
     } catch (e) {
       debugPrint('Backend getFavorites error: $e');
       return [];
@@ -338,10 +340,7 @@ class BackendService {
   /// Toggle favorite state for a song
   Future<bool> toggleFavorite(String songId, {bool liked = true}) async {
     try {
-      await dio.post(
-        '/api/favorites/$songId/',
-        data: {'liked': liked},
-      );
+      await dio.post('/api/favorites/$songId/', data: {'liked': liked});
       return true;
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
@@ -371,14 +370,18 @@ class BackendService {
   // ==================== Playlists ====================
 
   /// Get user's playlists (with total count)
-  Future<List<Map<String, dynamic>>> getPlaylists({int offset = 0, int limit = 20}) async {
+  Future<List<Map<String, dynamic>>> getPlaylists({
+    int offset = 0,
+    int limit = 20,
+  }) async {
     try {
       final response = await dio.get(
         '/api/playlists/',
         queryParameters: {'offset': offset, 'limit': limit},
       );
       return List<Map<String, dynamic>>.from(
-          (response.data as Map)['playlists'] ?? []);
+        (response.data as Map)['playlists'] ?? [],
+      );
     } catch (e) {
       debugPrint('Backend getPlaylists error: $e');
       return [];
@@ -408,7 +411,11 @@ class BackendService {
   }
 
   /// Get playlist detail with songs (paginated)
-  Future<Map<String, dynamic>?> getPlaylistDetail(String playlistId, {int offset = 0, int limit = 50}) async {
+  Future<Map<String, dynamic>?> getPlaylistDetail(
+    String playlistId, {
+    int offset = 0,
+    int limit = 50,
+  }) async {
     try {
       final response = await dio.get(
         '/api/playlists/$playlistId/',
@@ -433,8 +440,10 @@ class BackendService {
       if (title != null) body['title'] = title;
       if (description != null) body['description'] = description;
       if (imageUrl != null) body['image_url'] = imageUrl;
-      final response =
-          await dio.patch('/api/playlists/$playlistId/', data: body);
+      final response = await dio.patch(
+        '/api/playlists/$playlistId/',
+        data: body,
+      );
       return response.data as Map<String, dynamic>;
     } catch (e) {
       debugPrint('Backend updatePlaylist error: $e');
@@ -454,13 +463,27 @@ class BackendService {
   }
 
   /// Add a song to playlist
-  Future<bool> addSongToPlaylist(String playlistId, String songId) async {
+  Future<bool> addSongToPlaylist(
+    String playlistId,
+    String songId, {
+    MusicModel? song,
+  }) async {
     try {
       final response = await dio.post(
         '/api/playlists/$playlistId/songs/',
-        data: {'song_id': songId},
+        data: {
+          'song_id': songId,
+          if (song != null) ...{
+            'title': song.title,
+            'subtitle': song.artist,
+            'image_url': song.albumArt,
+            'audio_url': song.audioUrl ?? '',
+            'duration': song.duration?.inSeconds,
+            'source': song.source.name,
+          },
+        },
       );
-      return response.statusCode == 201;
+      return response.statusCode == 201 || response.statusCode == 200;
     } catch (e) {
       debugPrint('Backend addSongToPlaylist error: $e');
       return false;
@@ -468,8 +491,7 @@ class BackendService {
   }
 
   /// Remove a song from playlist
-  Future<bool> removeSongFromPlaylist(
-      String playlistId, String songId) async {
+  Future<bool> removeSongFromPlaylist(String playlistId, String songId) async {
     try {
       await dio.delete('/api/playlists/$playlistId/songs/$songId/');
       return true;
@@ -481,7 +503,9 @@ class BackendService {
 
   /// Reorder songs in a playlist
   Future<bool> reorderPlaylistSongs(
-      String playlistId, List<String> songIds) async {
+    String playlistId,
+    List<String> songIds,
+  ) async {
     try {
       await dio.patch(
         '/api/playlists/$playlistId/songs/reorder/',
@@ -524,11 +548,12 @@ class BackendService {
   Future<String?> uploadAvatar(File file) async {
     try {
       final formData = FormData.fromMap({
-        'avatar': await MultipartFile.fromFile(file.path,
-            filename: file.path.split('/').last),
+        'avatar': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split('/').last,
+        ),
       });
-      final response =
-          await dio.post('/api/auth/me/avatar/', data: formData);
+      final response = await dio.post('/api/auth/me/avatar/', data: formData);
       return response.data['avatar_url'] as String?;
     } catch (e) {
       debugPrint('Backend uploadAvatar error: $e');
@@ -579,7 +604,10 @@ class BackendService {
   }
 
   /// List downloaded songs
-  Future<Map<String, dynamic>> getDownloads({int offset = 0, int limit = 20}) async {
+  Future<Map<String, dynamic>> getDownloads({
+    int offset = 0,
+    int limit = 20,
+  }) async {
     try {
       final response = await dio.get(
         '/api/downloads/',

@@ -6,7 +6,7 @@ part 'dio_client.g.dart';
 
 const kBackendBaseUrl = String.fromEnvironment(
   'SONUS_API_BASE_URL',
-  defaultValue: 'http://localhost:8000',
+  defaultValue: 'http://localhost:8001',
 );
 
 @Riverpod(keepAlive: true)
@@ -19,16 +19,18 @@ Dio dioClient(DioClientRef ref) {
     ),
   );
 
-  dio.interceptors.add(InterceptorsWrapper(
-    onRequest: (options, handler) async {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('sonus_backend_token');
-      if (token != null) {
-        options.headers['Authorization'] = 'Bearer $token';
-      }
-      handler.next(options);
-    },
-  ));
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('sonus_backend_token');
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        handler.next(options);
+      },
+    ),
+  );
 
   return dio;
 }

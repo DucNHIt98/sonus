@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../network/dio_client.dart';
 import '../network/supabase_provider.dart';
 
 part 'auth_service.g.dart';
@@ -15,14 +18,10 @@ AuthService authService(AuthServiceRef ref) {
 }
 
 class AuthService {
-  static const _baseUrl = String.fromEnvironment(
-    'SONUS_API_BASE_URL',
-    defaultValue: 'http://localhost:8000/api',
-  );
   static const _tokenKey = 'sonus_backend_token';
 
   final SupabaseClient _supabase;
-  final Dio _dio = Dio(BaseOptions(baseUrl: _baseUrl));
+  final Dio _dio = Dio(BaseOptions(baseUrl: '$kBackendBaseUrl/api'));
 
   // Single instance of GoogleSignIn for consistency
   final _googleSignIn = GoogleSignIn(
@@ -176,6 +175,7 @@ class AuthService {
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: accessToken,
+        nonce: _nonceFromIdToken(idToken),
       );
 
       final supabaseAccessToken = response.session?.accessToken;
@@ -191,6 +191,21 @@ class AuthService {
     } catch (e) {
       debugPrint('DEBUG: Error during Google Sign-In: $e');
       rethrow;
+    }
+  }
+
+  String? _nonceFromIdToken(String idToken) {
+    final parts = idToken.split('.');
+    if (parts.length != 3) return null;
+
+    try {
+      final payload = utf8.decode(
+        base64Url.decode(base64Url.normalize(parts[1])),
+      );
+      final claims = jsonDecode(payload) as Map<String, dynamic>;
+      return claims['nonce'] as String?;
+    } catch (_) {
+      return null;
     }
   }
 

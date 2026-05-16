@@ -43,9 +43,7 @@ class MusicModel {
       genre: json['genre'],
       region: json['region'],
       // rank: json['trending_rank'], // Removed as per user request
-      duration: json['duration'] != null
-          ? Duration(seconds: json['duration'])
-          : null,
+      duration: _durationFromJson(json['duration']),
     );
   }
 
@@ -110,5 +108,15 @@ class MusicModel {
     }
 
     return MusicSource.youtube;
+  }
+
+  static Duration? _durationFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return Duration(seconds: value.round());
+    if (value is String) {
+      final parsed = num.tryParse(value);
+      if (parsed != null) return Duration(seconds: parsed.round());
+    }
+    return null;
   }
 }

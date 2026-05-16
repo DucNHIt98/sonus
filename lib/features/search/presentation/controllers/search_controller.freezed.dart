@@ -20,6 +20,7 @@ mixin _$SearchState {
   List<String> get suggestions => throw _privateConstructorUsedError;
   List<String> get history => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
+  bool get truncated => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -38,6 +39,7 @@ abstract class $SearchStateCopyWith<$Res> {
       List<String> suggestions,
       List<String> history,
       bool isLoading,
+      bool truncated,
       String? error});
 }
 
@@ -58,6 +60,7 @@ class _$SearchStateCopyWithImpl<$Res, $Val extends SearchState>
     Object? suggestions = null,
     Object? history = null,
     Object? isLoading = null,
+    Object? truncated = null,
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
@@ -76,6 +79,10 @@ class _$SearchStateCopyWithImpl<$Res, $Val extends SearchState>
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      truncated: null == truncated
+          ? _value.truncated
+          : truncated // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _value.error
@@ -98,6 +105,7 @@ abstract class _$$SearchStateImplCopyWith<$Res>
       List<String> suggestions,
       List<String> history,
       bool isLoading,
+      bool truncated,
       String? error});
 }
 
@@ -116,6 +124,7 @@ class __$$SearchStateImplCopyWithImpl<$Res>
     Object? suggestions = null,
     Object? history = null,
     Object? isLoading = null,
+    Object? truncated = null,
     Object? error = freezed,
   }) {
     return _then(_$SearchStateImpl(
@@ -135,6 +144,10 @@ class __$$SearchStateImplCopyWithImpl<$Res>
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
               as bool,
+      truncated: null == truncated
+          ? _value.truncated
+          : truncated // ignore: cast_nullable_to_non_nullable
+              as bool,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -151,6 +164,7 @@ class _$SearchStateImpl implements _SearchState {
       final List<String> suggestions = const [],
       final List<String> history = const [],
       this.isLoading = false,
+      this.truncated = false,
       this.error})
       : _results = results,
         _suggestions = suggestions,
@@ -187,11 +201,14 @@ class _$SearchStateImpl implements _SearchState {
   @JsonKey()
   final bool isLoading;
   @override
+  @JsonKey()
+  final bool truncated;
+  @override
   final String? error;
 
   @override
   String toString() {
-    return 'SearchState(results: $results, suggestions: $suggestions, history: $history, isLoading: $isLoading, error: $error)';
+    return 'SearchState(results: $results, suggestions: $suggestions, history: $history, isLoading: $isLoading, truncated: $truncated, error: $error)';
   }
 
   @override
@@ -205,6 +222,8 @@ class _$SearchStateImpl implements _SearchState {
             const DeepCollectionEquality().equals(other._history, _history) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
+            (identical(other.truncated, truncated) ||
+                other.truncated == truncated) &&
             (identical(other.error, error) || other.error == error));
   }
 
@@ -215,6 +234,7 @@ class _$SearchStateImpl implements _SearchState {
       const DeepCollectionEquality().hash(_suggestions),
       const DeepCollectionEquality().hash(_history),
       isLoading,
+      truncated,
       error);
 
   @JsonKey(ignore: true)
@@ -230,6 +250,7 @@ abstract class _SearchState implements SearchState {
       final List<String> suggestions,
       final List<String> history,
       final bool isLoading,
+      final bool truncated,
       final String? error}) = _$SearchStateImpl;
 
   @override
@@ -240,6 +261,8 @@ abstract class _SearchState implements SearchState {
   List<String> get history;
   @override
   bool get isLoading;
+  @override
+  bool get truncated;
   @override
   String? get error;
   @override

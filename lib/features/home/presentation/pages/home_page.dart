@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/home/presentation/providers/home_provider.dart';
-import 'package:sonus/features/home/presentation/providers/genre_provider.dart';
 import 'package:sonus/features/home/presentation/widgets/home_widgets.dart';
 import 'package:sonus/features/home/presentation/widgets/chart_widgets.dart';
 import 'package:sonus/features/home/presentation/providers/chart_provider.dart';
@@ -40,7 +39,8 @@ class HomePage extends ConsumerWidget {
                   .toList();
               // Other sections
               final otherSections = Map<String, List<Home>>.from(sections)
-                ..remove('Recently Played');
+                ..remove('Recently Played')
+                ..removeWhere((_, items) => items.isEmpty);
 
               return RefreshIndicator(
                 onRefresh: () async {
@@ -174,35 +174,35 @@ class HomePage extends ConsumerWidget {
 
                     SliverToBoxAdapter(child: SizedBox(height: 24.h)),
 
-                    if (isPremium) ...[
+                    if (isPremium)
                       // Supermix Card
                       const SliverToBoxAdapter(child: SupermixCard()),
 
-                      // Horizontal Sections
+                    if (otherSections.isNotEmpty)
+                      // Horizontal Sections returned by the home feed.
                       SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final title = otherSections.keys.elementAt(index);
-                        final items = otherSections[title]!;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            HomeSectionHeader(title: title),
-                            SizedBox(
-                              height:
-                                  220.h, // Increased height to prevent overflow
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: items.length,
-                                itemBuilder: (context, i) {
-                                  return HomeHorizontalCard(item: items[i]);
-                                },
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final title = otherSections.keys.elementAt(index);
+                          final items = otherSections[title]!;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              HomeSectionHeader(title: title),
+                              SizedBox(
+                                height: 220
+                                    .h, // Increased height to prevent overflow
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: items.length,
+                                  itemBuilder: (context, i) {
+                                    return HomeHorizontalCard(item: items[i]);
+                                  },
+                                ),
                               ),
-                            ),
-                          ],
-                        );
-                      }, childCount: otherSections.length),
-                    ),
-                    ],
+                            ],
+                          );
+                        }, childCount: otherSections.length),
+                      ),
 
                     SliverToBoxAdapter(child: SizedBox(height: 24.h)),
 
@@ -273,8 +273,6 @@ class _GenreCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final genreTracksAsync = ref.watch(genreControllerProvider(genre));
-
     return InkWell(
       onTap: () =>
           context.pushNamed('genre-detail', pathParameters: {'name': genre}),
@@ -295,47 +293,7 @@ class _GenreCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12.r),
           child: Stack(
             children: [
-              // Background Thumbnail or Gradient
-              genreTracksAsync.when(
-                data: (songs) {
-                  if (songs.isNotEmpty && songs.first.albumArt.isNotEmpty) {
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.network(
-                          songs.first.albumArt,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildGradientBackground(),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.8),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return _buildGradientBackground();
-                },
-                loading: () => Container(
-                  color: Colors.grey[900],
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white24,
-                    ),
-                  ),
-                ),
-                error: (_, __) => _buildGradientBackground(),
-              ),
+              _buildGradientBackground(),
 
               // Genre Name
               Padding(

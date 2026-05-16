@@ -205,6 +205,7 @@ class SongTile extends StatelessWidget {
   final String artist;
   final String duration;
   final String imageUrl;
+  final Widget? trailing;
 
   const SongTile({
     super.key,
@@ -212,6 +213,7 @@ class SongTile extends StatelessWidget {
     required this.artist,
     required this.duration,
     required this.imageUrl,
+    this.trailing,
   });
 
   @override
@@ -261,13 +263,14 @@ class SongTile extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            duration,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 14.sp,
-            ),
-          ),
+          trailing ??
+              Text(
+                duration,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14.sp,
+                ),
+              ),
         ],
       ),
     );

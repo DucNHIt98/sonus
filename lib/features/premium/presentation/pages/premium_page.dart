@@ -18,7 +18,11 @@ class PremiumPage extends ConsumerWidget {
         elevation: 0,
         title: Text(
           'Premium',
-          style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.r),
@@ -32,7 +36,8 @@ class PremiumPage extends ConsumerWidget {
           }
           return _buildSubscribeView(context, ref);
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: Colors.red)),
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: Colors.red)),
         error: (err, _) => _buildSubscribeView(context, ref),
       ),
     );
@@ -52,7 +57,11 @@ class PremiumPage extends ConsumerWidget {
           SizedBox(height: 24.h),
           Text(
             'You are Premium!',
-            style: TextStyle(color: Colors.white, fontSize: 24.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24.sp,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -71,9 +80,15 @@ class PremiumPage extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: status.cancelAtPeriodEnd ? null : () => _confirmCancel(context, ref),
+              onPressed: status.cancelAtPeriodEnd
+                  ? null
+                  : () => _confirmCancel(context, ref),
               icon: Icon(Icons.cancel_outlined, size: 18.r),
-              label: Text(status.cancelAtPeriodEnd ? 'Cancelling...' : 'Cancel Subscription'),
+              label: Text(
+                status.cancelAtPeriodEnd
+                    ? 'Cancelling...'
+                    : 'Cancel Subscription',
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.red,
                 side: BorderSide(color: Colors.red),
@@ -97,7 +112,11 @@ class PremiumPage extends ConsumerWidget {
             SizedBox(height: 16.h),
             Text(
               'Upgrade to Premium',
-              style: TextStyle(color: Colors.white, fontSize: 24.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             SizedBox(height: 8.h),
             Text(
@@ -106,12 +125,36 @@ class PremiumPage extends ConsumerWidget {
               style: TextStyle(color: Colors.grey[400], fontSize: 14.sp),
             ),
             SizedBox(height: 32.h),
-            _buildFeatureItem(Icons.download, 'Offline Downloads', 'Download up to 20 songs or go unlimited'),
-            _buildFeatureItem(Icons.favorite, 'Unlimited Favorites', 'Save all your favorite songs'),
-            _buildFeatureItem(Icons.playlist_add, 'Unlimited Playlists', 'Create as many playlists as you want'),
-            _buildFeatureItem(Icons.history, 'Full Listening History', 'Go beyond the last 7 days'),
-            _buildFeatureItem(Icons.search, 'More Search Results', 'See all results, not just the first 10'),
-            _buildFeatureItem(Icons.explore, 'Full Home Feed', 'Charts, trending, and AI recommendations'),
+            _buildFeatureItem(
+              Icons.download,
+              'Offline Downloads',
+              'Download up to 20 songs or go unlimited',
+            ),
+            _buildFeatureItem(
+              Icons.favorite,
+              'Unlimited Favorites',
+              'Save all your favorite songs',
+            ),
+            _buildFeatureItem(
+              Icons.playlist_add,
+              'Unlimited Playlists',
+              'Create as many playlists as you want',
+            ),
+            _buildFeatureItem(
+              Icons.history,
+              'Full Listening History',
+              'Go beyond the last 7 days',
+            ),
+            _buildFeatureItem(
+              Icons.search,
+              'More Search Results',
+              'See all results, not just the first 10',
+            ),
+            _buildFeatureItem(
+              Icons.explore,
+              'Full Home Feed',
+              'Charts, trending, and AI recommendations',
+            ),
             SizedBox(height: 40.h),
             Container(
               width: double.infinity,
@@ -133,7 +176,11 @@ class PremiumPage extends ConsumerWidget {
                   SizedBox(height: 8.h),
                   Text(
                     '\$9.99 / month',
-                    style: TextStyle(color: Colors.white, fontSize: 28.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -152,9 +199,17 @@ class PremiumPage extends ConsumerWidget {
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
                 ),
-                child: Text('Subscribe Now', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'Subscribe Now',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             SizedBox(height: 16.h),
@@ -188,9 +243,19 @@ class PremiumPage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: Colors.white, fontSize: 15.sp, fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 SizedBox(height: 2.h),
-                Text(subtitle, style: TextStyle(color: Colors.grey[400], fontSize: 13.sp)),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey[400], fontSize: 13.sp),
+                ),
               ],
             ),
           ),
@@ -203,16 +268,17 @@ class PremiumPage extends ConsumerWidget {
     const successUrl = 'sonus://premium/success';
     const cancelUrl = 'sonus://premium/cancel';
 
-    final url = await ref.read(premiumControllerProvider.notifier).createCheckout(
-      successUrl: successUrl,
-      cancelUrl: cancelUrl,
-    );
+    final url = await ref
+        .read(premiumControllerProvider.notifier)
+        .createCheckout(successUrl: successUrl, cancelUrl: cancelUrl);
 
     if (url == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Payment is not available yet. Please configure Stripe keys.'),
+            content: Text(
+              'Payment is not available yet. Please configure Stripe keys.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -223,6 +289,16 @@ class PremiumPage extends ConsumerWidget {
     final uri = Uri.tryParse(url);
     if (uri != null && await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not open Stripe checkout.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -231,7 +307,10 @@ class PremiumPage extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text('Cancel Subscription', style: TextStyle(color: Colors.white)),
+        title: Text(
+          'Cancel Subscription',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Text(
           'Your premium features will remain active until the end of the billing period.',
           style: TextStyle(color: Colors.white70),
@@ -250,11 +329,15 @@ class PremiumPage extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      final success = await ref.read(premiumControllerProvider.notifier).cancel();
+      final success = await ref
+          .read(premiumControllerProvider.notifier)
+          .cancel();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? 'Subscription cancelled' : 'Failed to cancel'),
+            content: Text(
+              success ? 'Subscription cancelled' : 'Failed to cancel',
+            ),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );

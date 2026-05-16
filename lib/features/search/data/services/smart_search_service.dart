@@ -16,12 +16,12 @@ class SmartSearchService {
   SmartSearchService(this._backend);
 
   Future<({List<MusicModel> results, bool truncated})> search(String query) async {
-    if (query.trim().isEmpty) return (results: [], truncated: false);
+    if (query.trim().isEmpty) return (results: <MusicModel>[], truncated: false);
     try {
       return await _backend.search(query: query);
     } catch (e) {
       debugPrint('SmartSearch Error: $e');
-      return (results: [], truncated: false);
+      return (results: <MusicModel>[], truncated: false);
     }
   }
 }

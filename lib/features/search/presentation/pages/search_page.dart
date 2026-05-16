@@ -9,8 +9,7 @@ import 'package:sonus/features/player/presentation/controllers/player_controller
 import 'package:sonus/features/search/presentation/controllers/search_controller.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/core/models/music_model.dart';
-import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
-
+import 'package:sonus/core/network/backend_service.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -24,14 +23,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   late final FocusNode _focusNode;
   bool _isSearching = false;
 
-  Future<void> _preloadAudio(List<MusicModel> results) async {
-    final youtubeIds = results
-        .where((m) => m.source == MusicSource.youtube && (m.audioUrl == null || m.audioUrl!.isEmpty))
-        .take(3)
-        .map((m) => m.id)
-        .toList();
-    if (youtubeIds.isEmpty) return;
-    await ref.read(playerControllerProvider.notifier).preloadSongs(youtubeIds);
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    _focusNode = FocusNode();
   }
 
   @override
@@ -44,15 +40,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   @override
   Widget build(BuildContext context) {
     final searchAsync = ref.watch(searchControllerProvider);
-
-    // Preload audio for visible search results
-    ref.listen(searchControllerProvider, (_, next) {
-      if (next.results.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _preloadAudio(next.results);
-        });
-      }
-    });
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -123,8 +110,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                           ),
                         ),
 
-                        // Nếu đang có kết quả search thì hiện kết quả
-                        if (searchState.results.isNotEmpty && !_isSearching)
+                        if (searchState.isLoading && !_isSearching)
+                          ..._buildSearchLoading()
+                        else if (searchState.error != null && !_isSearching)
+                          ..._buildSearchError(searchState.error!)
+                        else if (searchState.results.isNotEmpty &&
+                            !_isSearching)
                           ..._buildSearchResults(searchState)
                         else
                           ..._buildDefaultContent(),
@@ -215,6 +206,36 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     );
   }
 
+  List<Widget> _buildSearchLoading() {
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40.h),
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.red),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildSearchError(String error) {
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40.h),
+          child: Center(
+            child: Text(
+              error,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
   List<Widget> _buildSearchResults(SearchState searchState) {
     return [
       SliverToBoxAdapter(
@@ -253,7 +274,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                         style: TextStyle(color: Colors.white, fontSize: 13.sp),
                       ),
                     ),
-                    Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14.r),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey,
+                      size: 14.r,
+                    ),
                   ],
                 ),
               ),
@@ -294,6 +319,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ? '${song.duration!.inMinutes}:${(song.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
                   : '',
               imageUrl: song.albumArt,
+              trailing: IconButton(
+                icon: Icon(
+                  Icons.playlist_add,
+                  color: Colors.white70,
+                  size: 24.r,
+                ),
+                onPressed: () => _showAddToPlaylistSheet(context, song),
+              ),
             ),
           );
         }, childCount: searchState.results.length),
@@ -368,5 +401,110 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ]),
       ),
     ];
+  }
+
+  Future<void> _showAddToPlaylistSheet(
+    BuildContext context,
+    MusicModel song,
+  ) async {
+    final backend = ref.read(backendServiceProvider);
+    final playlists = await backend.getPlaylists();
+
+    if (!context.mounted) return;
+
+    if (playlists.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Create a playlist first.')));
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF181818),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 12.h,
+                  ),
+                  child: Text(
+                    'Add to playlist',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: playlists.length,
+                    itemBuilder: (context, index) {
+                      final playlist = playlists[index];
+                      return ListTile(
+                        leading: Container(
+                          width: 44.w,
+                          height: 44.w,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[850],
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: const Icon(
+                            Icons.queue_music,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        title: Text(
+                          playlist['title']?.toString() ?? 'Playlist',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          '${playlist['song_count'] ?? 0} songs',
+                          style: TextStyle(color: Colors.grey[500]),
+                        ),
+                        onTap: () async {
+                          final ok = await backend.addSongToPlaylist(
+                            playlist['id'].toString(),
+                            song.id,
+                            song: song,
+                          );
+
+                          if (!sheetContext.mounted) return;
+                          Navigator.of(sheetContext).pop();
+
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                ok
+                                    ? 'Added to ${playlist['title'] ?? 'playlist'}'
+                                    : 'Could not add song to playlist',
+                              ),
+                              backgroundColor: ok ? Colors.green : Colors.red,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
