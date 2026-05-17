@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sonus/core/models/music_model.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 import 'package:sonus/features/home/presentation/providers/chart_provider.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 import 'package:go_router/go_router.dart';
@@ -127,33 +128,21 @@ class ChartItemCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12.r),
                   child: Stack(
                     children: [
-                      song.albumArt.isNotEmpty
-                          ? Image.network(
-                              song.albumArt,
-                              width: 140.w,
-                              height: 140.w,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, _, __) => Container(
-                                width: 140.w,
-                                height: 140.w,
-                                color: Colors.grey[900],
-                                child: Icon(
-                                  Icons.music_note,
-                                  color: Colors.white24,
-                                  size: 40.r,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              width: 140.w,
-                              height: 140.w,
-                              color: Colors.grey[900],
-                              child: Icon(
-                                Icons.music_note,
-                                color: Colors.white24,
-                                size: 40.r,
-                              ),
-                            ),
+                      CachedArtwork(
+                        imageUrl: song.albumArt,
+                        width: 140.w,
+                        height: 140.w,
+                        fallback: Container(
+                          width: 140.w,
+                          height: 140.w,
+                          color: Colors.grey[900],
+                          child: Icon(
+                            Icons.music_note,
+                            color: Colors.white24,
+                            size: 40.r,
+                          ),
+                        ),
+                      ),
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
@@ -162,7 +151,7 @@ class ChartItemCard extends ConsumerWidget {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.3),
+                                Colors.black.withValues(alpha: 0.3),
                               ],
                             ),
                           ),
@@ -196,11 +185,11 @@ class ChartItemCard extends ConsumerWidget {
                       vertical: 4.h,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.9),
+                      color: Colors.red.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(6.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),

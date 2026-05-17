@@ -4,8 +4,5 @@ class DownloadedSong {
   final DateTime downloadedAt;
   final Home song;
 
-  const DownloadedSong({
-    required this.downloadedAt,
-    required this.song,
-  });
+  const DownloadedSong({required this.downloadedAt, required this.song});
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 
 class CustomSearchBar extends StatelessWidget {
   final TextEditingController? controller;
@@ -22,7 +23,7 @@ class CustomSearchBar extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       height: 50.h,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: TextField(
@@ -34,7 +35,7 @@ class CustomSearchBar extends StatelessWidget {
           border: InputBorder.none,
           icon: Icon(
             Icons.search,
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             size: 24.r,
           ),
           suffixIcon: controller != null && controller!.text.isNotEmpty
@@ -48,7 +49,7 @@ class CustomSearchBar extends StatelessWidget {
               : null,
           hintText: 'Search song, playlist, artist...',
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.6),
+            color: Colors.white.withValues(alpha: 0.6),
             fontSize: 16.sp,
           ),
         ),
@@ -96,7 +97,7 @@ class _CategoryTabsState extends State<CategoryTabs> {
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white
-                          : Colors.white.withOpacity(0.6),
+                          : Colors.white.withValues(alpha: 0.6),
                       fontSize: 16.sp,
                       fontWeight: isSelected
                           ? FontWeight.bold
@@ -142,58 +143,60 @@ class FeaturedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap ?? () => context.push('/player'),
-      child: Container(
-        width: 260.w,
-        margin: EdgeInsets.only(right: 16.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.r),
-          image: imageUrl.isNotEmpty
-              ? DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  fit: BoxFit.cover,
-                )
-              : null,
-          color: imageUrl.isEmpty ? dummyColor : null,
-        ),
-        child: Stack(
-          children: [
-            // Gradient Overlay
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.r),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
-                  stops: const [0.6, 1.0],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.r),
+        child: Container(
+          width: 260.w,
+          margin: EdgeInsets.only(right: 16.w),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: CachedArtwork(
+                  imageUrl: imageUrl,
+                  fallback: Container(color: dummyColor),
                 ),
               ),
-            ),
-            Positioned(
-              left: 16.w,
-              bottom: 16.h,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+              // Gradient Overlay
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.r),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.8),
+                    ],
+                    stops: const [0.6, 1.0],
                   ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14.sp,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
+              Positioned(
+                left: 16.w,
+                bottom: 16.h,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -203,6 +206,7 @@ class FeaturedCard extends StatelessWidget {
 class SongTile extends StatelessWidget {
   final String title;
   final String artist;
+  final String? source;
   final String duration;
   final String imageUrl;
   final Widget? trailing;
@@ -211,6 +215,7 @@ class SongTile extends StatelessWidget {
     super.key,
     required this.title,
     required this.artist,
+    this.source,
     required this.duration,
     required this.imageUrl,
     this.trailing,
@@ -222,22 +227,19 @@ class SongTile extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
         children: [
-          Container(
-            width: 60.w,
-            height: 60.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.r),
-              image: imageUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(imageUrl),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-              color: Colors.grey[800],
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12.r),
+            child: CachedArtwork(
+              imageUrl: imageUrl,
+              width: 60.w,
+              height: 60.h,
+              fallback: Container(
+                width: 60.w,
+                height: 60.h,
+                color: Colors.grey[800],
+                child: Icon(Icons.music_note, color: Colors.white, size: 30.r),
+              ),
             ),
-            child: imageUrl.isEmpty
-                ? Icon(Icons.music_note, color: Colors.white, size: 30.r)
-                : null,
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -253,24 +255,57 @@ class SongTile extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 4.h),
-                Text(
-                  artist,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 14.sp,
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        artist,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                    if (source != null && source!.isNotEmpty) ...[
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 7.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(999.r),
+                        ),
+                        child: Text(
+                          source!.toUpperCase(),
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.55),
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
+                if (duration.isNotEmpty) ...[
+                  SizedBox(height: 3.h),
+                  Text(
+                    duration,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.38),
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-          trailing ??
-              Text(
-                duration,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
-                  fontSize: 14.sp,
-                ),
-              ),
+          if (trailing != null) trailing!,
         ],
       ),
     );

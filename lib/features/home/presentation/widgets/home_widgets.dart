@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/home/presentation/providers/home_provider.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
@@ -19,31 +20,32 @@ class HomeShortcutCard extends ConsumerWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(4.r),
         ),
         child: Row(
           children: [
             // Image placeholder
-            Container(
-              width: 56.w,
-              height: 56.h,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(4.r),
-                  bottomLeft: Radius.circular(4.r),
-                ),
-                image: item.imageUrl.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(item.imageUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(4.r),
+                bottomLeft: Radius.circular(4.r),
               ),
-              child: item.imageUrl.isEmpty
-                  ? Icon(Icons.music_note, color: Colors.white54, size: 24.r)
-                  : null,
+              child: CachedArtwork(
+                imageUrl: item.imageUrl,
+                width: 56.w,
+                height: 56.h,
+                fallback: Container(
+                  width: 56.w,
+                  height: 56.h,
+                  color: Colors.grey[800],
+                  child: Icon(
+                    Icons.music_note,
+                    color: Colors.white54,
+                    size: 24.r,
+                  ),
+                ),
+              ),
             ),
             SizedBox(width: 8.w),
             Expanded(
@@ -85,36 +87,51 @@ class HomeSectionHeader extends StatelessWidget {
   }
 }
 
-class HomeHorizontalCard extends StatelessWidget {
+class HomeHorizontalCard extends ConsumerWidget {
   final Home item;
-  const HomeHorizontalCard({super.key, required this.item});
+  final List<Home> contextQueue;
+
+  const HomeHorizontalCard({
+    super.key,
+    required this.item,
+    this.contextQueue = const [],
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => context.push('/player'),
+      onTap: () {
+        ref
+            .read(playerControllerProvider.notifier)
+            .playSong(
+              item,
+              contextQueue: contextQueue.isEmpty ? null : contextQueue,
+            );
+        context.push('/player');
+      },
       child: Container(
         width: 140.w,
         margin: EdgeInsets.only(left: 16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 140.h,
-              width: 140.w,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(8.r),
-                image: item.imageUrl.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(item.imageUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: CachedArtwork(
+                imageUrl: item.imageUrl,
+                width: 140.w,
+                height: 140.h,
+                fallback: Container(
+                  width: 140.w,
+                  height: 140.h,
+                  color: Colors.grey[800],
+                  child: Icon(
+                    Icons.music_note,
+                    size: 50.r,
+                    color: Colors.white54,
+                  ),
+                ),
               ),
-              child: item.imageUrl.isEmpty
-                  ? Icon(Icons.music_note, size: 50.r, color: Colors.white54)
-                  : null,
             ),
             SizedBox(height: 12.h),
             Text(
@@ -167,7 +184,7 @@ class SupermixCard extends ConsumerWidget {
           color: const Color(0xFF301934), // Fallback base color
           boxShadow: [
             BoxShadow(
-              color: Colors.purple.withOpacity(0.3),
+              color: Colors.purple.withValues(alpha: 0.3),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -198,11 +215,10 @@ class SupermixCard extends ConsumerWidget {
                     fit: StackFit.expand,
                     children: [
                       if (imageUrl != null)
-                        Image.network(
-                          imageUrl,
+                        CachedArtwork(
+                          imageUrl: imageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildDefaultGradient(),
+                          fallback: _buildDefaultGradient(),
                         )
                       else
                         _buildDefaultGradient(),
@@ -214,9 +230,9 @@ class SupermixCard extends ConsumerWidget {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFF301934).withOpacity(0.8),
-                              const Color(0xFF7B1FA2).withOpacity(0.6),
-                              const Color(0xFFFFD700).withOpacity(0.4),
+                              const Color(0xFF301934).withValues(alpha: 0.8),
+                              const Color(0xFF7B1FA2).withValues(alpha: 0.6),
+                              const Color(0xFFFFD700).withValues(alpha: 0.4),
                             ],
                             stops: const [0.0, 0.4, 1.0],
                           ),
@@ -235,7 +251,7 @@ class SupermixCard extends ConsumerWidget {
                 top: -20.h,
                 child: CircleAvatar(
                   radius: 60.r,
-                  backgroundColor: Colors.white.withOpacity(0.1),
+                  backgroundColor: Colors.white.withValues(alpha: 0.1),
                 ),
               ),
 
@@ -252,7 +268,7 @@ class SupermixCard extends ConsumerWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 10,
                           ),
                         ],
@@ -273,7 +289,7 @@ class SupermixCard extends ConsumerWidget {
                         letterSpacing: -0.5,
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             offset: const Offset(0, 2),
                             blurRadius: 4,
                           ),
@@ -283,12 +299,12 @@ class SupermixCard extends ConsumerWidget {
                     Text(
                       'Giai điệu dành riêng cho bạn',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             offset: const Offset(0, 1),
                             blurRadius: 2,
                           ),
@@ -305,7 +321,7 @@ class SupermixCard extends ConsumerWidget {
                 bottom: 24.h,
                 child: Icon(
                   Icons.auto_awesome,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   size: 40.r,
                 ),
               ),

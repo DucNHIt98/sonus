@@ -238,7 +238,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                           borderRadius: BorderRadius.circular(28.r),
                         ),
                         elevation: 8,
-                        shadowColor: const Color(0xFFB91C1C).withOpacity(0.5),
+                        shadowColor: const Color(
+                          0xFFB91C1C,
+                        ).withValues(alpha: 0.5),
                       ),
                       child: signUpState.isLoading
                           ? const CircularProgressIndicator(
@@ -311,7 +313,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       child: Text(
         title,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
         ),
@@ -339,7 +341,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               boxShadow: hasFocus
                   ? [
                       BoxShadow(
-                        color: const Color(0xFFB91C1C).withOpacity(0.2),
+                        color: const Color(0xFFB91C1C).withValues(alpha: 0.2),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
@@ -359,7 +361,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 prefixIcon: Icon(icon, color: Colors.white70, size: 22.r),
                 suffixIcon: suffixIcon,
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.05),
+                fillColor: Colors.white.withValues(alpha: 0.05),
                 contentPadding: EdgeInsets.symmetric(
                   vertical: 20.h,
                   horizontal: 20.w,
@@ -367,7 +369,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15.r),
                   borderSide: BorderSide(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     width: 1,
                   ),
                 ),

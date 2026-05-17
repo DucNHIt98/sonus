@@ -12,14 +12,14 @@ String _$splashControllerHash() => r'9e4f4b38e0af604e989566907bd84dea01c968ef';
 @ProviderFor(SplashController)
 final splashControllerProvider =
     AutoDisposeAsyncNotifierProvider<SplashController, bool>.internal(
-  SplashController.new,
-  name: r'splashControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$splashControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      SplashController.new,
+      name: r'splashControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$splashControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$SplashController = AutoDisposeAsyncNotifier<bool>;
 // ignore_for_file: type=lint

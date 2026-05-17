@@ -23,10 +23,7 @@ class PremiumRepository {
     try {
       final response = await _dio.post(
         '/api/payments/create-checkout-session/',
-        data: {
-          'success_url': successUrl,
-          'cancel_url': cancelUrl,
-        },
+        data: {'success_url': successUrl, 'cancel_url': cancelUrl},
       );
       return response.data['url'] as String?;
     } catch (e) {
@@ -37,9 +34,7 @@ class PremiumRepository {
 
   Future<SubscriptionStatus> getSubscriptionStatus() async {
     try {
-      final response = await _dio.get(
-        '/api/payments/subscription/',
-      );
+      final response = await _dio.get('/api/payments/subscription/');
       return SubscriptionStatus.fromJson(response.data);
     } catch (e) {
       debugPrint('getSubscriptionStatus error: $e');
@@ -49,9 +44,7 @@ class PremiumRepository {
 
   Future<bool> cancelSubscription() async {
     try {
-      final response = await _dio.post(
-        '/api/payments/subscription/cancel/',
-      );
+      final response = await _dio.post('/api/payments/subscription/cancel/');
       return response.data['status'] == 'success';
     } catch (e) {
       debugPrint('cancelSubscription error: $e');

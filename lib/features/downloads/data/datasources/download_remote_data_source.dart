@@ -11,7 +11,11 @@ DownloadRemoteDataSource downloadRemoteDataSource(
 }
 
 abstract class DownloadRemoteDataSource {
-  Future<Map<String, dynamic>> getDownloads({int offset = 0, int limit = 20});
+  Future<Map<String, dynamic>> getDownloads({
+    int offset = 0,
+    int limit = 20,
+    bool returnTotal = false,
+  });
   Future<Map<String, dynamic>?> markDownloaded({
     required String songId,
     String title = '',
@@ -31,8 +35,16 @@ class DownloadRemoteDataSourceImpl implements DownloadRemoteDataSource {
   DownloadRemoteDataSourceImpl(this._backend);
 
   @override
-  Future<Map<String, dynamic>> getDownloads({int offset = 0, int limit = 20}) async {
-    return _backend.getDownloads(offset: offset, limit: limit);
+  Future<Map<String, dynamic>> getDownloads({
+    int offset = 0,
+    int limit = 20,
+    bool returnTotal = false,
+  }) async {
+    return _backend.getDownloads(
+      offset: offset,
+      limit: limit,
+      returnTotal: returnTotal,
+    );
   }
 
   @override

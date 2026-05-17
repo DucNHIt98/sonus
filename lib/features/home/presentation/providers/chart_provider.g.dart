@@ -34,10 +34,7 @@ abstract class _$ChartController
   late final String region;
   late final String? playlistId;
 
-  FutureOr<List<MusicModel>> build(
-    String region, {
-    String? playlistId,
-  });
+  FutureOr<List<MusicModel>> build(String region, {String? playlistId});
 }
 
 /// See also [ChartController].
@@ -50,24 +47,15 @@ class ChartControllerFamily extends Family<AsyncValue<List<MusicModel>>> {
   const ChartControllerFamily();
 
   /// See also [ChartController].
-  ChartControllerProvider call(
-    String region, {
-    String? playlistId,
-  }) {
-    return ChartControllerProvider(
-      region,
-      playlistId: playlistId,
-    );
+  ChartControllerProvider call(String region, {String? playlistId}) {
+    return ChartControllerProvider(region, playlistId: playlistId);
   }
 
   @override
   ChartControllerProvider getProviderOverride(
     covariant ChartControllerProvider provider,
   ) {
-    return call(
-      provider.region,
-      playlistId: provider.playlistId,
-    );
+    return call(provider.region, playlistId: provider.playlistId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -89,25 +77,22 @@ class ChartControllerFamily extends Family<AsyncValue<List<MusicModel>>> {
 class ChartControllerProvider
     extends AsyncNotifierProviderImpl<ChartController, List<MusicModel>> {
   /// See also [ChartController].
-  ChartControllerProvider(
-    String region, {
-    String? playlistId,
-  }) : this._internal(
-          () => ChartController()
-            ..region = region
-            ..playlistId = playlistId,
-          from: chartControllerProvider,
-          name: r'chartControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$chartControllerHash,
-          dependencies: ChartControllerFamily._dependencies,
-          allTransitiveDependencies:
-              ChartControllerFamily._allTransitiveDependencies,
-          region: region,
-          playlistId: playlistId,
-        );
+  ChartControllerProvider(String region, {String? playlistId})
+    : this._internal(
+        () => ChartController()
+          ..region = region
+          ..playlistId = playlistId,
+        from: chartControllerProvider,
+        name: r'chartControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$chartControllerHash,
+        dependencies: ChartControllerFamily._dependencies,
+        allTransitiveDependencies:
+            ChartControllerFamily._allTransitiveDependencies,
+        region: region,
+        playlistId: playlistId,
+      );
 
   ChartControllerProvider._internal(
     super._createNotifier, {
@@ -127,10 +112,7 @@ class ChartControllerProvider
   FutureOr<List<MusicModel>> runNotifierBuild(
     covariant ChartController notifier,
   ) {
-    return notifier.build(
-      region,
-      playlistId: playlistId,
-    );
+    return notifier.build(region, playlistId: playlistId);
   }
 
   @override
@@ -154,7 +136,7 @@ class ChartControllerProvider
 
   @override
   AsyncNotifierProviderElement<ChartController, List<MusicModel>>
-      createElement() {
+  createElement() {
     return _ChartControllerProviderElement(this);
   }
 
@@ -193,5 +175,6 @@ class _ChartControllerProviderElement
   @override
   String? get playlistId => (origin as ChartControllerProvider).playlistId;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

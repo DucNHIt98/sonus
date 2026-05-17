@@ -33,9 +33,7 @@ abstract class _$GenreController
     extends BuildlessAsyncNotifier<List<MusicModel>> {
   late final String genre;
 
-  FutureOr<List<MusicModel>> build(
-    String genre,
-  );
+  FutureOr<List<MusicModel>> build(String genre);
 }
 
 /// See also [GenreController].
@@ -48,21 +46,15 @@ class GenreControllerFamily extends Family<AsyncValue<List<MusicModel>>> {
   const GenreControllerFamily();
 
   /// See also [GenreController].
-  GenreControllerProvider call(
-    String genre,
-  ) {
-    return GenreControllerProvider(
-      genre,
-    );
+  GenreControllerProvider call(String genre) {
+    return GenreControllerProvider(genre);
   }
 
   @override
   GenreControllerProvider getProviderOverride(
     covariant GenreControllerProvider provider,
   ) {
-    return call(
-      provider.genre,
-    );
+    return call(provider.genre);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -84,21 +76,19 @@ class GenreControllerFamily extends Family<AsyncValue<List<MusicModel>>> {
 class GenreControllerProvider
     extends AsyncNotifierProviderImpl<GenreController, List<MusicModel>> {
   /// See also [GenreController].
-  GenreControllerProvider(
-    String genre,
-  ) : this._internal(
-          () => GenreController()..genre = genre,
-          from: genreControllerProvider,
-          name: r'genreControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$genreControllerHash,
-          dependencies: GenreControllerFamily._dependencies,
-          allTransitiveDependencies:
-              GenreControllerFamily._allTransitiveDependencies,
-          genre: genre,
-        );
+  GenreControllerProvider(String genre)
+    : this._internal(
+        () => GenreController()..genre = genre,
+        from: genreControllerProvider,
+        name: r'genreControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$genreControllerHash,
+        dependencies: GenreControllerFamily._dependencies,
+        allTransitiveDependencies:
+            GenreControllerFamily._allTransitiveDependencies,
+        genre: genre,
+      );
 
   GenreControllerProvider._internal(
     super._createNotifier, {
@@ -116,9 +106,7 @@ class GenreControllerProvider
   FutureOr<List<MusicModel>> runNotifierBuild(
     covariant GenreController notifier,
   ) {
-    return notifier.build(
-      genre,
-    );
+    return notifier.build(genre);
   }
 
   @override
@@ -139,7 +127,7 @@ class GenreControllerProvider
 
   @override
   AsyncNotifierProviderElement<GenreController, List<MusicModel>>
-      createElement() {
+  createElement() {
     return _GenreControllerProviderElement(this);
   }
 
@@ -170,5 +158,6 @@ class _GenreControllerProviderElement
   @override
   String get genre => (origin as GenreControllerProvider).genre;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

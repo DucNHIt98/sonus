@@ -18,9 +18,15 @@ class DownloadRepositoryImpl implements DownloadRepository {
   DownloadRepositoryImpl(this._dataSource);
 
   @override
-  Future<List<DownloadedSong>> getDownloads({int offset = 0, int limit = 20}) async {
+  Future<List<DownloadedSong>> getDownloads({
+    int offset = 0,
+    int limit = 20,
+  }) async {
     try {
-      final result = await _dataSource.getDownloads(offset: offset, limit: limit);
+      final result = await _dataSource.getDownloads(
+        offset: offset,
+        limit: limit,
+      );
       final list = result['downloads'] as List<dynamic>? ?? [];
       return list.map((json) {
         final songJson = json['song'] as Map<String, dynamic>;
@@ -45,7 +51,11 @@ class DownloadRepositoryImpl implements DownloadRepository {
   @override
   Future<int> getTotalDownloads() async {
     try {
-      final result = await _dataSource.getDownloads(offset: 0, limit: 1);
+      final result = await _dataSource.getDownloads(
+        offset: 0,
+        limit: 1,
+        returnTotal: true,
+      );
       return result['total'] as int? ?? 0;
     } catch (e) {
       return 0;

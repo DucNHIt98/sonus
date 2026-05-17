@@ -2,7 +2,6 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
 class PlayerProgressBar extends ConsumerWidget {
@@ -41,8 +40,8 @@ class PlayerProgressBar extends ConsumerWidget {
                   buffered: bufferedPosition,
                   total: duration,
                   progressBarColor: Colors.white,
-                  baseBarColor: Colors.white.withOpacity(0.24),
-                  bufferedBarColor: Colors.white.withOpacity(0.24),
+                  baseBarColor: Colors.white.withValues(alpha: 0.24),
+                  bufferedBarColor: Colors.white.withValues(alpha: 0.24),
                   thumbColor: Colors.white,
                   barHeight: 2.h,
                   thumbRadius: 6.r,

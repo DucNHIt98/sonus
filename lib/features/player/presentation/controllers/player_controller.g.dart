@@ -12,14 +12,14 @@ String _$playerControllerHash() => r'7b90dab39c80a88268f93f6a9f004d3714bbebc3';
 @ProviderFor(PlayerController)
 final playerControllerProvider =
     NotifierProvider<PlayerController, PlayerState>.internal(
-  PlayerController.new,
-  name: r'playerControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$playerControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      PlayerController.new,
+      name: r'playerControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$playerControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$PlayerController = Notifier<PlayerState>;
 // ignore_for_file: type=lint

@@ -12,14 +12,14 @@ String _$libraryRepositoryHash() => r'83129388d1a952c3026dff04df1b345295fc3e83';
 @ProviderFor(libraryRepository)
 final libraryRepositoryProvider =
     AutoDisposeProvider<LibraryRepository>.internal(
-  libraryRepository,
-  name: r'libraryRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$libraryRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      libraryRepository,
+      name: r'libraryRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$libraryRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef LibraryRepositoryRef = AutoDisposeProviderRef<LibraryRepository>;
 // ignore_for_file: type=lint

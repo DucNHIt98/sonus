@@ -28,6 +28,8 @@ linter:
 # https://dart.dev/guides/language/analysis-options
 
 analyzer:
+  errors:
+    invalid_annotation_target: ignore
   exclude:
     - "clean_feature/**" # Loại bỏ thư mục chứa brick của bạn
     - "**/*.g.dart"

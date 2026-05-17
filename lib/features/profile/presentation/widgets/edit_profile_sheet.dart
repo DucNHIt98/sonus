@@ -37,6 +37,8 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
   }
 
   Future<void> _pickImage() async {
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -50,9 +52,7 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Lỗi chọn ảnh: $e')));
+      messenger.showSnackBar(SnackBar(content: Text('Lỗi chọn ảnh: $e')));
     }
   }
 

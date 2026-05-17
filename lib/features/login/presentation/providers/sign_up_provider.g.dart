@@ -12,14 +12,14 @@ String _$signUpControllerHash() => r'027bf59fa413439e2d1bbd34b2ab97a18221a871';
 @ProviderFor(SignUpController)
 final signUpControllerProvider =
     AutoDisposeNotifierProvider<SignUpController, AsyncValue<void>>.internal(
-  SignUpController.new,
-  name: r'signUpControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$signUpControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      SignUpController.new,
+      name: r'signUpControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$signUpControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$SignUpController = AutoDisposeNotifier<AsyncValue<void>>;
 // ignore_for_file: type=lint

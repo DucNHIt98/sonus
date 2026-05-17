@@ -12,7 +12,8 @@ part of 'splash.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Splash _$SplashFromJson(Map<String, dynamic> json) {
   return _Splash.fromJson(json);
@@ -47,23 +48,25 @@ class _$SplashCopyWithImpl<$Res, $Val extends Splash>
 
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? status = null,
-  }) {
-    return _then(_value.copyWith(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-    ) as $Val);
+  $Res call({Object? status = null}) {
+    return _then(
+      _value.copyWith(
+            status: null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as String,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$SplashImplCopyWith<$Res> implements $SplashCopyWith<$Res> {
   factory _$$SplashImplCopyWith(
-          _$SplashImpl value, $Res Function(_$SplashImpl) then) =
-      __$$SplashImplCopyWithImpl<$Res>;
+    _$SplashImpl value,
+    $Res Function(_$SplashImpl) then,
+  ) = __$$SplashImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String status});
@@ -74,20 +77,21 @@ class __$$SplashImplCopyWithImpl<$Res>
     extends _$SplashCopyWithImpl<$Res, _$SplashImpl>
     implements _$$SplashImplCopyWith<$Res> {
   __$$SplashImplCopyWithImpl(
-      _$SplashImpl _value, $Res Function(_$SplashImpl) _then)
-      : super(_value, _then);
+    _$SplashImpl _value,
+    $Res Function(_$SplashImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? status = null,
-  }) {
-    return _then(_$SplashImpl(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
+  $Res call({Object? status = null}) {
+    return _then(
+      _$SplashImpl(
+        status: null == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
   }
 }
 
@@ -127,9 +131,7 @@ class _$SplashImpl implements _Splash {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SplashImplToJson(
-      this,
-    );
+    return _$$SplashImplToJson(this);
   }
 }
 

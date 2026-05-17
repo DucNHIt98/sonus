@@ -12,7 +12,8 @@ part of 'home_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 HomeModel _$HomeModelFromJson(Map<String, dynamic> json) {
   return _HomeModel.fromJson(json);
@@ -43,15 +44,16 @@ abstract class $HomeModelCopyWith<$Res> {
   factory $HomeModelCopyWith(HomeModel value, $Res Function(HomeModel) then) =
       _$HomeModelCopyWithImpl<$Res, HomeModel>;
   @useResult
-  $Res call(
-      {String id,
-      String title,
-      String subtitle,
-      String imageUrl,
-      @JsonKey(name: 'audio_url') String audioUrl,
-      String source,
-      @JsonKey(name: 'youtube_id') String? youtubeId,
-      @JsonKey(name: 'duration_ms') int? durationMs});
+  $Res call({
+    String id,
+    String title,
+    String subtitle,
+    String imageUrl,
+    @JsonKey(name: 'audio_url') String audioUrl,
+    String source,
+    @JsonKey(name: 'youtube_id') String? youtubeId,
+    @JsonKey(name: 'duration_ms') int? durationMs,
+  });
 }
 
 /// @nodoc
@@ -76,40 +78,43 @@ class _$HomeModelCopyWithImpl<$Res, $Val extends HomeModel>
     Object? youtubeId = freezed,
     Object? durationMs = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      subtitle: null == subtitle
-          ? _value.subtitle
-          : subtitle // ignore: cast_nullable_to_non_nullable
-              as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      audioUrl: null == audioUrl
-          ? _value.audioUrl
-          : audioUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      source: null == source
-          ? _value.source
-          : source // ignore: cast_nullable_to_non_nullable
-              as String,
-      youtubeId: freezed == youtubeId
-          ? _value.youtubeId
-          : youtubeId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      durationMs: freezed == durationMs
-          ? _value.durationMs
-          : durationMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            title: null == title
+                ? _value.title
+                : title // ignore: cast_nullable_to_non_nullable
+                      as String,
+            subtitle: null == subtitle
+                ? _value.subtitle
+                : subtitle // ignore: cast_nullable_to_non_nullable
+                      as String,
+            imageUrl: null == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            audioUrl: null == audioUrl
+                ? _value.audioUrl
+                : audioUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            source: null == source
+                ? _value.source
+                : source // ignore: cast_nullable_to_non_nullable
+                      as String,
+            youtubeId: freezed == youtubeId
+                ? _value.youtubeId
+                : youtubeId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            durationMs: freezed == durationMs
+                ? _value.durationMs
+                : durationMs // ignore: cast_nullable_to_non_nullable
+                      as int?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -117,19 +122,21 @@ class _$HomeModelCopyWithImpl<$Res, $Val extends HomeModel>
 abstract class _$$HomeModelImplCopyWith<$Res>
     implements $HomeModelCopyWith<$Res> {
   factory _$$HomeModelImplCopyWith(
-          _$HomeModelImpl value, $Res Function(_$HomeModelImpl) then) =
-      __$$HomeModelImplCopyWithImpl<$Res>;
+    _$HomeModelImpl value,
+    $Res Function(_$HomeModelImpl) then,
+  ) = __$$HomeModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String id,
-      String title,
-      String subtitle,
-      String imageUrl,
-      @JsonKey(name: 'audio_url') String audioUrl,
-      String source,
-      @JsonKey(name: 'youtube_id') String? youtubeId,
-      @JsonKey(name: 'duration_ms') int? durationMs});
+  $Res call({
+    String id,
+    String title,
+    String subtitle,
+    String imageUrl,
+    @JsonKey(name: 'audio_url') String audioUrl,
+    String source,
+    @JsonKey(name: 'youtube_id') String? youtubeId,
+    @JsonKey(name: 'duration_ms') int? durationMs,
+  });
 }
 
 /// @nodoc
@@ -137,8 +144,9 @@ class __$$HomeModelImplCopyWithImpl<$Res>
     extends _$HomeModelCopyWithImpl<$Res, _$HomeModelImpl>
     implements _$$HomeModelImplCopyWith<$Res> {
   __$$HomeModelImplCopyWithImpl(
-      _$HomeModelImpl _value, $Res Function(_$HomeModelImpl) _then)
-      : super(_value, _then);
+    _$HomeModelImpl _value,
+    $Res Function(_$HomeModelImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -152,56 +160,58 @@ class __$$HomeModelImplCopyWithImpl<$Res>
     Object? youtubeId = freezed,
     Object? durationMs = freezed,
   }) {
-    return _then(_$HomeModelImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      subtitle: null == subtitle
-          ? _value.subtitle
-          : subtitle // ignore: cast_nullable_to_non_nullable
-              as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      audioUrl: null == audioUrl
-          ? _value.audioUrl
-          : audioUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      source: null == source
-          ? _value.source
-          : source // ignore: cast_nullable_to_non_nullable
-              as String,
-      youtubeId: freezed == youtubeId
-          ? _value.youtubeId
-          : youtubeId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      durationMs: freezed == durationMs
-          ? _value.durationMs
-          : durationMs // ignore: cast_nullable_to_non_nullable
-              as int?,
-    ));
+    return _then(
+      _$HomeModelImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        title: null == title
+            ? _value.title
+            : title // ignore: cast_nullable_to_non_nullable
+                  as String,
+        subtitle: null == subtitle
+            ? _value.subtitle
+            : subtitle // ignore: cast_nullable_to_non_nullable
+                  as String,
+        imageUrl: null == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        audioUrl: null == audioUrl
+            ? _value.audioUrl
+            : audioUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        source: null == source
+            ? _value.source
+            : source // ignore: cast_nullable_to_non_nullable
+                  as String,
+        youtubeId: freezed == youtubeId
+            ? _value.youtubeId
+            : youtubeId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        durationMs: freezed == durationMs
+            ? _value.durationMs
+            : durationMs // ignore: cast_nullable_to_non_nullable
+                  as int?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$HomeModelImpl extends _HomeModel {
-  const _$HomeModelImpl(
-      {required this.id,
-      required this.title,
-      this.subtitle = '',
-      this.imageUrl = '',
-      @JsonKey(name: 'audio_url') this.audioUrl = '',
-      this.source = 'youtube',
-      @JsonKey(name: 'youtube_id') this.youtubeId,
-      @JsonKey(name: 'duration_ms') this.durationMs})
-      : super._();
+  const _$HomeModelImpl({
+    required this.id,
+    required this.title,
+    this.subtitle = '',
+    this.imageUrl = '',
+    @JsonKey(name: 'audio_url') this.audioUrl = '',
+    this.source = 'youtube',
+    @JsonKey(name: 'youtube_id') this.youtubeId,
+    @JsonKey(name: 'duration_ms') this.durationMs,
+  }) : super._();
 
   factory _$HomeModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$HomeModelImplFromJson(json);
@@ -256,8 +266,17 @@ class _$HomeModelImpl extends _HomeModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, subtitle, imageUrl,
-      audioUrl, source, youtubeId, durationMs);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    title,
+    subtitle,
+    imageUrl,
+    audioUrl,
+    source,
+    youtubeId,
+    durationMs,
+  );
 
   @JsonKey(ignore: true)
   @override
@@ -267,22 +286,21 @@ class _$HomeModelImpl extends _HomeModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$HomeModelImplToJson(
-      this,
-    );
+    return _$$HomeModelImplToJson(this);
   }
 }
 
 abstract class _HomeModel extends HomeModel {
-  const factory _HomeModel(
-      {required final String id,
-      required final String title,
-      final String subtitle,
-      final String imageUrl,
-      @JsonKey(name: 'audio_url') final String audioUrl,
-      final String source,
-      @JsonKey(name: 'youtube_id') final String? youtubeId,
-      @JsonKey(name: 'duration_ms') final int? durationMs}) = _$HomeModelImpl;
+  const factory _HomeModel({
+    required final String id,
+    required final String title,
+    final String subtitle,
+    final String imageUrl,
+    @JsonKey(name: 'audio_url') final String audioUrl,
+    final String source,
+    @JsonKey(name: 'youtube_id') final String? youtubeId,
+    @JsonKey(name: 'duration_ms') final int? durationMs,
+  }) = _$HomeModelImpl;
   const _HomeModel._() : super._();
 
   factory _HomeModel.fromJson(Map<String, dynamic> json) =

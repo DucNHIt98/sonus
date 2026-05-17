@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 
 class DownloadedSongTile extends StatelessWidget {
@@ -33,9 +34,10 @@ class DownloadedSongTile extends StatelessWidget {
                 color: Colors.grey[800],
               ),
               clipBehavior: Clip.antiAlias,
-              child: song.imageUrl.isNotEmpty
-                  ? Image.network(song.imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _placeholder())
-                  : _placeholder(),
+              child: CachedArtwork(
+                imageUrl: song.imageUrl,
+                fallback: _placeholder(),
+              ),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -55,10 +57,7 @@ class DownloadedSongTile extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Text(
                     song.subtitle.isNotEmpty ? song.subtitle : 'Downloaded',
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 13.sp,
-                    ),
+                    style: TextStyle(color: Colors.grey[400], fontSize: 13.sp),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -67,7 +66,11 @@ class DownloadedSongTile extends StatelessWidget {
             ),
             if (onRemove != null)
               IconButton(
-                icon: Icon(Icons.delete_outline, color: Colors.white54, size: 20.r),
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Colors.white54,
+                  size: 20.r,
+                ),
                 onPressed: onRemove,
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),

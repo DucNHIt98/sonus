@@ -154,7 +154,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             borderRadius: BorderRadius.circular(28.r),
                           ),
                           elevation: 8,
-                          shadowColor: const Color(0xFFB91C1C).withOpacity(0.5),
+                          shadowColor: const Color(
+                            0xFFB91C1C,
+                          ).withValues(alpha: 0.5),
                         ),
                         child: loginState is AsyncLoading
                             ? const CircularProgressIndicator(
@@ -206,11 +208,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               final success = await ref
                                   .read(loginControllerProvider.notifier)
                                   .signInWithGoogle();
+                              if (!context.mounted) return;
+
                               if (success) {
-                                if (mounted) context.go('/home');
+                                context.go('/home');
                               } else {
                                 final state = ref.read(loginControllerProvider);
-                                if (state is AsyncError && mounted) {
+                                if (state is AsyncError) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       backgroundColor: const Color(0xFFB91C1C),
@@ -278,7 +282,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: TextField(

@@ -12,7 +12,8 @@ part of 'home.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 Home _$HomeFromJson(Map<String, dynamic> json) {
   return _Home.fromJson(json);
@@ -43,18 +44,19 @@ abstract class $HomeCopyWith<$Res> {
   factory $HomeCopyWith(Home value, $Res Function(Home) then) =
       _$HomeCopyWithImpl<$Res, Home>;
   @useResult
-  $Res call(
-      {String id,
-      String title,
-      String subtitle,
-      String imageUrl,
-      String audioUrl,
-      String source,
-      String? youtubeId,
-      String? deezerId,
-      String? jamendoId,
-      String? nctId,
-      Duration? duration});
+  $Res call({
+    String id,
+    String title,
+    String subtitle,
+    String imageUrl,
+    String audioUrl,
+    String source,
+    String? youtubeId,
+    String? deezerId,
+    String? jamendoId,
+    String? nctId,
+    Duration? duration,
+  });
 }
 
 /// @nodoc
@@ -82,74 +84,79 @@ class _$HomeCopyWithImpl<$Res, $Val extends Home>
     Object? nctId = freezed,
     Object? duration = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      subtitle: null == subtitle
-          ? _value.subtitle
-          : subtitle // ignore: cast_nullable_to_non_nullable
-              as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      audioUrl: null == audioUrl
-          ? _value.audioUrl
-          : audioUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      source: null == source
-          ? _value.source
-          : source // ignore: cast_nullable_to_non_nullable
-              as String,
-      youtubeId: freezed == youtubeId
-          ? _value.youtubeId
-          : youtubeId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      deezerId: freezed == deezerId
-          ? _value.deezerId
-          : deezerId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      jamendoId: freezed == jamendoId
-          ? _value.jamendoId
-          : jamendoId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      nctId: freezed == nctId
-          ? _value.nctId
-          : nctId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      duration: freezed == duration
-          ? _value.duration
-          : duration // ignore: cast_nullable_to_non_nullable
-              as Duration?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            title: null == title
+                ? _value.title
+                : title // ignore: cast_nullable_to_non_nullable
+                      as String,
+            subtitle: null == subtitle
+                ? _value.subtitle
+                : subtitle // ignore: cast_nullable_to_non_nullable
+                      as String,
+            imageUrl: null == imageUrl
+                ? _value.imageUrl
+                : imageUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            audioUrl: null == audioUrl
+                ? _value.audioUrl
+                : audioUrl // ignore: cast_nullable_to_non_nullable
+                      as String,
+            source: null == source
+                ? _value.source
+                : source // ignore: cast_nullable_to_non_nullable
+                      as String,
+            youtubeId: freezed == youtubeId
+                ? _value.youtubeId
+                : youtubeId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            deezerId: freezed == deezerId
+                ? _value.deezerId
+                : deezerId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            jamendoId: freezed == jamendoId
+                ? _value.jamendoId
+                : jamendoId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            nctId: freezed == nctId
+                ? _value.nctId
+                : nctId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            duration: freezed == duration
+                ? _value.duration
+                : duration // ignore: cast_nullable_to_non_nullable
+                      as Duration?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$HomeImplCopyWith<$Res> implements $HomeCopyWith<$Res> {
   factory _$$HomeImplCopyWith(
-          _$HomeImpl value, $Res Function(_$HomeImpl) then) =
-      __$$HomeImplCopyWithImpl<$Res>;
+    _$HomeImpl value,
+    $Res Function(_$HomeImpl) then,
+  ) = __$$HomeImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String id,
-      String title,
-      String subtitle,
-      String imageUrl,
-      String audioUrl,
-      String source,
-      String? youtubeId,
-      String? deezerId,
-      String? jamendoId,
-      String? nctId,
-      Duration? duration});
+  $Res call({
+    String id,
+    String title,
+    String subtitle,
+    String imageUrl,
+    String audioUrl,
+    String source,
+    String? youtubeId,
+    String? deezerId,
+    String? jamendoId,
+    String? nctId,
+    Duration? duration,
+  });
 }
 
 /// @nodoc
@@ -157,7 +164,7 @@ class __$$HomeImplCopyWithImpl<$Res>
     extends _$HomeCopyWithImpl<$Res, _$HomeImpl>
     implements _$$HomeImplCopyWith<$Res> {
   __$$HomeImplCopyWithImpl(_$HomeImpl _value, $Res Function(_$HomeImpl) _then)
-      : super(_value, _then);
+    : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -174,70 +181,73 @@ class __$$HomeImplCopyWithImpl<$Res>
     Object? nctId = freezed,
     Object? duration = freezed,
   }) {
-    return _then(_$HomeImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      subtitle: null == subtitle
-          ? _value.subtitle
-          : subtitle // ignore: cast_nullable_to_non_nullable
-              as String,
-      imageUrl: null == imageUrl
-          ? _value.imageUrl
-          : imageUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      audioUrl: null == audioUrl
-          ? _value.audioUrl
-          : audioUrl // ignore: cast_nullable_to_non_nullable
-              as String,
-      source: null == source
-          ? _value.source
-          : source // ignore: cast_nullable_to_non_nullable
-              as String,
-      youtubeId: freezed == youtubeId
-          ? _value.youtubeId
-          : youtubeId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      deezerId: freezed == deezerId
-          ? _value.deezerId
-          : deezerId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      jamendoId: freezed == jamendoId
-          ? _value.jamendoId
-          : jamendoId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      nctId: freezed == nctId
-          ? _value.nctId
-          : nctId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      duration: freezed == duration
-          ? _value.duration
-          : duration // ignore: cast_nullable_to_non_nullable
-              as Duration?,
-    ));
+    return _then(
+      _$HomeImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        title: null == title
+            ? _value.title
+            : title // ignore: cast_nullable_to_non_nullable
+                  as String,
+        subtitle: null == subtitle
+            ? _value.subtitle
+            : subtitle // ignore: cast_nullable_to_non_nullable
+                  as String,
+        imageUrl: null == imageUrl
+            ? _value.imageUrl
+            : imageUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        audioUrl: null == audioUrl
+            ? _value.audioUrl
+            : audioUrl // ignore: cast_nullable_to_non_nullable
+                  as String,
+        source: null == source
+            ? _value.source
+            : source // ignore: cast_nullable_to_non_nullable
+                  as String,
+        youtubeId: freezed == youtubeId
+            ? _value.youtubeId
+            : youtubeId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        deezerId: freezed == deezerId
+            ? _value.deezerId
+            : deezerId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        jamendoId: freezed == jamendoId
+            ? _value.jamendoId
+            : jamendoId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        nctId: freezed == nctId
+            ? _value.nctId
+            : nctId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        duration: freezed == duration
+            ? _value.duration
+            : duration // ignore: cast_nullable_to_non_nullable
+                  as Duration?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$HomeImpl implements _Home {
-  const _$HomeImpl(
-      {required this.id,
-      required this.title,
-      this.subtitle = '',
-      this.imageUrl = '',
-      this.audioUrl = '',
-      this.source = 'youtube',
-      this.youtubeId,
-      this.deezerId,
-      this.jamendoId,
-      this.nctId,
-      this.duration});
+  const _$HomeImpl({
+    required this.id,
+    required this.title,
+    this.subtitle = '',
+    this.imageUrl = '',
+    this.audioUrl = '',
+    this.source = 'youtube',
+    this.youtubeId,
+    this.deezerId,
+    this.jamendoId,
+    this.nctId,
+    this.duration,
+  });
 
   factory _$HomeImpl.fromJson(Map<String, dynamic> json) =>
       _$$HomeImplFromJson(json);
@@ -258,7 +268,7 @@ class _$HomeImpl implements _Home {
   @override
   @JsonKey()
   final String source;
-// 'youtube' | 'jamendo' | 'deezer_preview'
+  // 'youtube' | 'jamendo' | 'deezer_preview'
   @override
   final String? youtubeId;
   @override
@@ -302,8 +312,20 @@ class _$HomeImpl implements _Home {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, title, subtitle, imageUrl,
-      audioUrl, source, youtubeId, deezerId, jamendoId, nctId, duration);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    title,
+    subtitle,
+    imageUrl,
+    audioUrl,
+    source,
+    youtubeId,
+    deezerId,
+    jamendoId,
+    nctId,
+    duration,
+  );
 
   @JsonKey(ignore: true)
   @override
@@ -313,25 +335,24 @@ class _$HomeImpl implements _Home {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$HomeImplToJson(
-      this,
-    );
+    return _$$HomeImplToJson(this);
   }
 }
 
 abstract class _Home implements Home {
-  const factory _Home(
-      {required final String id,
-      required final String title,
-      final String subtitle,
-      final String imageUrl,
-      final String audioUrl,
-      final String source,
-      final String? youtubeId,
-      final String? deezerId,
-      final String? jamendoId,
-      final String? nctId,
-      final Duration? duration}) = _$HomeImpl;
+  const factory _Home({
+    required final String id,
+    required final String title,
+    final String subtitle,
+    final String imageUrl,
+    final String audioUrl,
+    final String source,
+    final String? youtubeId,
+    final String? deezerId,
+    final String? jamendoId,
+    final String? nctId,
+    final Duration? duration,
+  }) = _$HomeImpl;
 
   factory _Home.fromJson(Map<String, dynamic> json) = _$HomeImpl.fromJson;
 

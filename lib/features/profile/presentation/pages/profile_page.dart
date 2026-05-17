@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 import 'package:sonus/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
@@ -21,7 +23,7 @@ ImageProvider? parseAvatarImage(String url) {
       return null;
     }
   }
-  return NetworkImage(url);
+  return CachedNetworkImageProvider(url);
 }
 
 class ProfilePage extends ConsumerStatefulWidget {
@@ -149,10 +151,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                     EditProfileSheet(userProfile: user),
                               );
                             },
-                            icon: Icon(Icons.edit, size: 16.r, color: Colors.red),
+                            icon: Icon(
+                              Icons.edit,
+                              size: 16.r,
+                              color: Colors.red,
+                            ),
                             label: Text(
                               'Edit Profile',
-                              style: TextStyle(color: Colors.red, fontSize: 14.sp),
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 14.sp,
+                              ),
                             ),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Colors.red),
@@ -169,9 +178,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           GestureDetector(
                             onTap: () => context.push('/premium'),
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 6.h,
+                              ),
                               decoration: BoxDecoration(
-                                color: (user['is_premium'] == true) ? Colors.amber : Colors.grey[800],
+                                color: (user['is_premium'] == true)
+                                    ? Colors.amber
+                                    : Colors.grey[800],
                                 borderRadius: BorderRadius.circular(16.r),
                               ),
                               child: Row(
@@ -179,14 +193,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 children: [
                                   Icon(
                                     Icons.stars,
-                                    color: (user['is_premium'] == true) ? Colors.black : Colors.grey,
+                                    color: (user['is_premium'] == true)
+                                        ? Colors.black
+                                        : Colors.grey,
                                     size: 16.r,
                                   ),
                                   SizedBox(width: 4.w),
                                   Text(
-                                    (user['is_premium'] == true) ? 'Premium' : 'Get Premium',
+                                    (user['is_premium'] == true)
+                                        ? 'Premium'
+                                        : 'Get Premium',
                                     style: TextStyle(
-                                      color: (user['is_premium'] == true) ? Colors.black : Colors.white,
+                                      color: (user['is_premium'] == true)
+                                          ? Colors.black
+                                          : Colors.white,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -341,22 +361,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             .playSelectedSongWithMetadata(song);
         context.push('/player');
       },
-      leading: Container(
-        width: 50.w,
-        height: 50.h,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.r),
-          image: song.imageUrl.isNotEmpty
-              ? DecorationImage(
-                  image: NetworkImage(song.imageUrl),
-                  fit: BoxFit.cover,
-                )
-              : null,
-          color: Colors.grey[800],
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(8.r),
+        child: CachedArtwork(
+          imageUrl: song.imageUrl,
+          width: 50.w,
+          height: 50.h,
+          fallback: Container(
+            width: 50.w,
+            height: 50.h,
+            color: Colors.grey[800],
+            child: Icon(Icons.music_note, color: Colors.white54, size: 24.r),
+          ),
         ),
-        child: song.imageUrl.isEmpty
-            ? Icon(Icons.music_note, color: Colors.white54, size: 24.r)
-            : null,
       ),
       title: Text(
         song.title,
@@ -377,7 +394,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       trailing: Container(
         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(4.r),
         ),
         child: Text(

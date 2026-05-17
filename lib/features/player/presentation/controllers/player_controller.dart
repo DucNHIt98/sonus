@@ -1,15 +1,14 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
-import 'package:sonus/features/home/presentation/providers/home_provider.dart';
 import 'package:sonus/features/search/data/services/ai_recommend_service.dart';
 import 'package:sonus/core/models/music_model.dart';
 import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/core/network/supabase_repository.dart';
-
 
 part 'player_controller.freezed.dart';
 part 'player_controller.g.dart';
@@ -89,7 +88,7 @@ class PlayerController extends _$PlayerController {
         _audioPlayer.setShuffleModeEnabled(false);
       }
     } catch (e) {
-      print('DEBUG: PlayerController - Error disabling shuffle on init: $e');
+      _log('DEBUG: PlayerController - Error disabling shuffle on init: $e');
     }
 
     _audioPlayer.playbackEventStream.listen((event) {
@@ -103,16 +102,11 @@ class PlayerController extends _$PlayerController {
         // Update History
         ref.read(supabaseRepositoryProvider).updateLastPlayed(newSong);
 
-        // Invalidate Home Controller to refresh Recently Played list
-        ref.invalidate(homeControllerProvider);
-
         // Reset count flag for new song
         _hasCountedPlay = false;
 
         _preloadNextSong();
-        if (newSong.source == 'youtube' || newSong.youtubeId != null) {
-          fetchAiRecommendations();
-        }
+        _scheduleBackgroundEnrichment(newSong);
       }
     });
 
@@ -121,9 +115,9 @@ class PlayerController extends _$PlayerController {
       (event) {},
       onError: (Object e, StackTrace st) {
         if (e is PlayerException) {
-          print('DEBUG: PlayerException caught: ${e.message}');
+          _log('DEBUG: PlayerException caught: ${e.message}');
         } else {
-          print('DEBUG: Player error caught: $e');
+          _log('DEBUG: Player error caught: $e');
         }
 
         // Automatically skip to next song if current song fails
@@ -150,17 +144,11 @@ class PlayerController extends _$PlayerController {
               .read(supabaseRepositoryProvider)
               .updateLastPlayed(state.queue[index]);
 
-          // Invalidate Home Controller to refresh Recently Played list
-          ref.invalidate(homeControllerProvider);
-
           // Reset count flag for new song
           _hasCountedPlay = false;
 
           _preloadNextSong();
-          if (state.queue[index].source == 'youtube' ||
-              state.queue[index].youtubeId != null) {
-            fetchAiRecommendations();
-          }
+          _scheduleBackgroundEnrichment(state.queue[index]);
         }
       }
     });
@@ -184,10 +172,7 @@ class PlayerController extends _$PlayerController {
               _hasCountedPlay = false;
 
               _preloadNextSong();
-              if (state.queue[queueIndex].source == 'youtube' ||
-                  state.queue[queueIndex].youtubeId != null) {
-                fetchAiRecommendations();
-              }
+              _scheduleBackgroundEnrichment(state.queue[queueIndex]);
             }
           }
         } catch (_) {}
@@ -214,8 +199,9 @@ class PlayerController extends _$PlayerController {
         }
       }
 
-      if (metaDur.inSeconds > 0 && position.inSeconds > metaDur.inSeconds)
+      if (metaDur.inSeconds > 0 && position.inSeconds > metaDur.inSeconds) {
         return;
+      }
 
       try {
         final sequenceState = _audioPlayer.sequenceState;
@@ -280,13 +266,11 @@ class PlayerController extends _$PlayerController {
     });
 
     // Position tracking for song transition detection
-    int _advancedFromIndex =
-        -1; // Track which index we've already advanced from
+    int advancedFromIndex = -1; // Track which index we've already advanced from
 
     // TIMER-BASED SYNC: Use METADATA duration to detect song transitions
     // (YouTube audio streams can have incorrect duration from certain clients)
-    // Reduce interval to 50ms for near-instant repeat detection
-    _syncTimer = Timer.periodic(const Duration(milliseconds: 50), (_) {
+    _syncTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
       try {
         final position = _audioPlayer.position;
         final stateIndex = state.currentIndex;
@@ -295,7 +279,7 @@ class PlayerController extends _$PlayerController {
 
         if (metadataDuration.inMilliseconds > 0 &&
             position.inMilliseconds >= metadataDuration.inMilliseconds &&
-            _advancedFromIndex != stateIndex) {
+            advancedFromIndex != stateIndex) {
           // FIX: Handle Repeat One manually in timer as watchdog
           if (state.repeatMode == LoopMode.one) {
             // Only force seek if metadata is valid AND we are past it
@@ -307,7 +291,7 @@ class PlayerController extends _$PlayerController {
             return;
           }
 
-          _advancedFromIndex = stateIndex;
+          advancedFromIndex = stateIndex;
           final nextIndex = stateIndex + 1;
           if (nextIndex < queueLen) {
             final newSong = state.queue[nextIndex];
@@ -323,16 +307,14 @@ class PlayerController extends _$PlayerController {
             }
 
             _preloadNextSong();
-            if (newSong.source == 'youtube' || newSong.youtubeId != null) {
-              fetchAiRecommendations();
-            }
+            _scheduleBackgroundEnrichment(newSong);
           }
         }
       } catch (_) {}
     });
 
     ref.onDispose(() {
-      print("DEBUG: PlayerController DISPOSED (Hash: ${hashCode})");
+      _log('DEBUG: PlayerController DISPOSED (Hash: $hashCode)');
       _syncTimer?.cancel();
       _audioPlayer.dispose();
     });
@@ -346,7 +328,12 @@ class PlayerController extends _$PlayerController {
   // Track the index of the last song added to the actual _playlist audio source
   int _lastLoadedIndex = -1;
   bool _isPreloading = false;
+  String? _lastRelatedSeedId;
   List<Home> _originalQueue = []; // Store original queue for un-shuffle
+
+  void _log(String message) {
+    if (kDebugMode) debugPrint(message);
+  }
 
   /// Preload the next song in the queue if it hasn't been added to _playlist yet
   Future<void> _preloadNextSong() async {
@@ -354,8 +341,8 @@ class PlayerController extends _$PlayerController {
 
     _isPreloading = true;
     try {
-      // Preload up to 2 songs ahead
-      for (int offset = 1; offset <= 2; offset++) {
+      // Keep this light: resolving YouTube URLs is expensive.
+      for (int offset = 1; offset <= 1; offset++) {
         final nextIndex = state.currentIndex + offset;
         if (nextIndex >= state.queue.length) break;
         // Check if already loaded
@@ -375,11 +362,15 @@ class PlayerController extends _$PlayerController {
 
       // If queue is running low, fetch related songs to refill
       final remaining = state.queue.length - state.currentIndex;
-      if (remaining <= 3 && state.currentSong != null) {
-        _fetchRelatedSongs(state.currentSong!);
+      final currentSong = state.currentSong;
+      if (remaining <= 3 &&
+          currentSong != null &&
+          _lastRelatedSeedId != currentSong.id) {
+        _lastRelatedSeedId = currentSong.id;
+        _fetchRelatedSongs(currentSong);
       }
     } catch (e) {
-      print('DEBUG: Error preloading song: $e');
+      _log('DEBUG: Error preloading song: $e');
     } finally {
       _isPreloading = false;
     }
@@ -399,13 +390,13 @@ class PlayerController extends _$PlayerController {
 
       state = state.copyWith(queue: [...state.queue, ...newSongs]);
     } catch (e) {
-      print('DEBUG: Error fetching related songs: $e');
+      _log('DEBUG: Error fetching related songs: $e');
     }
   }
 
   /// Fetch songs from the current artist's channel and add to queue
   Future<void> fetchAndQueueArtistSongs(Home currentSong) async {
-    print(
+    _log(
       'DEBUG: Fetching artist songs for auto-queue: ${currentSong.subtitle}',
     );
 
@@ -432,7 +423,7 @@ class PlayerController extends _$PlayerController {
 
       if (newSongs.isEmpty) return;
 
-      print(
+      _log(
         'DEBUG: Adding ${newSongs.length} songs from artist to queue (state only, lazy loading audio)',
       );
 
@@ -444,13 +435,13 @@ class PlayerController extends _$PlayerController {
       // Trigger preload for the next song only
       _preloadNextSong();
     } catch (e) {
-      print('DEBUG: Error auto-queuing artist songs: $e');
+      _log('DEBUG: Error auto-queuing artist songs: $e');
     }
   }
 
   /// Add a song to the end of the queue
   Future<void> addToQueue(Home song) async {
-    print("DEBUG: addToQueue - ${song.title}");
+    _log('DEBUG: addToQueue - ${song.title}');
 
     final newQueue = [...state.queue, song];
     state = state.copyWith(queue: newQueue);
@@ -512,7 +503,7 @@ class PlayerController extends _$PlayerController {
     Home metadata, {
     List<Home>? contextQueue,
   }) async {
-    print("DEBUG: playSelectedSongWithMetadata - ${metadata.title}");
+    _log('DEBUG: playSelectedSongWithMetadata - ${metadata.title}');
     await playSong(metadata, contextQueue: contextQueue);
   }
 
@@ -531,23 +522,23 @@ class PlayerController extends _$PlayerController {
       // 1. Handle Hybrid Logic based on Source
       if (song.source == 'deezer_preview' && song.youtubeId == null) {
         // ... (existing Deezer resolution logic)
-        print("DEBUG: Resolving full version for Deezer track: ${song.title}");
+        _log('DEBUG: Resolving full version for Deezer track: ${song.title}');
         Home? resolvedSong;
         try {
           final backendService = ref.read(backendServiceProvider);
           resolvedSong = await backendService.getFullVersion(song);
         } catch (e) {
-          print("DEBUG: Backend resolution failed: $e");
+          _log('DEBUG: Backend resolution failed: $e');
         }
 
         if (resolvedSong != null) {
           song = resolvedSong;
-          print("DEBUG: Successfully resolved full version: ${song.youtubeId}");
+          _log('DEBUG: Successfully resolved full version: ${song.youtubeId}');
         } else {
-          print("DEBUG: Falling back to 30s preview for: ${song.title}");
+          _log('DEBUG: Falling back to 30s preview for: ${song.title}');
         }
-      } else if (song.source == 'jamendo' || song.source == 'jamendo_preview') {
-      }
+      } else if (song.source == 'jamendo' ||
+          song.source == 'jamendo_preview') {}
 
       // 2. Standard Playback Logic
       await _audioPlayer.stop();
@@ -619,30 +610,33 @@ class PlayerController extends _$PlayerController {
       // Reset count flag
       _hasCountedPlay = false;
 
-      // 3. Generate Auto-Playlist & AI recommendations (SKIP for Jamendo if we have a context queue)
-      final isJamendo =
-          song.source == 'jamendo' || song.source == 'jamendo_preview';
-
-      if (!isJamendo) {
-        if (song.source == 'youtube' || song.youtubeId != null) {
-          generateAutoPlaylist(song.youtubeId ?? song.id);
-        }
-      }
-
-      // Always fetch AI recommendations
-      fetchAiRecommendations();
+      _scheduleBackgroundEnrichment(song);
     } catch (e) {
-      print("Error playing song: $e");
+      _log('Error playing song: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
       // Skip to next if initial play fails
       _handleAndSkipError();
     }
   }
 
+  void _scheduleBackgroundEnrichment(Home song) {
+    Future.delayed(const Duration(seconds: 2), () {
+      if (state.currentSong?.id != song.id) return;
+
+      final isJamendo =
+          song.source == 'jamendo' || song.source == 'jamendo_preview';
+      if (!isJamendo && (song.source == 'youtube' || song.youtubeId != null)) {
+        generateAutoPlaylist(song.youtubeId ?? song.id);
+      }
+
+      fetchAiRecommendations();
+    });
+  }
+
   /// Helper to skip to NEXT song in QUEUE when current one fails
   void _handleAndSkipError() {
     if (state.currentIndex + 1 < state.queue.length) {
-      print('DEBUG: Error detected. Force skipping to next song in queue...');
+      _log('DEBUG: Error detected. Force skipping to next song in queue...');
       final nextSong = state.queue[state.currentIndex + 1];
 
       // Reset currentIndex for UI and trigger playSong for the next guy
@@ -650,13 +644,13 @@ class PlayerController extends _$PlayerController {
         playSong(nextSong);
       });
     } else {
-      print('DEBUG: Error detected but end of queue reached.');
+      _log('DEBUG: Error detected but end of queue reached.');
     }
   }
 
   /// Generate an auto-playlist based on the seed song's artist
   Future<void> generateAutoPlaylist(String videoId) async {
-    print('DEBUG: Generating Auto-Playlist for video: $videoId');
+    _log('DEBUG: Generating Auto-Playlist for video: $videoId');
 
     try {
       final currentSong = state.currentSong;
@@ -693,9 +687,7 @@ class PlayerController extends _$PlayerController {
       state = state.copyWith(queue: newQueue, currentIndex: 0);
 
       if (newQueue.length < 20) {
-        print(
-          'DEBUG: Queue small (${newQueue.length}), expanding with AI...',
-        );
+        _log('DEBUG: Queue small (${newQueue.length}), expanding with AI...');
         _expandQueueSmart(currentSong);
       }
 
@@ -737,7 +729,7 @@ class PlayerController extends _$PlayerController {
         return isNewId && isNewTitle;
       }).toList();
 
-      print(
+      _log(
         'DEBUG: Smart Expansion found ${filteredSongs.length} new songs (Source: YT Related + AI). Adding to queue...',
       );
 
@@ -746,7 +738,7 @@ class PlayerController extends _$PlayerController {
         _preloadNextSong();
       }
     } catch (e) {
-      print('DEBUG: Error expanding queue smart: $e');
+      _log('DEBUG: Error expanding queue smart: $e');
     }
   }
 
@@ -791,22 +783,26 @@ class PlayerController extends _$PlayerController {
         _preloadedUrls[videoId] = url;
       }
     } catch (e) {
-      print('DEBUG: Error preloading song $videoId: $e');
+      _log('DEBUG: Error preloading song $videoId: $e');
     }
   }
 
   /// Preload multiple songs in parallel (for visible list items)
   Future<void> preloadSongs(Iterable<String> videoIds) async {
-    final toLoad = videoIds.where((id) => !_preloadedUrls.containsKey(id)).toList();
+    final toLoad = videoIds
+        .where((id) => !_preloadedUrls.containsKey(id))
+        .toList();
     if (toLoad.isEmpty) return;
     try {
       final backendService = ref.read(backendServiceProvider);
-      await Future.wait(toLoad.map((id) async {
-        final url = await backendService.convertYoutubeToMp3(id);
-        if (url != null) _preloadedUrls[id] = url;
-      }));
+      await Future.wait(
+        toLoad.map((id) async {
+          final url = await backendService.convertYoutubeToMp3(id);
+          if (url != null) _preloadedUrls[id] = url;
+        }),
+      );
     } catch (e) {
-      print('DEBUG: Error preloading songs: $e');
+      _log('DEBUG: Error preloading songs: $e');
     }
   }
 
@@ -847,7 +843,7 @@ class PlayerController extends _$PlayerController {
         );
         if (url != null) {
           final secureUrl = url.replaceFirst('http://', 'https://');
-          print('DEBUG: Resolved YouTube stream URL: $secureUrl');
+          _log('DEBUG: Resolved YouTube stream URL for ${song.id}');
 
           return AudioSource.uri(
             Uri.parse(secureUrl),
@@ -866,7 +862,7 @@ class PlayerController extends _$PlayerController {
           );
         }
       } else if (song.source == 'nct') {
-        print('DEBUG: Resolving NCT via backend: ${song.title}');
+        _log('DEBUG: Resolving NCT via backend: ${song.title}');
         final backendService = ref.read(backendServiceProvider);
         final resolved = await backendService.getFullVersion(song);
 
@@ -875,7 +871,7 @@ class PlayerController extends _$PlayerController {
             'http://',
             'https://',
           );
-          print('DEBUG: Resolved NCT via YouTube: $secureUrl');
+          _log('DEBUG: Resolved NCT via YouTube for ${song.id}');
 
           return AudioSource.uri(
             Uri.parse(secureUrl),
@@ -893,11 +889,11 @@ class PlayerController extends _$PlayerController {
             ),
           );
         } else {
-          print('DEBUG: Failed to resolve NCT via backend for ${song.title}');
+          _log('DEBUG: Failed to resolve NCT via backend for ${song.title}');
         }
       } else if (song.audioUrl.isNotEmpty) {
         final secureUrl = song.audioUrl.replaceFirst('http://', 'https://');
-        print('DEBUG: Playing remote URL: $secureUrl');
+        _log('DEBUG: Playing remote URL for ${song.id}');
 
         final isJamendo =
             song.source == 'jamendo' || secureUrl.contains('jamendo.com');
@@ -919,7 +915,7 @@ class PlayerController extends _$PlayerController {
         );
       }
     } catch (e) {
-      print("Error creating audio source: $e");
+      _log('Error creating audio source: $e');
     }
     return null;
   }
@@ -964,7 +960,7 @@ class PlayerController extends _$PlayerController {
         try {
           await _playlist.removeRange(1, _playlist.length);
         } catch (e) {
-          print(
+          _log(
             'DEBUG: PlayerController - Error removing range from playlist: $e',
           );
         }
@@ -992,7 +988,7 @@ class PlayerController extends _$PlayerController {
           try {
             await _playlist.removeRange(1, _playlist.length);
           } catch (e) {
-            print(
+            _log(
               'DEBUG: PlayerController - Error removing range from playlist (un-shuffle): $e',
             );
           }
@@ -1027,7 +1023,7 @@ class PlayerController extends _$PlayerController {
     } else {
       // Check if we have more in queue but not loaded
       if (state.currentIndex + 1 < state.queue.length) {
-        print("DEBUG: skipNext - Next song not loaded yet. Loading now...");
+        _log('DEBUG: skipNext - Next song not loaded yet. Loading now...');
         await _preloadNextSong();
         if (_audioPlayer.hasNext) {
           _audioPlayer.seekToNext();
@@ -1052,7 +1048,7 @@ class PlayerController extends _$PlayerController {
   Future<void> seekToIndex(int index) async {
     if (index < 0 || index >= state.queue.length) return;
 
-    print("DEBUG: seekToIndex - Target: $index, Loaded: ${_playlist.length}");
+    _log('DEBUG: seekToIndex - Target: $index, Loaded: ${_playlist.length}');
 
     // Check if the song is already loaded in the just_audio playlist
     try {
@@ -1061,7 +1057,7 @@ class PlayerController extends _$PlayerController {
         await _audioPlayer.seek(Duration.zero, index: index);
       } else {
         // Not loaded. "Jump" to this song.
-        print("DEBUG: seekToIndex - Jumping to unloaded song at $index");
+        _log('DEBUG: seekToIndex - Jumping to unloaded song at $index');
         final song = state.queue[index];
 
         state = state.copyWith(isLoading: true);
@@ -1096,7 +1092,7 @@ class PlayerController extends _$PlayerController {
         }
       }
     } catch (e) {
-      print("Error seeking to index: $e");
+      _log('Error seeking to index: $e');
     }
   }
 
@@ -1106,7 +1102,7 @@ class PlayerController extends _$PlayerController {
     if (currentSong == null) return;
 
     // Fetch AI recommendations for ALL sources
-    print('DEBUG: Fetching AI recommendations for ${currentSong.title}');
+    _log('DEBUG: Fetching AI recommendations for ${currentSong.title}');
 
     try {
       final aiService = ref.read(aiRecommendServiceProvider);
@@ -1117,9 +1113,9 @@ class PlayerController extends _$PlayerController {
       );
 
       state = state.copyWith(aiRecommendations: recommendations);
-      print('DEBUG: Stored ${recommendations.length} AI recommendations');
+      _log('DEBUG: Stored ${recommendations.length} AI recommendations');
     } catch (e) {
-      print('DEBUG: Error fetching AI recommendations: $e');
+      _log('DEBUG: Error fetching AI recommendations: $e');
     }
   }
 

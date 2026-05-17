@@ -16,7 +16,10 @@ class PremiumController extends _$PremiumController {
     return repo.getSubscriptionStatus();
   }
 
-  Future<String?> createCheckout({required String successUrl, required String cancelUrl}) async {
+  Future<String?> createCheckout({
+    required String successUrl,
+    required String cancelUrl,
+  }) async {
     final repo = ref.read(premiumRepositoryProvider);
     final url = await repo.createCheckoutSession(
       successUrl: successUrl,

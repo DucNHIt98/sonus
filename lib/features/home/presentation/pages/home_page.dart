@@ -41,7 +41,6 @@ class HomePage extends ConsumerWidget {
               final otherSections = Map<String, List<Home>>.from(sections)
                 ..remove('Recently Played')
                 ..removeWhere((_, items) => items.isEmpty);
-
               return RefreshIndicator(
                 onRefresh: () async {
                   // Refresh all charts
@@ -195,7 +194,10 @@ class HomePage extends ConsumerWidget {
                                   scrollDirection: Axis.horizontal,
                                   itemCount: items.length,
                                   itemBuilder: (context, i) {
-                                    return HomeHorizontalCard(item: items[i]);
+                                    return HomeHorizontalCard(
+                                      item: items[i],
+                                      contextQueue: items,
+                                    );
                                   },
                                 ),
                               ),
@@ -283,7 +285,7 @@ class _GenreCard extends ConsumerWidget {
           color: Colors.grey[900],
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -332,7 +334,7 @@ class _GenreCard extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: [
             _getGenreColor(genre),
-            _getGenreColor(genre).withOpacity(0.6),
+            _getGenreColor(genre).withValues(alpha: 0.6),
           ],
         ),
       ),

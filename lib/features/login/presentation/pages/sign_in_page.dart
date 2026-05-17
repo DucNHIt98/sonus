@@ -101,7 +101,7 @@ class SignInPage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(28.r),
                     ),
                     elevation: 8,
-                    shadowColor: const Color(0xFFB91C1C).withOpacity(0.5),
+                    shadowColor: const Color(0xFFB91C1C).withValues(alpha: 0.5),
                   ),
                   child: Text(
                     'Log in with a password',

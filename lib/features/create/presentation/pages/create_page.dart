@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sonus/core/network/backend_service.dart';
 import 'package:sonus/features/create/presentation/widgets/create_widgets.dart';
-import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
 class CreatePage extends ConsumerStatefulWidget {
   const CreatePage({super.key});
@@ -27,7 +26,10 @@ class _CreatePageState extends ConsumerState<CreatePage> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a playlist name'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Please enter a playlist name'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -41,10 +43,17 @@ class _CreatePageState extends ConsumerState<CreatePage> {
 
     if (result != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Playlist "$name" created!'), backgroundColor: Colors.green),
+        SnackBar(
+          content: Text('Playlist "$name" created!'),
+          backgroundColor: Colors.green,
+        ),
       );
       _nameController.clear();
-      context.pushNamed('playlist-detail', pathParameters: {'id': result['id'] ?? ''}, extra: result);
+      context.pushNamed(
+        'playlist-detail',
+        pathParameters: {'id': result['id'] ?? ''},
+        extra: result,
+      );
     } else if (mounted) {
       _showUpgradeDialog(context, 'playlist');
     }
@@ -55,7 +64,10 @@ class _CreatePageState extends ConsumerState<CreatePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text('$feature Limit Reached', style: TextStyle(color: Colors.white)),
+        title: Text(
+          '$feature Limit Reached',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Text(
           'Free accounts have a limit on $feature count. Upgrade to Premium for unlimited $feature.',
           style: TextStyle(color: Colors.white70),
@@ -118,11 +130,26 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
                         ),
                         child: _isCreating
-                            ? SizedBox(width: 20.r, height: 20.r, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : Text('Create Playlist', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                            ? SizedBox(
+                                width: 20.r,
+                                height: 20.r,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Create Playlist',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -184,7 +211,11 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                     padding: EdgeInsets.only(bottom: 16.h),
                     child: Text(
                       'Start with a template',
-                      style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -194,10 +225,26 @@ class _CreatePageState extends ConsumerState<CreatePage> {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: const [
-                        TemplateCard(title: 'Running', imageUrl: 'https://images.unsplash.com/photo-1552674605-46f538355272?auto=format&fit=crop&w=300&q=80'),
-                        TemplateCard(title: 'Party', imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=80'),
-                        TemplateCard(title: 'Relax', imageUrl: 'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=300&q=80'),
-                        TemplateCard(title: 'Focus', imageUrl: 'https://images.unsplash.com/photo-1456324504439-367cee10d6b1?auto=format&fit=crop&w=300&q=80'),
+                        TemplateCard(
+                          title: 'Running',
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1552674605-46f538355272?auto=format&fit=crop&w=300&q=80',
+                        ),
+                        TemplateCard(
+                          title: 'Party',
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=80',
+                        ),
+                        TemplateCard(
+                          title: 'Relax',
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1516280440614-6697288d5d38?auto=format&fit=crop&w=300&q=80',
+                        ),
+                        TemplateCard(
+                          title: 'Focus',
+                          imageUrl:
+                              'https://images.unsplash.com/photo-1456324504439-367cee10d6b1?auto=format&fit=crop&w=300&q=80',
+                        ),
                       ],
                     ),
                   ),

@@ -12,7 +12,8 @@ part of 'login.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$Login {
@@ -49,28 +50,32 @@ class _$LoginCopyWithImpl<$Res, $Val extends Login>
     Object? email = freezed,
     Object? name = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      name: freezed == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            email: freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            name: freezed == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
   }
 }
 
 /// @nodoc
 abstract class _$$LoginImplCopyWith<$Res> implements $LoginCopyWith<$Res> {
   factory _$$LoginImplCopyWith(
-          _$LoginImpl value, $Res Function(_$LoginImpl) then) =
-      __$$LoginImplCopyWithImpl<$Res>;
+    _$LoginImpl value,
+    $Res Function(_$LoginImpl) then,
+  ) = __$$LoginImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String id, String? email, String? name});
@@ -81,8 +86,9 @@ class __$$LoginImplCopyWithImpl<$Res>
     extends _$LoginCopyWithImpl<$Res, _$LoginImpl>
     implements _$$LoginImplCopyWith<$Res> {
   __$$LoginImplCopyWithImpl(
-      _$LoginImpl _value, $Res Function(_$LoginImpl) _then)
-      : super(_value, _then);
+    _$LoginImpl _value,
+    $Res Function(_$LoginImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -91,20 +97,22 @@ class __$$LoginImplCopyWithImpl<$Res>
     Object? email = freezed,
     Object? name = freezed,
   }) {
-    return _then(_$LoginImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      name: freezed == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$LoginImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        email: freezed == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        name: freezed == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -146,10 +154,11 @@ class _$LoginImpl implements _Login {
 }
 
 abstract class _Login implements Login {
-  const factory _Login(
-      {required final String id,
-      final String? email,
-      final String? name}) = _$LoginImpl;
+  const factory _Login({
+    required final String id,
+    final String? email,
+    final String? name,
+  }) = _$LoginImpl;
 
   @override
   String get id;

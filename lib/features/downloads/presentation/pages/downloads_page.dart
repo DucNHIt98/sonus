@@ -33,7 +33,8 @@ class DownloadsPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.refresh, color: Colors.white, size: 20.r),
-            onPressed: () => ref.read(downloadControllerProvider.notifier).refresh(),
+            onPressed: () =>
+                ref.read(downloadControllerProvider.notifier).refresh(),
           ),
         ],
       ),
@@ -48,25 +49,39 @@ class DownloadsPage extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.download_outlined, color: Colors.grey[600], size: 64.r),
+                        Icon(
+                          Icons.download_outlined,
+                          color: Colors.grey[600],
+                          size: 64.r,
+                        ),
                         SizedBox(height: 16.h),
                         Text(
                           'No downloads yet',
-                          style: TextStyle(color: Colors.grey[400], fontSize: 16.sp),
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 16.sp,
+                          ),
                         ),
                         SizedBox(height: 8.h),
                         Text(
                           'Download songs to listen offline',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 13.sp),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 13.sp,
+                          ),
                         ),
                       ],
                     ),
                   );
                 }
                 return ListView.separated(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
                   itemCount: downloads.length,
-                  separatorBuilder: (_, __) => Divider(color: Colors.grey[800], height: 1.h),
+                  separatorBuilder: (_, __) =>
+                      Divider(color: Colors.grey[800], height: 1.h),
                   itemBuilder: (context, index) {
                     final d = downloads[index];
                     return DownloadedSongTile(
@@ -80,9 +95,14 @@ class DownloadsPage extends ConsumerWidget {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: Colors.red)),
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: Colors.red),
+              ),
               error: (err, _) => Center(
-                child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  'Error: $err',
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
             ),
           ),
@@ -91,7 +111,11 @@ class DownloadsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuotaBanner(BuildContext context, WidgetRef ref, AsyncValue<Map<String, dynamic>> quotaAsync) {
+  Widget _buildQuotaBanner(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<Map<String, dynamic>> quotaAsync,
+  ) {
     return quotaAsync.when(
       data: (quota) {
         final isPremium = quota['is_premium'] as bool? ?? false;
@@ -116,7 +140,11 @@ class DownloadsPage extends ConsumerWidget {
                 SizedBox(width: 8.w),
                 Text(
                   'Premium — Unlimited downloads',
-                  style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -133,7 +161,11 @@ class DownloadsPage extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.cloud_download_outlined, color: Colors.white54, size: 20.r),
+              Icon(
+                Icons.cloud_download_outlined,
+                color: Colors.white54,
+                size: 20.r,
+              ),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
@@ -144,14 +176,22 @@ class DownloadsPage extends ConsumerWidget {
               if (remaining <= 5 && remaining > 0)
                 Text(
                   '$remaining left',
-                  style: TextStyle(color: Colors.orange, fontSize: 12.sp, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               if (remaining <= 0)
                 GestureDetector(
                   onTap: () => context.push('/premium'),
                   child: Text(
                     'Upgrade',
-                    style: TextStyle(color: Colors.red, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
             ],
@@ -163,7 +203,11 @@ class DownloadsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmRemove(BuildContext context, WidgetRef ref, String songId) async {
+  Future<void> _confirmRemove(
+    BuildContext context,
+    WidgetRef ref,
+    String songId,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -187,7 +231,9 @@ class DownloadsPage extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(downloadControllerProvider.notifier).removeDownload(songId);
+      await ref
+          .read(downloadControllerProvider.notifier)
+          .removeDownload(songId);
     }
   }
 

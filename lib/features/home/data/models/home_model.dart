@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sonus/features/home/domain/entities/home.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'home_model.freezed.dart';
 part 'home_model.g.dart';

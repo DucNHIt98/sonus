@@ -12,7 +12,8 @@ part of 'login_model.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 LoginModel _$LoginModelFromJson(Map<String, dynamic> json) {
   return _LoginModel.fromJson(json);
@@ -33,8 +34,9 @@ mixin _$LoginModel {
 /// @nodoc
 abstract class $LoginModelCopyWith<$Res> {
   factory $LoginModelCopyWith(
-          LoginModel value, $Res Function(LoginModel) then) =
-      _$LoginModelCopyWithImpl<$Res, LoginModel>;
+    LoginModel value,
+    $Res Function(LoginModel) then,
+  ) = _$LoginModelCopyWithImpl<$Res, LoginModel>;
   @useResult
   $Res call({String id, String? email, String? name});
 }
@@ -56,20 +58,23 @@ class _$LoginModelCopyWithImpl<$Res, $Val extends LoginModel>
     Object? email = freezed,
     Object? name = freezed,
   }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      name: freezed == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            email: freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            name: freezed == name
+                ? _value.name
+                : name // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -77,8 +82,9 @@ class _$LoginModelCopyWithImpl<$Res, $Val extends LoginModel>
 abstract class _$$LoginModelImplCopyWith<$Res>
     implements $LoginModelCopyWith<$Res> {
   factory _$$LoginModelImplCopyWith(
-          _$LoginModelImpl value, $Res Function(_$LoginModelImpl) then) =
-      __$$LoginModelImplCopyWithImpl<$Res>;
+    _$LoginModelImpl value,
+    $Res Function(_$LoginModelImpl) then,
+  ) = __$$LoginModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String id, String? email, String? name});
@@ -89,8 +95,9 @@ class __$$LoginModelImplCopyWithImpl<$Res>
     extends _$LoginModelCopyWithImpl<$Res, _$LoginModelImpl>
     implements _$$LoginModelImplCopyWith<$Res> {
   __$$LoginModelImplCopyWithImpl(
-      _$LoginModelImpl _value, $Res Function(_$LoginModelImpl) _then)
-      : super(_value, _then);
+    _$LoginModelImpl _value,
+    $Res Function(_$LoginModelImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -99,20 +106,22 @@ class __$$LoginModelImplCopyWithImpl<$Res>
     Object? email = freezed,
     Object? name = freezed,
   }) {
-    return _then(_$LoginModelImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: freezed == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String?,
-      name: freezed == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$LoginModelImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        email: freezed == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        name: freezed == name
+            ? _value.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -158,17 +167,16 @@ class _$LoginModelImpl implements _LoginModel {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$LoginModelImplToJson(
-      this,
-    );
+    return _$$LoginModelImplToJson(this);
   }
 }
 
 abstract class _LoginModel implements LoginModel {
-  const factory _LoginModel(
-      {required final String id,
-      final String? email,
-      final String? name}) = _$LoginModelImpl;
+  const factory _LoginModel({
+    required final String id,
+    final String? email,
+    final String? name,
+  }) = _$LoginModelImpl;
 
   factory _LoginModel.fromJson(Map<String, dynamic> json) =
       _$LoginModelImpl.fromJson;

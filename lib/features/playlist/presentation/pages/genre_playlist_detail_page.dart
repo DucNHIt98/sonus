@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sonus/core/models/music_model.dart';
 import 'package:sonus/core/presentation/widgets/music_tile.dart';
 import 'package:sonus/features/home/presentation/providers/genre_provider.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
@@ -40,7 +39,7 @@ class GenrePlaylistDetailPage extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      _getGenreColor(genre).withOpacity(0.8),
+                      _getGenreColor(genre).withValues(alpha: 0.8),
                       Colors.black,
                     ],
                   ),

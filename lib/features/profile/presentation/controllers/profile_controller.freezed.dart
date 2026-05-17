@@ -12,7 +12,8 @@ part of 'profile_controller.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+);
 
 /// @nodoc
 mixin _$ProfileState {
@@ -32,17 +33,19 @@ mixin _$ProfileState {
 /// @nodoc
 abstract class $ProfileStateCopyWith<$Res> {
   factory $ProfileStateCopyWith(
-          ProfileState value, $Res Function(ProfileState) then) =
-      _$ProfileStateCopyWithImpl<$Res, ProfileState>;
+    ProfileState value,
+    $Res Function(ProfileState) then,
+  ) = _$ProfileStateCopyWithImpl<$Res, ProfileState>;
   @useResult
-  $Res call(
-      {Map<String, dynamic>? userProfile,
-      int playHistoryCount,
-      int favoritesCount,
-      int playlistsCount,
-      List<Home> topTracks,
-      bool isLoading,
-      String? error});
+  $Res call({
+    Map<String, dynamic>? userProfile,
+    int playHistoryCount,
+    int favoritesCount,
+    int playlistsCount,
+    List<Home> topTracks,
+    bool isLoading,
+    String? error,
+  });
 }
 
 /// @nodoc
@@ -66,36 +69,39 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
     Object? isLoading = null,
     Object? error = freezed,
   }) {
-    return _then(_value.copyWith(
-      userProfile: freezed == userProfile
-          ? _value.userProfile
-          : userProfile // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      playHistoryCount: null == playHistoryCount
-          ? _value.playHistoryCount
-          : playHistoryCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      favoritesCount: null == favoritesCount
-          ? _value.favoritesCount
-          : favoritesCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      playlistsCount: null == playlistsCount
-          ? _value.playlistsCount
-          : playlistsCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      topTracks: null == topTracks
-          ? _value.topTracks
-          : topTracks // ignore: cast_nullable_to_non_nullable
-              as List<Home>,
-      isLoading: null == isLoading
-          ? _value.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _value.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ) as $Val);
+    return _then(
+      _value.copyWith(
+            userProfile: freezed == userProfile
+                ? _value.userProfile
+                : userProfile // ignore: cast_nullable_to_non_nullable
+                      as Map<String, dynamic>?,
+            playHistoryCount: null == playHistoryCount
+                ? _value.playHistoryCount
+                : playHistoryCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            favoritesCount: null == favoritesCount
+                ? _value.favoritesCount
+                : favoritesCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            playlistsCount: null == playlistsCount
+                ? _value.playlistsCount
+                : playlistsCount // ignore: cast_nullable_to_non_nullable
+                      as int,
+            topTracks: null == topTracks
+                ? _value.topTracks
+                : topTracks // ignore: cast_nullable_to_non_nullable
+                      as List<Home>,
+            isLoading: null == isLoading
+                ? _value.isLoading
+                : isLoading // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            error: freezed == error
+                ? _value.error
+                : error // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
   }
 }
 
@@ -103,18 +109,20 @@ class _$ProfileStateCopyWithImpl<$Res, $Val extends ProfileState>
 abstract class _$$ProfileStateImplCopyWith<$Res>
     implements $ProfileStateCopyWith<$Res> {
   factory _$$ProfileStateImplCopyWith(
-          _$ProfileStateImpl value, $Res Function(_$ProfileStateImpl) then) =
-      __$$ProfileStateImplCopyWithImpl<$Res>;
+    _$ProfileStateImpl value,
+    $Res Function(_$ProfileStateImpl) then,
+  ) = __$$ProfileStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {Map<String, dynamic>? userProfile,
-      int playHistoryCount,
-      int favoritesCount,
-      int playlistsCount,
-      List<Home> topTracks,
-      bool isLoading,
-      String? error});
+  $Res call({
+    Map<String, dynamic>? userProfile,
+    int playHistoryCount,
+    int favoritesCount,
+    int playlistsCount,
+    List<Home> topTracks,
+    bool isLoading,
+    String? error,
+  });
 }
 
 /// @nodoc
@@ -122,8 +130,9 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     extends _$ProfileStateCopyWithImpl<$Res, _$ProfileStateImpl>
     implements _$$ProfileStateImplCopyWith<$Res> {
   __$$ProfileStateImplCopyWithImpl(
-      _$ProfileStateImpl _value, $Res Function(_$ProfileStateImpl) _then)
-      : super(_value, _then);
+    _$ProfileStateImpl _value,
+    $Res Function(_$ProfileStateImpl) _then,
+  ) : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
@@ -136,52 +145,54 @@ class __$$ProfileStateImplCopyWithImpl<$Res>
     Object? isLoading = null,
     Object? error = freezed,
   }) {
-    return _then(_$ProfileStateImpl(
-      userProfile: freezed == userProfile
-          ? _value._userProfile
-          : userProfile // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
-      playHistoryCount: null == playHistoryCount
-          ? _value.playHistoryCount
-          : playHistoryCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      favoritesCount: null == favoritesCount
-          ? _value.favoritesCount
-          : favoritesCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      playlistsCount: null == playlistsCount
-          ? _value.playlistsCount
-          : playlistsCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      topTracks: null == topTracks
-          ? _value._topTracks
-          : topTracks // ignore: cast_nullable_to_non_nullable
-              as List<Home>,
-      isLoading: null == isLoading
-          ? _value.isLoading
-          : isLoading // ignore: cast_nullable_to_non_nullable
-              as bool,
-      error: freezed == error
-          ? _value.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _$ProfileStateImpl(
+        userProfile: freezed == userProfile
+            ? _value._userProfile
+            : userProfile // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
+        playHistoryCount: null == playHistoryCount
+            ? _value.playHistoryCount
+            : playHistoryCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        favoritesCount: null == favoritesCount
+            ? _value.favoritesCount
+            : favoritesCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        playlistsCount: null == playlistsCount
+            ? _value.playlistsCount
+            : playlistsCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+        topTracks: null == topTracks
+            ? _value._topTracks
+            : topTracks // ignore: cast_nullable_to_non_nullable
+                  as List<Home>,
+        isLoading: null == isLoading
+            ? _value.isLoading
+            : isLoading // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        error: freezed == error
+            ? _value.error
+            : error // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
 /// @nodoc
 
 class _$ProfileStateImpl implements _ProfileState {
-  const _$ProfileStateImpl(
-      {final Map<String, dynamic>? userProfile,
-      this.playHistoryCount = 0,
-      this.favoritesCount = 0,
-      this.playlistsCount = 0,
-      final List<Home> topTracks = const [],
-      this.isLoading = false,
-      this.error})
-      : _userProfile = userProfile,
-        _topTracks = topTracks;
+  const _$ProfileStateImpl({
+    final Map<String, dynamic>? userProfile,
+    this.playHistoryCount = 0,
+    this.favoritesCount = 0,
+    this.playlistsCount = 0,
+    final List<Home> topTracks = const [],
+    this.isLoading = false,
+    this.error,
+  }) : _userProfile = userProfile,
+       _topTracks = topTracks;
 
   final Map<String, dynamic>? _userProfile;
   @override
@@ -227,16 +238,20 @@ class _$ProfileStateImpl implements _ProfileState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ProfileStateImpl &&
-            const DeepCollectionEquality()
-                .equals(other._userProfile, _userProfile) &&
+            const DeepCollectionEquality().equals(
+              other._userProfile,
+              _userProfile,
+            ) &&
             (identical(other.playHistoryCount, playHistoryCount) ||
                 other.playHistoryCount == playHistoryCount) &&
             (identical(other.favoritesCount, favoritesCount) ||
                 other.favoritesCount == favoritesCount) &&
             (identical(other.playlistsCount, playlistsCount) ||
                 other.playlistsCount == playlistsCount) &&
-            const DeepCollectionEquality()
-                .equals(other._topTracks, _topTracks) &&
+            const DeepCollectionEquality().equals(
+              other._topTracks,
+              _topTracks,
+            ) &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             (identical(other.error, error) || other.error == error));
@@ -244,14 +259,15 @@ class _$ProfileStateImpl implements _ProfileState {
 
   @override
   int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(_userProfile),
-      playHistoryCount,
-      favoritesCount,
-      playlistsCount,
-      const DeepCollectionEquality().hash(_topTracks),
-      isLoading,
-      error);
+    runtimeType,
+    const DeepCollectionEquality().hash(_userProfile),
+    playHistoryCount,
+    favoritesCount,
+    playlistsCount,
+    const DeepCollectionEquality().hash(_topTracks),
+    isLoading,
+    error,
+  );
 
   @JsonKey(ignore: true)
   @override
@@ -261,14 +277,15 @@ class _$ProfileStateImpl implements _ProfileState {
 }
 
 abstract class _ProfileState implements ProfileState {
-  const factory _ProfileState(
-      {final Map<String, dynamic>? userProfile,
-      final int playHistoryCount,
-      final int favoritesCount,
-      final int playlistsCount,
-      final List<Home> topTracks,
-      final bool isLoading,
-      final String? error}) = _$ProfileStateImpl;
+  const factory _ProfileState({
+    final Map<String, dynamic>? userProfile,
+    final int playHistoryCount,
+    final int favoritesCount,
+    final int playlistsCount,
+    final List<Home> topTracks,
+    final bool isLoading,
+    final String? error,
+  }) = _$ProfileStateImpl;
 
   @override
   Map<String, dynamic>? get userProfile;

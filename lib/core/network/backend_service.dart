@@ -145,19 +145,19 @@ class BackendService {
     try {
       final response = await dio.get('/api/music/feed/');
       final data = response.data;
-      return {
-        'trending': _parseMusicList(data['trending']),
-        'charts': data['charts'] is Map
-            ? (data['charts'] as Map).map(
-                (k, v) => MapEntry(k.toString(), _parseMusicList(v)),
-              )
-            : <String, List<MusicModel>>{},
-        'genres': data['genres'] is Map
-            ? (data['genres'] as Map).map(
-                (k, v) => MapEntry(k.toString(), _parseMusicList(v)),
-              )
-            : <String, List<MusicModel>>{},
-      };
+      final trending = _parseMusicList(data['trending']);
+      final charts = data['charts'] is Map
+          ? (data['charts'] as Map).map(
+              (k, v) => MapEntry(k.toString(), _parseMusicList(v)),
+            )
+          : <String, List<MusicModel>>{};
+      final genres = data['genres'] is Map
+          ? (data['genres'] as Map).map(
+              (k, v) => MapEntry(k.toString(), _parseMusicList(v)),
+            )
+          : <String, List<MusicModel>>{};
+
+      return {'trending': trending, 'charts': charts, 'genres': genres};
     } catch (e) {
       debugPrint('Backend home feed error: $e');
       return {'trending': <MusicModel>[], 'charts': {}, 'genres': {}};
@@ -261,7 +261,11 @@ class BackendService {
     try {
       final response = await dio.get(
         '/api/history/',
-        queryParameters: {'offset': offset, 'limit': limit},
+        queryParameters: {
+          'offset': offset,
+          'limit': limit,
+          'return_total': returnTotal,
+        },
       );
       final data = response.data as Map;
       final entries = List<Map<String, dynamic>>.from(data['history'] ?? []);
@@ -326,7 +330,11 @@ class BackendService {
     try {
       final response = await dio.get(
         '/api/favorites/',
-        queryParameters: {'offset': offset, 'limit': limit},
+        queryParameters: {
+          'offset': offset,
+          'limit': limit,
+          'return_total': false,
+        },
       );
       return List<Map<String, dynamic>>.from(
         (response.data as Map)['favorites'] ?? [],
@@ -377,7 +385,11 @@ class BackendService {
     try {
       final response = await dio.get(
         '/api/playlists/',
-        queryParameters: {'offset': offset, 'limit': limit},
+        queryParameters: {
+          'offset': offset,
+          'limit': limit,
+          'return_total': false,
+        },
       );
       return List<Map<String, dynamic>>.from(
         (response.data as Map)['playlists'] ?? [],
@@ -415,11 +427,16 @@ class BackendService {
     String playlistId, {
     int offset = 0,
     int limit = 50,
+    bool returnTotal = false,
   }) async {
     try {
       final response = await dio.get(
         '/api/playlists/$playlistId/',
-        queryParameters: {'offset': offset, 'limit': limit},
+        queryParameters: {
+          'offset': offset,
+          'limit': limit,
+          'return_total': returnTotal,
+        },
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {
@@ -607,11 +624,16 @@ class BackendService {
   Future<Map<String, dynamic>> getDownloads({
     int offset = 0,
     int limit = 20,
+    bool returnTotal = false,
   }) async {
     try {
       final response = await dio.get(
         '/api/downloads/',
-        queryParameters: {'offset': offset, 'limit': limit},
+        queryParameters: {
+          'offset': offset,
+          'limit': limit,
+          'return_total': returnTotal,
+        },
       );
       return response.data as Map<String, dynamic>;
     } catch (e) {

@@ -161,7 +161,9 @@ class SupabaseRepository {
   }
 
   Future<void> upsertTrendingSongs(
-      List<MusicModel> songs, String region) async {
+    List<MusicModel> songs,
+    String region,
+  ) async {
     // No-op: backend handles trending upsert
   }
 }

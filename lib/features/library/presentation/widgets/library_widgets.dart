@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 
 class LibraryHeader extends StatelessWidget {
   const LibraryHeader({super.key});
@@ -136,20 +137,23 @@ class LibraryListTile extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         children: [
-          Container(
-            width: 64.w,
-            height: 64.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4.r),
-              image: DecorationImage(
-                image: NetworkImage(imageUrl),
-                fit: BoxFit.cover,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4.r),
+            child: CachedArtwork(
+              imageUrl: imageUrl,
+              width: 64.w,
+              height: 64.h,
+              fallback: Container(
+                width: 64.w,
+                height: 64.h,
+                color: Colors.grey[800],
+                child: Icon(
+                  Icons.music_note,
+                  color: Colors.white54,
+                  size: 30.r,
+                ),
               ),
-              color: Colors.grey[800],
             ),
-            child: imageUrl.isEmpty
-                ? Icon(Icons.music_note, color: Colors.white54, size: 30.r)
-                : null,
           ),
           SizedBox(width: 12.w),
           Expanded(

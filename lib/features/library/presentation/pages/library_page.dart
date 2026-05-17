@@ -7,7 +7,6 @@ import 'package:sonus/features/library/data/repositories/library_repository_impl
 import 'package:sonus/features/library/presentation/widgets/library_widgets.dart';
 import 'package:sonus/features/premium/presentation/providers/premium_provider.dart';
 
-
 class LibraryPage extends ConsumerWidget {
   const LibraryPage({super.key});
 
@@ -176,7 +175,11 @@ class _PremiumBanner extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     'Premium Active',
-                    style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -202,10 +205,18 @@ class _PremiumBanner extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     'Upgrade to Premium',
-                    style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14.r),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white70,
+                  size: 14.r,
+                ),
               ],
             ),
           ),

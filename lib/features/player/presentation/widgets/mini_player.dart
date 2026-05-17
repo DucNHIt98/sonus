@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
 class MiniPlayer extends ConsumerWidget {
@@ -25,33 +26,36 @@ class MiniPlayer extends ConsumerWidget {
           height: 60.h,
           margin: EdgeInsets.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
-            color: const Color(0xFF400503).withOpacity(0.8),
+            color: const Color(0xFF400503).withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               width: 1.w,
             ),
           ),
           child: Row(
             children: [
               // Album Art
-              Container(
-                width: 44.w,
-                height: 44.h,
-                margin: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(
+              Padding(
+                padding: EdgeInsets.all(8.r),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(6.r),
-                  image: song.imageUrl.isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(song.imageUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                  color: song.imageUrl.isEmpty ? Colors.grey[900] : null,
+                  child: CachedArtwork(
+                    imageUrl: song.imageUrl,
+                    width: 44.w,
+                    height: 44.h,
+                    fallback: Container(
+                      width: 44.w,
+                      height: 44.h,
+                      color: Colors.grey[900],
+                      child: Icon(
+                        Icons.music_note,
+                        color: Colors.white24,
+                        size: 24.r,
+                      ),
+                    ),
+                  ),
                 ),
-                child: song.imageUrl.isEmpty
-                    ? Icon(Icons.music_note, color: Colors.white24, size: 24.r)
-                    : null,
               ),
               SizedBox(width: 4.w),
 
@@ -74,7 +78,7 @@ class MiniPlayer extends ConsumerWidget {
                     Text(
                       song.subtitle,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 11.sp,
                       ),
                       maxLines: 1,

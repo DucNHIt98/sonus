@@ -12,14 +12,14 @@ String _$premiumControllerHash() => r'4f10370443eeb989aa9386d110b79fd7390bc6ba';
 @ProviderFor(PremiumController)
 final premiumControllerProvider =
     AsyncNotifierProvider<PremiumController, SubscriptionStatus>.internal(
-  PremiumController.new,
-  name: r'premiumControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$premiumControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      PremiumController.new,
+      name: r'premiumControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$premiumControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$PremiumController = AsyncNotifier<SubscriptionStatus>;
 // ignore_for_file: type=lint

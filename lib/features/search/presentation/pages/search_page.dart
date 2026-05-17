@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -21,7 +23,18 @@ class SearchPage extends ConsumerStatefulWidget {
 class _SearchPageState extends ConsumerState<SearchPage> {
   late final TextEditingController _searchController;
   late final FocusNode _focusNode;
+  Timer? _searchDebounce;
   bool _isSearching = false;
+  String _lastSubmittedQuery = '';
+
+  static const List<String> _quickSearches = [
+    'vpop 2026',
+    'lofi chill',
+    'son tung mtp',
+    'indie viet',
+    'edm workout',
+    'acoustic cafe',
+  ];
 
   @override
   void initState() {
@@ -32,9 +45,51 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    final query = value.trim();
+    ref.read(searchControllerProvider.notifier).getSuggestions(value);
+
+    setState(() {
+      _isSearching = query.isNotEmpty;
+      if (query.isEmpty) _lastSubmittedQuery = '';
+    });
+
+    _searchDebounce?.cancel();
+    if (query.isEmpty) {
+      ref.read(searchControllerProvider.notifier).clearResults();
+      return;
+    }
+    if (query.length < 2) return;
+
+    _searchDebounce = Timer(const Duration(milliseconds: 520), () {
+      _runSearch(query, keepFocus: true);
+    });
+  }
+
+  void _runSearch(String query, {bool keepFocus = false}) {
+    final normalized = query.trim();
+    if (normalized.isEmpty) return;
+
+    setState(() {
+      _isSearching = false;
+      _lastSubmittedQuery = normalized;
+    });
+
+    ref.read(searchControllerProvider.notifier).search(normalized);
+    if (!keepFocus) _focusNode.unfocus();
+  }
+
+  void _selectQuickSearch(String query) {
+    _searchDebounce?.cancel();
+    _searchController.text = query;
+    _searchController.selection = TextSelection.collapsed(offset: query.length);
+    _runSearch(query);
   }
 
   @override
@@ -68,7 +123,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                             children: [
                               SizedBox(height: 20.h),
                               Text(
-                                'Welcome back!',
+                                'Search',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 28.sp,
@@ -77,9 +132,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                               ),
                               SizedBox(height: 8.h),
                               Text(
-                                'What do you feel like today?',
+                                'Find a track, artist, or mood. Results update while you type.',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: Colors.white.withValues(alpha: 0.6),
                                   fontSize: 14.sp,
                                 ),
                               ),
@@ -87,43 +142,31 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                               CustomSearchBar(
                                 controller: _searchController,
                                 focusNode: _focusNode,
-                                onChanged: (value) {
-                                  ref
-                                      .read(searchControllerProvider.notifier)
-                                      .getSuggestions(value);
-                                  setState(() {
-                                    _isSearching = value.isNotEmpty;
-                                  });
-                                },
-                                onSubmitted: (query) {
-                                  ref
-                                      .read(searchControllerProvider.notifier)
-                                      .search(query);
-                                  _focusNode.unfocus();
-                                  setState(() {
-                                    _isSearching = false;
-                                  });
-                                },
+                                onChanged: _onSearchChanged,
+                                onSubmitted: _runSearch,
                               ),
                               SizedBox(height: 32.h),
                             ],
                           ),
                         ),
 
-                        if (searchState.isLoading && !_isSearching)
+                        if (searchState.isLoading)
                           ..._buildSearchLoading()
-                        else if (searchState.error != null && !_isSearching)
+                        else if (searchState.error != null)
                           ..._buildSearchError(searchState.error!)
                         else if (searchState.results.isNotEmpty &&
                             !_isSearching)
                           ..._buildSearchResults(searchState)
+                        else if (_lastSubmittedQuery.isNotEmpty)
+                          ..._buildEmptySearchResults()
                         else
                           ..._buildDefaultContent(),
                       ],
                     ),
 
                     // Overlay gợi ý hoặc lịch sử
-                    if (_focusNode.hasFocus) _buildOverlay(searchState),
+                    if (_focusNode.hasFocus && !searchState.isLoading)
+                      _buildOverlay(searchState),
                   ],
                 );
               },
@@ -155,7 +198,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -193,11 +236,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ),
               onTap: () {
                 _searchController.text = item;
-                ref.read(searchControllerProvider.notifier).search(item);
-                _focusNode.unfocus();
-                setState(() {
-                  _isSearching = false;
-                });
+                _searchController.selection = TextSelection.collapsed(
+                  offset: item.length,
+                );
+                _runSearch(item);
               },
             );
           },
@@ -211,8 +253,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.only(top: 40.h),
-          child: const Center(
-            child: CircularProgressIndicator(color: Colors.red),
+          child: Column(
+            children: List.generate(
+              6,
+              (index) => _SearchSkeletonTile(delay: index),
+            ),
           ),
         ),
       ),
@@ -237,17 +282,35 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   List<Widget> _buildSearchResults(SearchState searchState) {
+    final resultLabel = _lastSubmittedQuery.isEmpty
+        ? 'Search results'
+        : 'Results for "$_lastSubmittedQuery"';
+
     return [
       SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.only(bottom: 16.h),
-          child: Text(
-            'Search Results',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  resultLabel,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Text(
+                '${searchState.results.length} tracks',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.55),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -260,9 +323,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               child: Container(
                 padding: EdgeInsets.all(12.r),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.15),
+                  color: Colors.red.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -315,6 +378,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             child: SongTile(
               title: song.title,
               artist: song.artist,
+              source: song.source.name,
               duration: song.duration != null
                   ? '${song.duration!.inMinutes}:${(song.duration!.inSeconds % 60).toString().padLeft(2, '0')}'
                   : '',
@@ -339,67 +403,122 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     return [
       SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.only(bottom: 24.h),
-          child: const CategoryTabs(),
-        ),
-      ),
-      SliverToBoxAdapter(
-        child: SizedBox(
-          height: 240.h,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              FeaturedCard(
-                title: 'Discover Jamendo',
-                subtitle: 'Open content music',
-                imageUrl:
-                    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
-                dummyColor: Colors.orange,
-                onTap: () => context.push('/discover'),
-              ),
-              const FeaturedCard(
-                title: 'R&B Playlist',
-                subtitle: 'Chill your mind',
-                imageUrl:
-                    'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&w=600&q=80',
-                dummyColor: Colors.purple,
-              ),
-              FeaturedCard(
-                title: 'Daily Mix 2',
-                subtitle: 'Made for you',
-                imageUrl:
-                    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
-                dummyColor: Colors.blue,
-              ),
-            ],
-          ),
-        ),
-      ),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.only(top: 32.h, bottom: 16.h),
+          padding: EdgeInsets.only(bottom: 16.h),
           child: Text(
-            'Your favourites',
+            'Start with a mood',
             style: TextStyle(
               color: Colors.white,
               fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
       ),
-      SliverList(
-        delegate: SliverChildListDelegate([
-          const SongTile(
-            title: 'Bye Bye',
-            artist: 'Marshmello, Juice WRLD',
-            duration: '2:09',
-            imageUrl:
-                'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-          ),
-          SizedBox(height: 180.h),
-        ]),
+      SliverToBoxAdapter(
+        child: Wrap(
+          spacing: 10.w,
+          runSpacing: 10.h,
+          children: _quickSearches
+              .map(
+                (query) => _QuickSearchChip(
+                  label: query,
+                  onTap: () => _selectQuickSearch(query),
+                ),
+              )
+              .toList(),
+        ),
       ),
+      SliverToBoxAdapter(child: SizedBox(height: 28.h)),
+      SliverToBoxAdapter(
+        child: _SearchHeroCard(
+          onTap: () => _selectQuickSearch('new music friday'),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 28.h, bottom: 14.h),
+          child: Text(
+            'Search tips',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Column(
+          children: [
+            _SearchTipRow(
+              icon: Icons.graphic_eq,
+              title: 'Use mood words',
+              subtitle: 'Try "rainy lofi" or "late night r&b".',
+            ),
+            _SearchTipRow(
+              icon: Icons.person_search,
+              title: 'Artist + context works best',
+              subtitle: 'Search "taylor acoustic" or "den vau chill".',
+            ),
+            SizedBox(height: 180.h),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildEmptySearchResults() {
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 24.h),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(22.r),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(22.r),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.search_off, color: Colors.white70, size: 32.r),
+                SizedBox(height: 14.h),
+                Text(
+                  'No tracks found',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Text(
+                  'Try a shorter query, artist name, or one of the mood searches below.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.62),
+                    fontSize: 13.sp,
+                    height: 1.35,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Wrap(
+                  spacing: 10.w,
+                  runSpacing: 10.h,
+                  children: _quickSearches.take(4).map((query) {
+                    return _QuickSearchChip(
+                      label: query,
+                      onTap: () => _selectQuickSearch(query),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(child: SizedBox(height: 180.h)),
     ];
   }
 
@@ -505,6 +624,231 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ),
         );
       },
+    );
+  }
+}
+
+class _QuickSearchChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickSearchChip({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999.r),
+        child: Ink(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(999.r),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchHeroCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _SearchHeroCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(22.r),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28.r),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF65100B), Color(0xFF171010)],
+          ),
+          border: Border.all(color: Colors.white24),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF65100B).withValues(alpha: 0.24),
+              blurRadius: 30,
+              offset: const Offset(0, 18),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'New music Friday',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w900,
+                      height: 1.05,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Tap to search fresh releases across Sonus sources.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.62),
+                      fontSize: 13.sp,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 18.w),
+            Container(
+              width: 58.w,
+              height: 58.w,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Icon(Icons.arrow_forward, color: Colors.white, size: 26.r),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchTipRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _SearchTipRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(14.r),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.055),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42.w,
+            height: 42.w,
+            decoration: BoxDecoration(
+              color: const Color(0xFFB91C1C).withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+            child: Icon(icon, color: const Color(0xFFFFA39E), size: 21.r),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 3.h),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.55),
+                    fontSize: 12.sp,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchSkeletonTile extends StatelessWidget {
+  final int delay;
+
+  const _SearchSkeletonTile({required this.delay});
+
+  @override
+  Widget build(BuildContext context) {
+    final opacity = 0.08 + (delay % 3) * 0.025;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Row(
+        children: [
+          Container(
+            width: 60.w,
+            height: 60.w,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: opacity),
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FractionallySizedBox(
+                  widthFactor: 0.78,
+                  child: Container(
+                    height: 14.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: opacity),
+                      borderRadius: BorderRadius.circular(999.r),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                FractionallySizedBox(
+                  widthFactor: 0.45,
+                  child: Container(
+                    height: 10.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: opacity * 0.8),
+                      borderRadius: BorderRadius.circular(999.r),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -7,11 +7,7 @@ part of 'splash_model.dart';
 // **************************************************************************
 
 _$SplashModelImpl _$$SplashModelImplFromJson(Map<String, dynamic> json) =>
-    _$SplashModelImpl(
-      status: json['status'] as String,
-    );
+    _$SplashModelImpl(status: json['status'] as String);
 
 Map<String, dynamic> _$$SplashModelImplToJson(_$SplashModelImpl instance) =>
-    <String, dynamic>{
-      'status': instance.status,
-    };
+    <String, dynamic>{'status': instance.status};

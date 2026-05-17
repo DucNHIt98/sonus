@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sonus/core/presentation/widgets/cached_artwork.dart';
 import 'package:sonus/features/player/presentation/controllers/player_controller.dart';
 
 class UpNextSheet extends ConsumerWidget {
@@ -34,10 +35,10 @@ class UpNextSheet extends ConsumerWidget {
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A).withOpacity(0.9),
+                color: const Color(0xFF1A1A1A).withValues(alpha: 0.9),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -49,7 +50,7 @@ class UpNextSheet extends ConsumerWidget {
                     width: 40.w,
                     height: 4.h,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -71,10 +72,7 @@ class UpNextSheet extends ConsumerWidget {
                         Expanded(
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            child: Row(children: [
-
-                              ],
-                            ),
+                            child: Row(children: []),
                           ),
                         ),
                       ],
@@ -91,7 +89,7 @@ class UpNextSheet extends ConsumerWidget {
                       child: Text(
                         '${queue.length} bài hát trong hàng chờ',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 13.sp,
                         ),
                       ),
@@ -115,13 +113,13 @@ class UpNextSheet extends ConsumerWidget {
                                 Icon(
                                   Icons.queue_music,
                                   size: 60.r,
-                                  color: Colors.white.withOpacity(0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                 ),
                                 SizedBox(height: 16.h),
                                 Text(
                                   'Hàng chờ trống',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
+                                    color: Colors.white.withValues(alpha: 0.5),
                                     fontSize: 16.sp,
                                   ),
                                 ),
@@ -144,7 +142,7 @@ class UpNextSheet extends ConsumerWidget {
                                 alignment: Alignment.centerRight,
                                 padding: EdgeInsets.only(right: 20.w),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.8),
+                                  color: Colors.red.withValues(alpha: 0.8),
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 child: Icon(
@@ -195,7 +193,7 @@ class UpNextSheet extends ConsumerWidget {
                           Text(
                             'Dựa trên bài ${playerState.currentSong?.title ?? "hiện tại"}',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 12.sp,
                             ),
                           ),
@@ -257,12 +255,12 @@ class UpNextSheet extends ConsumerWidget {
         padding: EdgeInsets.all(8.r),
         decoration: BoxDecoration(
           color: isCurrentlyPlaying
-              ? const Color(0xFF400503).withOpacity(0.6)
-              : Colors.white.withOpacity(0.05),
+              ? const Color(0xFF400503).withValues(alpha: 0.6)
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12.r),
           border: isCurrentlyPlaying
               ? Border.all(
-                  color: const Color(0xFFFF4444).withOpacity(0.5),
+                  color: const Color(0xFFFF4444).withValues(alpha: 0.5),
                   width: 1,
                 )
               : null,
@@ -283,7 +281,7 @@ class UpNextSheet extends ConsumerWidget {
                       : Text(
                           '${index + 1}',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 14.sp,
                           ),
                         ),
@@ -295,12 +293,11 @@ class UpNextSheet extends ConsumerWidget {
             // Thumbnail
             ClipRRect(
               borderRadius: BorderRadius.circular(8.r),
-              child: Image.network(
-                song.imageUrl,
+              child: CachedArtwork(
+                imageUrl: song.imageUrl,
                 width: 48.w,
                 height: 48.h,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                fallback: Container(
                   width: 48.w,
                   height: 48.h,
                   color: Colors.grey[800],
@@ -336,7 +333,7 @@ class UpNextSheet extends ConsumerWidget {
                   Text(
                     song.subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 12.sp,
                     ),
                     maxLines: 1,
@@ -351,7 +348,7 @@ class UpNextSheet extends ConsumerWidget {
               IconButton(
                 icon: Icon(
                   Icons.add_circle_outline,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   size: 24.r,
                 ),
                 onPressed: onAdd,
@@ -361,7 +358,7 @@ class UpNextSheet extends ConsumerWidget {
               Text(
                 _formatDuration(song.duration!),
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 12.sp,
                 ),
               ),

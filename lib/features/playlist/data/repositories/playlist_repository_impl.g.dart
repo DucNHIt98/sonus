@@ -13,14 +13,14 @@ String _$playlistRepositoryHash() =>
 @ProviderFor(playlistRepository)
 final playlistRepositoryProvider =
     AutoDisposeProvider<PlaylistRepository>.internal(
-  playlistRepository,
-  name: r'playlistRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$playlistRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      playlistRepository,
+      name: r'playlistRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$playlistRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef PlaylistRepositoryRef = AutoDisposeProviderRef<PlaylistRepository>;
 // ignore_for_file: type=lint

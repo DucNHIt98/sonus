@@ -13,14 +13,14 @@ String _$homeRemoteDataSourceHash() =>
 @ProviderFor(homeRemoteDataSource)
 final homeRemoteDataSourceProvider =
     AutoDisposeProvider<HomeRemoteDataSource>.internal(
-  homeRemoteDataSource,
-  name: r'homeRemoteDataSourceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$homeRemoteDataSourceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      homeRemoteDataSource,
+      name: r'homeRemoteDataSourceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$homeRemoteDataSourceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef HomeRemoteDataSourceRef = AutoDisposeProviderRef<HomeRemoteDataSource>;
 // ignore_for_file: type=lint

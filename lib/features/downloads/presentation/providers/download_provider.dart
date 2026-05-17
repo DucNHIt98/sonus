@@ -68,7 +68,10 @@ class DownloadQuotaController extends _$DownloadQuotaController {
   }
 }
 
-final isSongDownloadedProvider = FutureProvider.family<bool, String>((ref, songId) async {
+final isSongDownloadedProvider = FutureProvider.family<bool, String>((
+  ref,
+  songId,
+) async {
   final downloads = await ref.watch(downloadControllerProvider.future);
   return downloads.any((d) => d.song.id == songId);
 });

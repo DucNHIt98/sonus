@@ -233,7 +233,7 @@ class PremiumPage extends ConsumerWidget {
           Container(
             padding: EdgeInsets.all(10.r),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.15),
+              color: Colors.red.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(icon, color: Colors.red, size: 24.r),

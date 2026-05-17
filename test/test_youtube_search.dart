@@ -1,19 +1,15 @@
-import 'package:sonus/features/search/data/services/youtube_service.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sonus/core/models/music_model.dart';
 
-void main() async {
-  final service = YoutubeService();
-  print('Searching for "Son Tung MTP"...');
+void main() {
+  test('MusicModel keeps YouTube source for plain video ids', () {
+    final model = MusicModel.fromSupabase({
+      'id': 'Y2-QJsbv1WQ',
+      'title': 'Sample',
+      'subtitle': 'Artist',
+      'source': 'youtube',
+    });
 
-  final results = await service.searchSongs('Son Tung MTP');
-
-  if (results.isEmpty) {
-    print('No results found.');
-  } else {
-    print('Found ${results.length} results:');
-    for (var video in results.take(5)) {
-      print('- ${video.title} (ID: ${video.id}) - Duration: ${video.duration}');
-    }
-  }
-
-  service.dispose();
+    expect(model.source, MusicSource.youtube);
+  });
 }

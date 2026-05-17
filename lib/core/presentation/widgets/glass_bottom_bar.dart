@@ -23,15 +23,15 @@ class GlassBottomBar extends StatelessWidget {
           child: Container(
             height: 70.h,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1), // Glass tint
+              color: Colors.white.withValues(alpha: 0.1), // Glass tint
               borderRadius: BorderRadius.circular(30.r),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2), // Subtle border
+                color: Colors.white.withValues(alpha: 0.2), // Subtle border
                 width: 1.5.w,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10.r,
                   offset: Offset(0, 4.h),
                 ),
@@ -72,7 +72,9 @@ class GlassBottomBar extends StatelessWidget {
           child: Icon(
             isSelected ? selectedIcon : unselectedIcon,
             key: ValueKey(isSelected),
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
+            color: isSelected
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.5),
             size: 28.r,
           ),
         ),

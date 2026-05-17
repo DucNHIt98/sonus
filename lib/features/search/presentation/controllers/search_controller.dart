@@ -69,6 +69,20 @@ class SearchController extends _$SearchController {
     state = AsyncValue.data(state.value!.copyWith(history: history));
   }
 
+  void clearResults() {
+    _searchRequestId++;
+    final currentState = state.value ?? const SearchState();
+    state = AsyncValue.data(
+      currentState.copyWith(
+        results: [],
+        suggestions: [],
+        isLoading: false,
+        truncated: false,
+        error: null,
+      ),
+    );
+  }
+
   Future<void> getSuggestions(String query) async {
     final normalized = query.trim().toLowerCase();
     _suggestionDebounce?.cancel();
