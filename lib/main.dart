@@ -1,12 +1,17 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/router/router.dart';
+import 'features/premium/presentation/providers/premium_provider.dart';
 
 // Khai báo provider cho Isar để dùng ở các layer khác
 final isarProvider = Provider<Isar>((ref) => throw UnimplementedError());
@@ -48,11 +53,59 @@ void main() async {
   );
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _appLinks = AppLinks();
+    _listenForPaymentLinks();
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _listenForPaymentLinks() async {
+    final initialLink = await _appLinks.getInitialLink();
+    if (initialLink != null) _handleIncomingLink(initialLink);
+
+    _linkSubscription = _appLinks.uriLinkStream.listen(_handleIncomingLink);
+  }
+
+  void _handleIncomingLink(Uri uri) {
+    if (uri.scheme != 'sonus' || uri.host != 'premium') return;
+
+    ref.read(premiumControllerProvider.notifier).refresh();
+    if (!mounted) return;
+
+    context.go('/premium');
+    final success = uri.path == '/success';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Payment completed. Premium status is refreshing.'
+              : 'Payment cancelled.',
+        ),
+        backgroundColor: success ? Colors.green : Colors.orange,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Lấy config router từ provider
     final router = ref.watch(routerProvider);
 

@@ -345,3 +345,46 @@ class PremiumPage extends ConsumerWidget {
     }
   }
 }
+
+class PremiumCallbackPage extends ConsumerStatefulWidget {
+  final bool success;
+
+  const PremiumCallbackPage({super.key, required this.success});
+
+  @override
+  ConsumerState<PremiumCallbackPage> createState() =>
+      _PremiumCallbackPageState();
+}
+
+class _PremiumCallbackPageState extends ConsumerState<PremiumCallbackPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(premiumControllerProvider.notifier).refresh();
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.success
+                ? 'Payment completed. Premium status is refreshing.'
+                : 'Payment cancelled.',
+          ),
+          backgroundColor: widget.success ? Colors.green : Colors.orange,
+        ),
+      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const PremiumPage()));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(child: CircularProgressIndicator(color: Colors.red)),
+    );
+  }
+}

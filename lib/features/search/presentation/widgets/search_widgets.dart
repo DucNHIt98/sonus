@@ -224,8 +224,9 @@ class SongTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.only(bottom: 14.h),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
@@ -248,10 +249,13 @@ class SongTile extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5.sp,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
                   ),
                 ),
                 SizedBox(height: 4.h),

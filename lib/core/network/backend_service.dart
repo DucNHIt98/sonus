@@ -87,7 +87,7 @@ class BackendService {
   Future<({List<MusicModel> results, bool truncated})> search({
     required String query,
     int limit = 10,
-    String sources = 'db',
+    String sources = 'youtube,jamendo,nct',
   }) async {
     try {
       final response = await dio.get(

@@ -40,6 +40,14 @@ GoRouter router(RouterRef ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
+    redirect: (context, state) {
+      final uri = state.uri;
+      if (uri.scheme == 'sonus' && uri.host == 'premium') {
+        if (uri.path == '/success') return '/premium/success';
+        if (uri.path == '/cancel') return '/premium/cancel';
+      }
+      return null;
+    },
     routes: [
       // Splash Screen (Root)
       GoRoute(
@@ -176,6 +184,16 @@ GoRouter router(RouterRef ref) {
         path: '/premium',
         name: 'premium',
         builder: (context, state) => const PremiumPage(),
+      ),
+      GoRoute(
+        path: '/premium/success',
+        name: 'premium-success',
+        builder: (context, state) => const PremiumCallbackPage(success: true),
+      ),
+      GoRoute(
+        path: '/premium/cancel',
+        name: 'premium-cancel',
+        builder: (context, state) => const PremiumCallbackPage(success: false),
       ),
 
       // Favorites List Screen

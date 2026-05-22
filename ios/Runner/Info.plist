@@ -61,6 +61,16 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>sonus</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>sonus</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<!-- TODO: Replace with your REVERSED_CLIENT_ID from GoogleService-Info.plist -->
